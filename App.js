@@ -67,7 +67,9 @@ export default function App({ navigation }) {
           console.log(' app com , login ');
         } else {
           console.log('app com , logout ');
-          alert('هناك خطأ ما ');
+          alert('تم الخروج بالنجاح  ');
+          // navigation.navigate('Welcome');
+          setisLoggedIn(false);
         }
       });
     };
@@ -84,7 +86,7 @@ export default function App({ navigation }) {
     return (
       <ThemeProvider theme={theme}>
         <UserContext.Provider value={providerValue}>
-          <NavigationRoot token={token} isLoggedIn={isLoggedIn} />
+          <NavigationRoot />
         </UserContext.Provider>
       </ThemeProvider>
     );

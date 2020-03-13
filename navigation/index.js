@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -9,9 +9,12 @@ import ProfileScreen from '../screens/ProfileScreen';
 import InscriptionScreen from '../screens/SignUpScreen';
 import Welcome from '../screens/Welcome';
 import ForgotScreen from '../screens/ForgotScreen';
+import UserContext from '../context/UserContext';
 //-------------ROUTERS ------//
 const Stack = createStackNavigator();
-const StackRouter = ({ token, isLoggedIn }) => {
+const StackRouter = () => {
+  const { isLoggedIn, setisLoggedIn } = useContext(UserContext);
+  console.log('isloggedIn value : ', isLoggedIn);
   return (
     <Stack.Navigator
       headerMode='screen'
@@ -37,7 +40,7 @@ const StackRouter = ({ token, isLoggedIn }) => {
         }
       }}
     >
-      {token === null ? (
+      {!isLoggedIn ? (
         <>
           <Stack.Screen
             name='Welcome'
@@ -69,9 +72,12 @@ const StackRouter = ({ token, isLoggedIn }) => {
     </Stack.Navigator>
   );
 };
-const NavigationRoot = ({ token, isSignout }) => (
-  <NavigationContainer>
-    <StackRouter token={token} isSignout={isSignout} />
-  </NavigationContainer>
-);
+const NavigationRoot = () => {
+  return (
+    <NavigationContainer>
+      <StackRouter />
+    </NavigationContainer>
+  );
+};
+
 export default NavigationRoot;
