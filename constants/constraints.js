@@ -17,6 +17,12 @@ export const constraints = {
       minimum: 6,
       message: '^ الرقم السري يجب أن يتجاوز ستة أحرف'
     }
+  },
+  confirmPassword: {
+    equality: {
+      attribute: 'password',
+      message: '^ الرقمان السريان لا يتوافقان'
+    }
   }
 };
 

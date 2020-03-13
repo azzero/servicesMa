@@ -58,8 +58,7 @@ export default function App({ navigation }) {
     return () => {
       f.auth().onAuthStateChanged(user => {
         if (user) {
-          console.log('app cmp , user', user);
-          setisLoggedIn(true);
+          // console.log('app cmp , user', user);
           setToken('faketoken');
           // {accessToken} = user.stsTokenManager;
           // console.log(' app component , user token : ', accessToken);
@@ -67,9 +66,8 @@ export default function App({ navigation }) {
           console.log(' app com , login ');
         } else {
           console.log('app com , logout ');
-          alert('تم الخروج بالنجاح  ');
+          // alert('تم الخروج بالنجاح  ');
           // navigation.navigate('Welcome');
-          setisLoggedIn(false);
         }
       });
     };

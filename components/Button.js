@@ -5,7 +5,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 class Button extends Component {
   render() {
-    console.log('shadow', this.props.shadow);
     const {
       style,
       opacity,
