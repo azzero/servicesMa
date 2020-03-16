@@ -10,8 +10,8 @@ import {
   Alert,
   StatusBar
 } from 'react-native';
-import { Input, Text, Divider } from 'react-native-elements';
-import Button from '../components/Button';
+import { Divider } from 'react-native-elements';
+import { Button, Input, Text } from '../components/';
 import validate from 'validate.js';
 import constraints from '../constants/constraints';
 import UserContext from '../context/UserContext.js';
@@ -24,7 +24,6 @@ const Login = ({ navigation }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [validation, setValidation] = useState(0);
   const [passwordError, setPasswordError] = useState('');
-  const [loginError, setLoginError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { isLoggedIn, setisLoggedIn } = useContext(UserContext);
   // console.log('we set token here ,token value : ', token);
@@ -148,13 +147,7 @@ const Login = ({ navigation }) => {
   const loginWithFacebook = async () => {
     try {
       await Facebook.initializeAsync('229138198490211');
-      const {
-        type,
-        token,
-        expires,
-        permissions,
-        declinedPermissions
-      } = await Facebook.logInWithReadPermissionsAsync({
+      const { type, token } = await Facebook.logInWithReadPermissionsAsync({
         permissions: ['public_profile']
       });
       if (type === 'success') {
@@ -166,7 +159,6 @@ const Login = ({ navigation }) => {
           .catch(error => {
             alert('Loging with facebook error : ', error);
           });
-        // console.log('token is : ', token);
       } else {
         // type === 'cancel'
         alert('هناك خطأ ما أعد المحاولة !');
@@ -182,7 +174,6 @@ const Login = ({ navigation }) => {
     if (validation === 1) {
       console.log('sign in validated');
       loginInDb();
-      console.log(loginError);
     } else {
       console.log('validation rejected ');
     }
@@ -205,27 +196,22 @@ const Login = ({ navigation }) => {
         <Input
           ref={inputEmailRef}
           placeholder='اكتب بريدك الالكتروني هنا '
-          placeholderTextColor='#bbc3c7'
-          inputStyle={styles.input}
-          containerStyle={styles.InputContainer}
-          rightIcon={{ type: 'MaterialCommunityIcons', name: 'mail-outline' }}
           onChangeText={handleEmail}
-          errorMessage={errorMessage !== '' ? errorMessage : ''}
+          rightIcon={{ type: 'MaterialCommunityIcons', name: 'mail-outline' }}
+          errorMessage={errorMessage}
           value={email}
         />
         <Input
           ref={inputPasswordRef}
           placeholder='أدخل رقمك السري هنا '
-          placeholderTextColor='#bbc3c7'
-          inputStyle={styles.input}
-          containerStyle={styles.InputContainer}
-          rightIcon={{ type: 'font-awesome', name: 'lock' }}
           secureTextEntry={true}
-          errorMessage={passwordError !== '' ? passwordError : ''}
           onChangeText={handlePassword}
+          errorMessage={passwordError}
+          rightIcon={{ type: 'font-awesome', name: 'lock' }}
           value={password}
           autoCapitalize='none'
         />
+
         <View style={{ ...styles.input, width: '80%' }}>
           <TouchableOpacity
             style={{ marginTop: 5, alignSelf: 'flex-end' }}
@@ -253,25 +239,14 @@ const Login = ({ navigation }) => {
         />
         <Button gradient onPress={onConfirm} style={styles.button}>
           <Text
+            button
             style={{
-              textAlign: 'center',
-              width: '100%',
-              color: 'black'
+              textAlign: 'center'
             }}
           >
             تسجيل الدخول
           </Text>
         </Button>
-        {/* <Divider
-          style={{
-            height: 1,
-            backgroundColor: '#ffffff',
-            width:
-              CustomConstants.screenWidth - CustomConstants.screenWidth / 3,
-            marginVertical: 10,
-            opacity: 0.5
-          }}
-        /> */}
         <Button
           gradient
           facebook
@@ -286,7 +261,10 @@ const Login = ({ navigation }) => {
           // color='facebook'
           style={styles.button}
         >
-          <Text> الدخول بحساب فايسبوك</Text>
+          <Text button style={{ color: '#ffffff' }}>
+            {' '}
+            الدخول بحساب فايسبوك
+          </Text>
         </Button>
         <Divider
           style={{
@@ -364,33 +342,13 @@ const styles = StyleSheet.create({
     backgroundColor: CustomConstants.PrimaryColor
   },
   intro: { marginBottom: 30 },
-  input: {
-    color: 'white',
-    width: '100%',
-    textAlign: 'right',
-    textDecorationLine: 'none',
-    fontFamily: 'openSans',
-    fontSize: 18,
-    margin: 5
-  },
-  InputContainer: {
-    width: '80%'
-  },
+
   button: {
     width: CustomConstants.screenWidth - 100,
     marginVertical: 10,
     justifyContent: 'center'
   },
-  // buttonContainer: {
-  //   flex: 1,
-  //   borderColor: 'yellow',
-  //   borderWidth: 3,
-  //   width: '100%',
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  //   marginVertical: 20,
-  //   marginHorizontal: 20
-  // },
+
   enregistrementText: {
     fontSize: 14,
     color: CustomConstants.fourthColor,

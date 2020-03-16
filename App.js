@@ -50,21 +50,28 @@ export default function App({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
   const [isLoggedIn, setisLoggedIn] = useState(false);
-  const providerValue = useMemo(() => ({ isLoggedIn, setisLoggedIn }), [
-    isLoggedIn,
-    setisLoggedIn
-  ]);
+  const providerValue = useMemo(
+    () => ({ isLoggedIn, setisLoggedIn, token, setToken }),
+    [isLoggedIn, setisLoggedIn, token, setToken]
+  );
   useEffect(() => {
     return () => {
-      f.auth().onAuthStateChanged(user => {
+      f.auth().onAuthStateChanged(async user => {
         if (user) {
-          // console.log('app cmp , user', user);
-          setToken('faketoken');
+          var currentUser = f.auth().currentUser;
+          if (currentUser != null) {
+            const userToken = await currentUser.getIdToken();
+            setToken(userToken);
+          }
+          console.log('token : ', token);
+          // var tokenmana = {};
+          // tokenmana = user.stsTokenManager;
           // {accessToken} = user.stsTokenManager;
           // console.log(' app component , user token : ', accessToken);
           // setToken(accessToken);
-          console.log(' app com , login ');
+          // console.log(' app com , login ');
         } else {
+          setToken(null);
           console.log('app com , logout ');
           // alert('تم الخروج بالنجاح  ');
           // navigation.navigate('Welcome');

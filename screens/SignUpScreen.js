@@ -20,16 +20,13 @@ const inputPasswordRef = React.createRef();
 const SignUp = ({ navigation }) => {
   //----------- initialisation ---------- //
   const [email, setemail] = useState('');
-  const [username, setUsername] = useState('');
   const [password, setpassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [validation, setValidation] = useState(0);
   const [passwordError, setPasswordError] = useState('');
   const [matchPasswordError, setMatchPasswordError] = useState('');
-  const [signupError, setSignupError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
+  const { isLoggedIn, setisLoggedIn } = useContext(UserContext);
   const onConfirm = () => {
     if (matchPasswordError !== '') {
       Alert.alert(matchPasswordError);
@@ -65,13 +62,11 @@ const SignUp = ({ navigation }) => {
     setpassword(text);
   };
   const handlePasswordConfirmation = text => {
-    setValidation(1);
     setConfirmPassword('');
     setConfirmPassword(text);
   };
   //------------ handling errors ------//
   const errorHandler = (error, type) => {
-    console.log('error type', type);
     switch (type) {
       case 'email':
         setErrorMessage(error);
@@ -84,11 +79,11 @@ const SignUp = ({ navigation }) => {
       case 'confirmPassword':
         setMatchPasswordError(error);
         return;
-      case 'auth/user-not-found': {
+      case 'auth/weak-password': {
         setValidation(0);
         Alert.alert(
-          'تعدر الدخول ',
-          'هذا البريد الالكتروني غير مسجل لدينا ، المرجو التحقق !',
+          'للأمان ',
+          'إستعمل رقم سري قوي  !',
           [
             {
               text: 'Cancel',
@@ -101,12 +96,12 @@ const SignUp = ({ navigation }) => {
         );
         return;
       }
-      case 'auth/wrong-password':
+      case 'auth/email-already-in-use':
         {
           setValidation(0);
           Alert.alert(
-            'تعدر الدخول ',
-            'الرقم السري لا يتوافق مع البريد الإلكتروني ، المرجو التحقق !',
+            'تعدر التسجيل ',
+            'هذا الإيميل مسجل لدينا  !',
 
             [
               {
@@ -147,12 +142,8 @@ const SignUp = ({ navigation }) => {
   //------------backend connection -----------//
   const loginInDb = async () => {
     try {
-      console.log('db connection phase ');
-      // await auth.signInWithEmailAndPassword(email, password);
-      // setisLoggedIn(true);
-      // const tokenn = await response.getToken();
-      // console.log('access  : ', tokenn);
-      // navigation.navigate('Home');
+      await auth.createUserWithEmailAndPassword(email, password);
+      setisLoggedIn(true);
     } catch (error) {
       var errorCode = error.code;
       errorHandler('', errorCode);
@@ -176,10 +167,11 @@ const SignUp = ({ navigation }) => {
       setValidation(0);
       errorHandler(confirmPasswordError, 'confirmPassword');
     }
-  }, [confirmPassword]);
+  }, [confirmPassword, password]);
 
   //---- use effect for db connection after validation  ----//
   useEffect(() => {
+    console.log('validation', validation);
     if (validation === 1) {
       loginInDb();
     } else {

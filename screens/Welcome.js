@@ -2,8 +2,7 @@ import React, { useContext } from 'react';
 import { StyleSheet, View, Image } from 'react-native';
 import Constants from 'expo-constants';
 import * as customConstants from '../constants/constants';
-import { Text, Divider } from 'react-native-elements';
-import Button from '../components/Button';
+import { Button, Text } from '../components';
 const Welcome = ({ navigation }) => {
   return (
     <View id='container' style={styles.container}>
@@ -17,22 +16,7 @@ const Welcome = ({ navigation }) => {
       {/* Header End  */}
 
       {/* Middle */}
-      {/* <View id='welcomeImage' style={styles.middle}>
-        <Image
-          source={require('../assets/illustrations/online_cv.png')}
-          resizeMode='contain'
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginHorizontal: 10,
-            width: customConstants.screenWidth,
-            // height: customConstants.screenHeight / 3,
-            overflow: 'visible'
-            // opacity: 0.1
-          }}
-        />
-      </View> */}
+
       {/* Middle End  */}
 
       {/* Buttom */}
@@ -46,17 +30,7 @@ const Welcome = ({ navigation }) => {
               gradient
               onPress={() => navigation.navigate('SignIn')}
             >
-              <Text
-                style={{
-                  textAlign: 'center',
-                  color: 'black',
-                  fontFamily: customConstants.ShebaYeFont,
-
-                  fontSize: 15
-                }}
-              >
-                تسجيل الدخول
-              </Text>
+              <Text button>تسجيل الدخول</Text>
             </Button>
           </View>
 
@@ -66,17 +40,7 @@ const Welcome = ({ navigation }) => {
               style={styles.button}
               onPress={() => navigation.navigate('SignUp')}
             >
-              <Text
-                style={{
-                  textAlign: 'center',
-                  color: 'black',
-                  fontFamily: customConstants.ShebaYeFont,
-                  elevation: 1,
-                  fontSize: 15
-                }}
-              >
-                للتسجيل اضغظ هنا
-              </Text>
+              <Text button>للتسجيل اضغظ هنا</Text>
             </Button>
           </View>
         </View>

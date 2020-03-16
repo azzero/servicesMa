@@ -14,7 +14,9 @@ import UserContext from '../context/UserContext';
 const Stack = createStackNavigator();
 const StackRouter = () => {
   const { isLoggedIn, setisLoggedIn } = useContext(UserContext);
+  const { token, setToken } = useContext(UserContext);
   console.log('isloggedIn value : ', isLoggedIn);
+  console.log('token : ', token);
   return (
     <Stack.Navigator
       headerMode='screen'
@@ -40,7 +42,7 @@ const StackRouter = () => {
         }
       }}
     >
-      {!isLoggedIn ? (
+      {!token ? (
         <>
           <Stack.Screen
             name='Welcome'
