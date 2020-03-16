@@ -8,6 +8,8 @@ import * as customConstants from './constants/constants';
 import { Asset } from 'expo-asset';
 import { f, database, auth } from './config/config.js';
 import UserContext from './context/UserContext';
+import { AsyncStorage } from 'react-native';
+
 const images = [
   require('./assets/illustrations/online_cv.png'),
   require('./assets/illustrations/phototry.jpg')
@@ -27,6 +29,8 @@ const theme = {
   }
 };
 //----Loading assets pre-lunch---//
+// get storage data
+// loading root :
 const loadingAssets = async () => {
   try {
     await Font.loadAsync({
@@ -35,12 +39,15 @@ const loadingAssets = async () => {
       MaghribiFont: require('./assets/fonts/Maghribi-Font.ttf'),
       ShebaYeFont: require('./assets/fonts/ShebaYe.ttf')
     });
+
     const cacheImages = images.map(image => {
       return Asset.fromModule(image).downloadAsync();
     });
+
     return Promise.all(cacheImages);
   } catch (e) {
-    console.log('error : ', e);
+    // error reading value
+    console.log('error storage : ', e);
   }
 };
 
@@ -54,37 +61,52 @@ export default function App({ navigation }) {
     () => ({ isLoggedIn, setisLoggedIn, token, setToken }),
     [isLoggedIn, setisLoggedIn, token, setToken]
   );
+
   useEffect(() => {
-    return () => {
+    return async () => {
+      try {
+        const value = await AsyncStorage.getItem('token');
+        console.log('storage value 2 : ', value);
+        if (value != null) {
+          // value previously stored
+          setToken(value);
+        }
+      } catch (e) {
+        alert(e);
+      }
+
       f.auth().onAuthStateChanged(async user => {
         if (user) {
           var currentUser = f.auth().currentUser;
           if (currentUser != null) {
             const userToken = await currentUser.getIdToken();
+            console.log('inter');
+
+            try {
+              AsyncStorage.setItem('token', userToken);
+            } catch (e) {
+              console.log('get token error :', e);
+            }
+
             setToken(userToken);
+            // store token async
           }
-          console.log('token : ', token);
-          // var tokenmana = {};
-          // tokenmana = user.stsTokenManager;
-          // {accessToken} = user.stsTokenManager;
-          // console.log(' app component , user token : ', accessToken);
-          // setToken(accessToken);
-          // console.log(' app com , login ');
         } else {
           setToken(null);
+          // AsyncStorage.removeItem("token")
           console.log('app com , logout ');
-          // alert('تم الخروج بالنجاح  ');
-          // navigation.navigate('Welcome');
         }
       });
     };
-  }, [isLoggedIn, setisLoggedIn]);
+  }, [isLoggedIn, setisLoggedIn, loading]);
 
   if (loading) {
     return (
       <AppLoading
         startAsync={loadingAssets}
-        onFinish={() => setLoading(false)}
+        onFinish={() => {
+          setLoading(false);
+        }}
       />
     );
   } else {
