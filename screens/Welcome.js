@@ -3,7 +3,20 @@ import { StyleSheet, View, Image } from 'react-native';
 import Constants from 'expo-constants';
 import * as customConstants from '../constants/constants';
 import { Button, Text } from '../components';
+import { AsyncStorage } from 'react-native';
 const Welcome = ({ navigation }) => {
+  const gettoken = async () => {
+    try {
+      const value = await AsyncStorage.getItem('token');
+      alert(value);
+      if (value != null) {
+        // value previously stored
+        console.log('storage value 3 : ', value);
+      }
+    } catch (e) {
+      alert(e);
+    }
+  };
   return (
     <View id='container' style={styles.container}>
       {/* { Header } */}
@@ -41,6 +54,11 @@ const Welcome = ({ navigation }) => {
               onPress={() => navigation.navigate('SignUp')}
             >
               <Text button>للتسجيل اضغظ هنا</Text>
+            </Button>
+          </View>
+          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <Button shadow style={styles.button} onPress={gettoken}>
+              <Text button>token</Text>
             </Button>
           </View>
         </View>

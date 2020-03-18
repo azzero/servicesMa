@@ -3,15 +3,14 @@ import { View, StyleSheet, Text, Button } from 'react-native';
 import { auth } from '../config/config';
 import UserContext from '../context/UserContext';
 import { AsyncStorage } from 'react-native';
-
 const Home = () => {
-  const { isLoggedIn, setisLoggedIn } = useContext(UserContext);
+  const { logging, tokenManager } = useContext(UserContext);
+  const { isLoggedIn, setisLoggedIn } = logging;
   const logout = () => {
     auth
       .signOut()
       .then(() => {
         setisLoggedIn(false);
-        console.log('lougout succeded');
       })
       .catch(error => {
         console.log('eror', error);
@@ -25,6 +24,7 @@ const Home = () => {
       console.log('error : ', e);
     }
   };
+  console.log('token inside home ', tokenManager.token);
   return (
     <View>
       <Text>Home screen </Text>

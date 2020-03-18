@@ -40,11 +40,11 @@ const loadingAssets = async () => {
       ShebaYeFont: require('./assets/fonts/ShebaYe.ttf')
     });
 
-    const cacheImages = images.map(image => {
-      return Asset.fromModule(image).downloadAsync();
-    });
+    // const cacheImages = images.map(image => {
+    //   return Asset.fromModule(image).downloadAsync();
+    // });
 
-    return Promise.all(cacheImages);
+    // return Promise.all(cacheImages);
   } catch (e) {
     // error reading value
     console.log('error storage : ', e);
@@ -54,51 +54,50 @@ const loadingAssets = async () => {
 //---------------------------APP --------//
 
 export default function App({ navigation }) {
+  let value;
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
+  const [loadingToken, setloadingToken] = useState(true);
   const [isLoggedIn, setisLoggedIn] = useState(false);
   const providerValue = useMemo(
-    () => ({ isLoggedIn, setisLoggedIn, token, setToken }),
-    [isLoggedIn, setisLoggedIn, token, setToken]
+    () => ({
+      logging: { isLoggedIn, setisLoggedIn },
+      tokenManager: { token, setToken },
+      splash: { loadingToken, setloadingToken }
+    }),
+    [isLoggedIn, setisLoggedIn, token, setToken, loadingToken, setloadingToken]
   );
-
   useEffect(() => {
     return async () => {
-      try {
-        const value = await AsyncStorage.getItem('token');
-        console.log('storage value 2 : ', value);
-        if (value != null) {
-          // value previously stored
-          setToken(value);
-        }
-      } catch (e) {
-        alert(e);
-      }
+      // if (!isLoggedIn) {
+      //   console.log('first time');
 
+      // } else {
+      //   console.log('false');
+      // }
       f.auth().onAuthStateChanged(async user => {
         if (user) {
           var currentUser = f.auth().currentUser;
-          if (currentUser != null) {
+          if (currentUser !== null) {
             const userToken = await currentUser.getIdToken();
             console.log('inter');
-
             try {
               AsyncStorage.setItem('token', userToken);
             } catch (e) {
               console.log('get token error :', e);
             }
-
             setToken(userToken);
             // store token async
           }
         } else {
+          currentUser = null;
           setToken(null);
-          // AsyncStorage.removeItem("token")
-          console.log('app com , logout ');
+          AsyncStorage.removeItem('token');
+          console.log('no user : ', token);
         }
       });
     };
-  }, [isLoggedIn, setisLoggedIn, loading]);
+  }, [isLoggedIn, setisLoggedIn]);
 
   if (loading) {
     return (

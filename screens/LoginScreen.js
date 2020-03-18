@@ -22,15 +22,15 @@ const Login = ({ navigation }) => {
   const [email, setemail] = useState('');
   const [password, setpassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [validation, setValidation] = useState(0);
+  const [validation, setValidation] = useState(1);
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { isLoggedIn, setisLoggedIn } = useContext(UserContext);
+  const { logging } = useContext(UserContext);
+  const { isLoggedIn, setisLoggedIn } = logging;
   // console.log('we set token here ,token value : ', token);
-  const onConfirm = () => {
+  const onConfirm = async () => {
     setIsLoading(true);
     // ----- validation  -------:
-    setValidation(1);
     const validationResult = validate(
       { email: email, password: password },
       constraints
@@ -44,6 +44,9 @@ const Login = ({ navigation }) => {
       const passwordErrors = validationResult.password[0];
       setValidation(0);
       errorHandler(passwordErrors, 'password');
+    }
+    if (validationResult === undefined) {
+      loginInDb();
     }
   };
   //-------------Validation End ----------//
@@ -132,6 +135,7 @@ const Login = ({ navigation }) => {
   const loginInDb = async () => {
     try {
       await auth.signInWithEmailAndPassword(email, password);
+      console.log('inside loginDb', isLoggedIn);
       setisLoggedIn(true);
       // const tokenn = await response.getToken();
       // console.log('access  : ', tokenn);
@@ -170,15 +174,15 @@ const Login = ({ navigation }) => {
   //---------------------------//
 
   //------- USE EFFECT  ------//
-  useEffect(() => {
-    if (validation === 1) {
-      console.log('sign in validated');
-      loginInDb();
-    } else {
-      console.log('validation rejected ');
-    }
-    setIsLoading(false);
-  }, [validation, isLoading]);
+  // useEffect(() => {
+  //   if (validation === 1) {
+  //     console.log('sign in validated');
+  //     loginInDb();
+  //   } else {
+  //     console.log('validation rejected ');
+  //   }
+  //   setIsLoading(false);
+  // }, [validation, isLoading]);
   //--------------------------//
 
   return (
