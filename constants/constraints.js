@@ -1,4 +1,28 @@
 export const constraints = {
+  services: {
+    name: {
+      presence: {
+        allowEmpty: false,
+        message: '^الرجاء إدخال إسم '
+      }
+    },
+    service: {
+      presence: {
+        allowEmpty: false,
+        message: '^رجاء أدخل خدمة '
+      }
+    },
+    tele: {
+      presence: {
+        allowEmpty: false,
+        message: '^الرجاء إدخال رقم هاتف فعال'
+      },
+      numericality: {
+        onlyInteger: true,
+        message: '^الرجاء إدخال  رقم '
+      }
+    }
+  },
   email: {
     presence: {
       allowEmpty: false,

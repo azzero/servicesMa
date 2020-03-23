@@ -10,6 +10,7 @@ import InscriptionScreen from '../screens/SignUpScreen';
 import Welcome from '../screens/Welcome';
 import ForgotScreen from '../screens/ForgotScreen';
 import UserContext from '../context/UserContext';
+import AddService from '../screens/ServiceScreen';
 import { AsyncStorage } from 'react-native';
 //-------------ROUTERS ------//
 const Stack = createStackNavigator();
@@ -61,6 +62,7 @@ const StackRouter = () => {
         <>
           <Stack.Screen name='Home' component={HomeScreen} />
           <Stack.Screen name='Profile' component={ProfileScreen} />
+          <Stack.Screen name='AddService' component={AddService} />
         </>
       )}
     </Stack.Navigator>

@@ -26,6 +26,7 @@ const styles = StyleSheet.create({
     width: '100%',
     textAlign: 'right',
     textDecorationLine: 'none',
+
     fontFamily: Constants.ShebaYeFont,
     fontWeight: '800',
     fontSize: 16,
