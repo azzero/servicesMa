@@ -8,13 +8,9 @@ const Splash = ({ navigation }) => {
   const { isLoggedIn, setisLoggedIn } = logging;
   const { loadingToken, setloadingToken } = splash;
   useEffect(() => {
-    console.log('inside splash');
     return async function fetchToken() {
       try {
-        console.log('inside fetchToken');
-
         const storedToken = await AsyncStorage.getItem('token');
-        console.log('stored Token : ', storedToken);
         if (storedToken !== undefined) {
           setToken(storedToken);
         }

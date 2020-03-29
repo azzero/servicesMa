@@ -56,11 +56,6 @@ const Welcome = ({ navigation }) => {
               <Text button>للتسجيل اضغظ هنا</Text>
             </Button>
           </View>
-          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-            <Button shadow style={styles.button} onPress={gettoken}>
-              <Text button>token</Text>
-            </Button>
-          </View>
         </View>
       </View>
       {/* Button End  */}

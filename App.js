@@ -8,13 +8,28 @@ import * as customConstants from './constants/constants';
 import { Asset } from 'expo-asset';
 import { f, database, auth } from './config/config.js';
 import UserContext from './context/UserContext';
+import DataContext from './context/DataContext';
 import { AsyncStorage } from 'react-native';
+import { YellowBox } from 'react-native';
+import _ from 'lodash';
+
+//-------------- disable setTimeOut warning :
+
+YellowBox.ignoreWarnings(['Setting a timer']);
+const _console = _.clone(console);
+console.warn = message => {
+  if (message.indexOf('Setting a timer') <= -1) {
+    _console.warn(message);
+  }
+};
+
+//--------------------------------
 
 const images = [
   require('./assets/illustrations/online_cv.png'),
   require('./assets/illustrations/phototry.jpg')
 ];
-//---- theme ---- //
+//---- react native element theme ---- //
 const theme = {
   Button: {
     raised: true
@@ -54,11 +69,15 @@ const loadingAssets = async () => {
 //---------------------------APP --------//
 
 export default function App({ navigation }) {
-  let value;
+  //----------------State Declaration ----------//
+
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
+  const [data, setData] = useState(null);
   const [loadingToken, setloadingToken] = useState(true);
   const [isLoggedIn, setisLoggedIn] = useState(false);
+
+  //-------------- User ContextProvider -------------------//
   const providerValue = useMemo(
     () => ({
       logging: { isLoggedIn, setisLoggedIn },
@@ -67,20 +86,16 @@ export default function App({ navigation }) {
     }),
     [isLoggedIn, setisLoggedIn, token, setToken, loadingToken, setloadingToken]
   );
+  //-------------------Data Contex Provider -------------------//
+  const DataProvider = useMemo(() => ({ data, setData }), [data, setData]);
+  //----------------------Use Effect ------------------------//
   useEffect(() => {
     return async () => {
-      // if (!isLoggedIn) {
-      //   console.log('first time');
-
-      // } else {
-      //   console.log('false');
-      // }
       f.auth().onAuthStateChanged(async user => {
         if (user) {
           var currentUser = f.auth().currentUser;
           if (currentUser !== null) {
             const userToken = await currentUser.getIdToken();
-            console.log('inter');
             try {
               AsyncStorage.setItem('token', userToken);
             } catch (e) {
@@ -98,7 +113,7 @@ export default function App({ navigation }) {
       });
     };
   }, [isLoggedIn, setisLoggedIn]);
-
+  //--------------- Loading assets -------------//
   if (loading) {
     return (
       <AppLoading
@@ -109,10 +124,13 @@ export default function App({ navigation }) {
       />
     );
   } else {
+    //---------------- display app --------------//
     return (
       <ThemeProvider theme={theme}>
         <UserContext.Provider value={providerValue}>
-          <NavigationRoot />
+          <DataContext.Provider value={DataProvider}>
+            <NavigationRoot />
+          </DataContext.Provider>
         </UserContext.Provider>
       </ThemeProvider>
     );

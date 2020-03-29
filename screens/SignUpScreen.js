@@ -32,12 +32,11 @@ const SignUp = ({ navigation }) => {
       Alert.alert(matchPasswordError);
       return;
     }
-
     // ----- validation  -------:
     setValidation(1);
     const validationResult = validate(
       { email: email, password: password },
-      constraints
+      constraints.login
     );
     if (typeof validationResult !== 'undefined' && validationResult.email) {
       const emailErrors = validationResult.email[0];
@@ -155,7 +154,7 @@ const SignUp = ({ navigation }) => {
   useEffect(() => {
     const emailMatchResult = validate(
       { password: password, confirmPassword: confirmPassword },
-      constraints
+      constraints.login
     );
     setMatchPasswordError('');
     if (
@@ -204,6 +203,7 @@ const SignUp = ({ navigation }) => {
           onChangeText={handleEmail}
           errorMessage={errorMessage !== '' ? errorMessage : ''}
           value={email}
+          keyboardType='email-address'
         />
         <Input
           ref={inputPasswordRef}
@@ -217,6 +217,8 @@ const SignUp = ({ navigation }) => {
           onChangeText={handlePassword}
           value={password}
           autoCapitalize='none'
+          keyboardType='number-pad'
+          autoCorrect={false}
         />
         <Input
           placeholder='أعد إدخال رقمك السري هنا  '

@@ -18,3 +18,43 @@ export const PrimaryFont = 'openSans';
 export const BoldFont = 'openSansBold';
 export const MaghribiFont = 'MaghribiFont';
 export const ShebaYeFont = 'ShebaYeFont';
+// sizes
+export const sizes = {
+  base: 16,
+  title: 18,
+  h1: 26,
+  h2: 20,
+  h3: 18,
+  header: 16,
+  body: 14
+};
+// cities :
+export const MoroccoCities = [
+  {
+    value: 'اسفي'
+  },
+  {
+    value: 'الدارالبيضاء'
+  },
+  {
+    value: 'الرباط'
+  },
+  {
+    value: 'اسفي'
+  },
+  {
+    value: 'الدارالبيضاء'
+  },
+  {
+    value: 'الرباط'
+  },
+  {
+    value: 'اسفي'
+  },
+  {
+    value: 'الدارالبيضاء'
+  },
+  {
+    value: 'الرباط'
+  }
+];

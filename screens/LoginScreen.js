@@ -33,7 +33,7 @@ const Login = ({ navigation }) => {
     // ----- validation  -------:
     const validationResult = validate(
       { email: email, password: password },
-      constraints
+      constraints.login
     );
     if (typeof validationResult !== 'undefined' && validationResult.email) {
       const emailErrors = validationResult.email[0];
@@ -127,6 +127,7 @@ const Login = ({ navigation }) => {
         }
         return;
       default:
+        Alert.alert(error);
         return;
     }
   };
@@ -135,7 +136,8 @@ const Login = ({ navigation }) => {
   const loginInDb = async () => {
     try {
       await auth.signInWithEmailAndPassword(email, password);
-      console.log('inside loginDb', isLoggedIn);
+      const currentUser = f.auth().currentUser;
+      console.log('current user : ', currentUser);
       setisLoggedIn(true);
       // const tokenn = await response.getToken();
       // console.log('access  : ', tokenn);
@@ -151,15 +153,23 @@ const Login = ({ navigation }) => {
   const loginWithFacebook = async () => {
     try {
       await Facebook.initializeAsync('229138198490211');
-      const { type, token } = await Facebook.logInWithReadPermissionsAsync({
+      const response = await Facebook.logInWithReadPermissionsAsync({
         permissions: ['public_profile']
       });
+      console.log('response : ', response);
+      const { type, token } = response;
+
       if (type === 'success') {
         // Get the user's name using Facebook's Graph API
         const credentials = f.auth.FacebookAuthProvider.credential(token);
+        console.log('facebook credentials : ', credentials);
         f.auth()
           .signInWithCredential(credentials)
-          .then(setisLoggedIn(true))
+          .then(() => {
+            setisLoggedIn(true);
+            const currentUser = f.auth().currentUser;
+            console.log('CURRENT USER : ', currentUser);
+          })
           .catch(error => {
             alert('Loging with facebook error : ', error);
           });
@@ -172,19 +182,6 @@ const Login = ({ navigation }) => {
     }
   };
   //---------------------------//
-
-  //------- USE EFFECT  ------//
-  // useEffect(() => {
-  //   if (validation === 1) {
-  //     console.log('sign in validated');
-  //     loginInDb();
-  //   } else {
-  //     console.log('validation rejected ');
-  //   }
-  //   setIsLoading(false);
-  // }, [validation, isLoading]);
-  //--------------------------//
-
   return (
     <KeyboardAvoidingView
       style={styles.loginContainer}
@@ -204,6 +201,7 @@ const Login = ({ navigation }) => {
           rightIcon={{ type: 'MaterialCommunityIcons', name: 'mail-outline' }}
           errorMessage={errorMessage}
           value={email}
+          keyboardType='email-address'
         />
         <Input
           ref={inputPasswordRef}
@@ -214,6 +212,8 @@ const Login = ({ navigation }) => {
           rightIcon={{ type: 'font-awesome', name: 'lock' }}
           value={password}
           autoCapitalize='none'
+          autoCorrect={false}
+          keyboardType='number-pad'
         />
 
         <View style={{ ...styles.input, width: '80%' }}>

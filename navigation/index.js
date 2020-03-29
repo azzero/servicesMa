@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Image, View, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-// import Splash from '../screens/SplashScreen';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -11,6 +10,7 @@ import Welcome from '../screens/Welcome';
 import ForgotScreen from '../screens/ForgotScreen';
 import UserContext from '../context/UserContext';
 import AddService from '../screens/ServiceScreen';
+import DisplayServices from '../screens/DisplayServices';
 import { AsyncStorage } from 'react-native';
 //-------------ROUTERS ------//
 const Stack = createStackNavigator();
@@ -45,7 +45,7 @@ const StackRouter = () => {
         }
       }}
     >
-      {token == null ? (
+      {token === null ? (
         <>
           <Stack.Screen
             name='Welcome'
@@ -62,6 +62,7 @@ const StackRouter = () => {
         <>
           <Stack.Screen name='Home' component={HomeScreen} />
           <Stack.Screen name='Profile' component={ProfileScreen} />
+          <Stack.Screen name='DisplayServices' component={DisplayServices} />
           <Stack.Screen name='AddService' component={AddService} />
         </>
       )}
@@ -80,19 +81,16 @@ const NavigationRoot = () => {
     // const { isLoggedIn, setisLoggedIn } = logging;
     // const { loadingToken, setloadingToken } = splash;
     useEffect(() => {
-      console.log('inside splash');
       // return async function fetchToken() {
       // try {
-      console.log('inside fetchToken');
       // const storedToken = await
       AsyncStorage.getItem('token').then(value => {
-        console.log('value retourned by promise : ', value);
         if (value !== null) {
           setToken(value);
           setisLoggedIn(true);
         }
+        setloadingToken(false);
       });
-      setloadingToken(false);
     }, []);
     return (
       <View style={styles.splash}>

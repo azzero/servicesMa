@@ -23,29 +23,31 @@ export const constraints = {
       }
     }
   },
-  email: {
-    presence: {
-      allowEmpty: false,
-      message: '^رجاء أدخل بريدك الإلكتروني '
-    },
+  login: {
     email: {
-      message: '^رجاء أدخل بريد الكتروني فعال'
-    }
-  },
-  password: {
-    presence: {
-      allowEmpty: false,
-      message: '^ادخال الرقم السري ضروري '
+      presence: {
+        allowEmpty: false,
+        message: '^رجاء أدخل بريدك الإلكتروني '
+      },
+      email: {
+        message: '^رجاء أدخل بريد الكتروني فعال'
+      }
     },
-    length: {
-      minimum: 6,
-      message: '^ الرقم السري يجب أن يتجاوز ستة أحرف'
-    }
-  },
-  confirmPassword: {
-    equality: {
-      attribute: 'password',
-      message: '^ الرقمان السريان لا يتوافقان'
+    password: {
+      presence: {
+        allowEmpty: false,
+        message: '^ادخال الرقم السري ضروري '
+      },
+      length: {
+        minimum: 6,
+        message: '^ الرقم السري يجب أن يتجاوز ستة أحرف'
+      }
+    },
+    confirmPassword: {
+      equality: {
+        attribute: 'password',
+        message: '^ الرقمان السريان لا يتوافقان'
+      }
     }
   }
 };

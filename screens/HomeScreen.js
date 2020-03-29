@@ -1,13 +1,20 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import UserContext from '../context/UserContext';
+import DataContext from '../context/DataContext';
 import { AsyncStorage } from 'react-native';
 import { Button, Text, Service } from '../components';
 import * as CustomConstants from '../constants/constants';
-import { f, db } from '../config/config';
+import { auth, db, fr, f } from '../config/config';
+
+//-------------- Home Screen ---------------------//
 const Home = ({ navigation }) => {
+  const { data, setData } = useContext(DataContext);
+
+  // const [data, setData] = useState(null);
   const { logging, tokenManager } = useContext(UserContext);
   const { isLoggedIn, setisLoggedIn } = logging;
+  //----------- logout funcion ------------------//
   const logout = () => {
     auth
       .signOut()
@@ -19,54 +26,38 @@ const Home = ({ navigation }) => {
       });
   };
   const getdata = async () => {
-    console.log('inside get data');
-    // db.collection('users')
-    //   .add({
-    //     first: 'Ada',
-    //     last: 'Lovelace',
-    //     born: 1815
-    //   })
-    //   .then(function(docRef) {
-    //     console.log('Document written with ID: ', docRef.id);
-    //   })
-    //   .catch(function(error) {
-    //     console.error('Error adding document: ', error);
-    //   });
     try {
-      var userId = f.auth().currentUser.uid;
-      console.log('user id : ', userId);
-      f.database()
-        .ref('/users/' + userId)
-        .set({
-          username: 'test',
-          email: 'test@test.com'
-        });
+      const docs = await fr
+        .collection('services')
+        .doc('اسفي')
+        .collection('كهربائي')
+        .get();
+      let list = [];
+      docs.forEach(doc => {
+        list.push(doc.data());
+        // setData([...data, row]);
+      });
+      setData(list);
+      navigation.navigate('DisplayServices');
     } catch (e) {
       console.log(e);
     }
-    // .then(() => {
-    //   console.log('Document successfully written!');
-    // })
-    // .catch(error => {
-    //   console.error('Error writing document: ', error);
-    // });
   };
 
+  //---------------- USE EFFECT-------------//
+
+  //----------------------------------------
   return (
     <View style={styles.container}>
-      <View style={styles.top}>
-        <Service>
-          <Text> الخدمة </Text>
-        </Service>
-        <Service>
-          <Text> service </Text>
-        </Service>
-      </View>
+      <View style={styles.top}></View>
       <View style={styles.buttonContainer}>
         <Button gradient onPress={() => navigation.navigate('AddService')}>
           <Text button> أضف خدمة </Text>
         </Button>
         <Button gradient onPress={() => getdata()}>
+          <Text button> get data </Text>
+        </Button>
+        <Button gradient onPress={() => logout()}>
           <Text button> logout </Text>
         </Button>
       </View>
@@ -86,7 +77,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   buttonContainer: {
-    flex: 0.2,
+    flex: 0.4,
     alignSelf: 'center',
     marginVertical: 10,
     bottom: 0,
