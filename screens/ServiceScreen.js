@@ -4,7 +4,6 @@ import {
   View,
   Picker,
   Alert,
-  Linking,
   Platform,
   AppState
 } from 'react-native';
@@ -20,6 +19,7 @@ import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
 import Modal from 'react-native-modal';
 import * as IntentLauncher from 'expo-intent-launcher';
+import { Linking } from 'expo';
 const Service = ({ navigation }) => {
   //---------------Some params ---------------------------//
   const currentUser = f.auth().currentUser;
@@ -38,6 +38,10 @@ const Service = ({ navigation }) => {
   const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
   const [appStateNow, setAppStateNow] = useState(AppState.currentState);
+  const [EnableLocationServiceAsked, setEnableLocationServiceAsked] = useState(
+    false
+  );
+
   //------------------ REFERENCES --------------------------//
   const nameRef = React.createRef();
   const serviceRef = React.createRef();
@@ -148,9 +152,22 @@ const Service = ({ navigation }) => {
   //-----------------------------------------------//
   const getLocationAsync = async () => {
     try {
-      console.log('inside get location async');
+      let ProviderStatus = Location.hasServicesEnabledAsync();
+      const locationIsEnbaled = await ProviderStatus;
+      console.log('provider status : ', locationIsEnbaled);
+      console.log('EnableLocationServiceAsked : ', EnableLocationServiceAsked);
+      if (!locationIsEnbaled && !EnableLocationServiceAsked) {
+        if (Platform.OS === 'ios') {
+          setIsLocationModalVisible(true);
+        }
+        setEnableLocationServiceAsked(true);
+      }
+      if (!locationIsEnbaled && EnableLocationServiceAsked) {
+        setErrorMessage('لم تسمح لنا بالوصول إلى موقعك');
+        return;
+      }
       let { status } = await Permissions.askAsync(Permissions.LOCATION);
-      console.log('stauts : ', status);
+      // console.log('stauts : ', status);
       if (status !== 'granted') {
         setErrorMessage('لم يسمح بالولوج للموقع');
         return;
@@ -158,20 +175,19 @@ const Service = ({ navigation }) => {
       let lc = await Location.getCurrentPositionAsync({});
       setLocation(lc);
     } catch (e) {
-      let status = Location.getProviderStatusAsync();
-      if (!status.locationServicesEnabled) {
-        setIsLocationModalVisible(true);
-      }
+      // setIsLocationModalVisible(true);
     }
   };
   //------------------------------------------------//
   //------------------------app State change Handler ------------------//
   //-----------------------------------------------//
   const handleAppStateChange = nextAppState => {
-    if (appStateNow.match(/inactive|background/) && nextAppState === 'active') {
-      console.log('App has come to the foreground!');
-      getLocationAsync();
-    }
+    console.log('AppStateNow :', appStateNow);
+    console.log('AppStateNext :', nextAppState);
+    // if (appStateNow.match(/inactive|background/) && nextAppState === 'active') {
+    //   console.log('App has come to the foreground!');
+    //   getLocationAsync();
+    // }
     setAppStateNow(nextAppState);
   };
   //------------------------------------------------//
@@ -185,11 +201,12 @@ const Service = ({ navigation }) => {
     } else {
       getLocationAsync();
     }
+    // console.log('appStateNow in effect', appStateNow);
     return () => {
       // clean listener
       AppState.removeEventListener('change', handleAppStateChange);
     };
-  }, []);
+  }, [appStateNow]);
   //-------------------- Render ----------------------//
   return (
     <View style={styles.container}>
@@ -206,13 +223,15 @@ const Service = ({ navigation }) => {
             backgroundColor: '#ffffff'
           }}
         >
+          <Text> تحتاج لتفعيل خدمة تحديد الموقع </Text>
           <Button
+            gradient
             onPress={() => {
               setIsLocationModalVisible(false);
               setOpenSetting(true);
             }}
           >
-            <Text>تفعيل خدمة تحديد الموقع</Text>
+            <Text button>للقيام بذلك إضغط هنا</Text>
           </Button>
         </View>
       </Modal>

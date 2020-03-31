@@ -14,7 +14,8 @@ const styles = StyleSheet.create({
   text: {
     color: Constants.black,
     fontFamily: Constants.ShebaYeFont,
-    fontSize: 16
+    fontSize: 16,
+    padding: 10
   },
   button: {
     textAlign: 'center'
