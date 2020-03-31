@@ -20,6 +20,10 @@ export const constraints = {
       numericality: {
         onlyInteger: true,
         message: '^الرجاء إدخال  رقم '
+      },
+      length: {
+        maximum: 15,
+        message: '^رقم الهاتف يجب يجب ألا يتعدى خمسة عشر رقما '
       }
     }
   },

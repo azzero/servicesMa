@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Image, View, Text, StyleSheet } from 'react-native';
+import { Image, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screens/LoginScreen';
@@ -78,12 +78,8 @@ const NavigationRoot = () => {
     const { logging, tokenManager } = useContext(UserContext);
     const { token, setToken } = tokenManager;
     const { isLoggedIn, setisLoggedIn } = logging;
-    // const { isLoggedIn, setisLoggedIn } = logging;
-    // const { loadingToken, setloadingToken } = splash;
+
     useEffect(() => {
-      // return async function fetchToken() {
-      // try {
-      // const storedToken = await
       AsyncStorage.getItem('token').then(value => {
         if (value !== null) {
           setToken(value);
@@ -94,7 +90,8 @@ const NavigationRoot = () => {
     }, []);
     return (
       <View style={styles.splash}>
-        <Text style={{ color: '#fff70a' }}>Loading ... !!</Text>
+        {/* <Text style={{ color: '#fff70a' }}>Loading ... !!</Text> */}
+        <ActivityIndicator size='large' />
       </View>
     );
   };

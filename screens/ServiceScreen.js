@@ -1,5 +1,13 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Picker } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  StyleSheet,
+  View,
+  Picker,
+  Alert,
+  Linking,
+  Platform,
+  AppState
+} from 'react-native';
 import { Text, Input, Button } from '../components';
 import validate from 'validate.js';
 import constraints from '../constants/constraints';
@@ -7,7 +15,12 @@ import { auth, db, f, fr } from '../config/config';
 import { Dropdown } from 'react-native-material-dropdown';
 import * as customConstants from '../constants/constants';
 import { FontAwesome } from '@expo/vector-icons';
-const Service = () => {
+import * as Location from 'expo-location';
+import * as Permissions from 'expo-permissions';
+import Constants from 'expo-constants';
+import Modal from 'react-native-modal';
+import * as IntentLauncher from 'expo-intent-launcher';
+const Service = ({ navigation }) => {
   //---------------Some params ---------------------------//
   const currentUser = f.auth().currentUser;
   //----------------State --------------------------------//
@@ -20,13 +33,17 @@ const Service = () => {
   const [teleErrors, setTeleerrors] = useState('');
   const [DescriptionErrors, setDescriptionErrors] = useState('');
   const [city, setCity] = useState('');
+  const [location, setLocation] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
+  const [openSetting, setOpenSetting] = useState(false);
+  const [appStateNow, setAppStateNow] = useState(AppState.currentState);
   //------------------ REFERENCES --------------------------//
   const nameRef = React.createRef();
   const serviceRef = React.createRef();
   const teleRref = React.createRef();
   const DescriptionRref = React.createRef();
   //------------------SetState Handler --------------------//
-
   const setNameHandler = text => {
     setNameerrors('');
     setName(text);
@@ -47,7 +64,9 @@ const Service = () => {
   const pickerHandler = value => {
     setCity(value);
   };
-  //-------------------Submit ----------------------//
+  //------------------------------------------------//
+  //------------------Confirmation------------------//
+  //-----------------------------------------------//
   const confirm = () => {
     const validationResult = validate(
       { name: name, service: serviceTitle, tele: tele },
@@ -86,7 +105,22 @@ const Service = () => {
             userID: currentUser.uid
           })
           .then(function() {
-            console.log('Document successfully written!');
+            Alert.alert(
+              'ممتاز !!',
+              'تمت الإضافة بنجاح ',
+              [
+                {
+                  text: 'البقاء هنا ',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel'
+                },
+                {
+                  text: 'الرجوع للواجهة الرئيسية',
+                  onPress: () => navigation.navigate('Home')
+                }
+              ],
+              { cancelable: false }
+            );
           })
           .catch(function(error) {
             console.error('Error writing document: ', error);
@@ -96,24 +130,92 @@ const Service = () => {
       }
     }
   };
-  const testFirestore = async () => {
-    fr.collection('users')
-      .doc('LA')
-      .set({
-        name: 'Los Angeles',
-        username: 'CA',
-        avatar: 'USA'
-      })
-      .then(function() {
-        console.log('Document successfully written!');
-      })
-      .catch(function(error) {
-        console.error('Error writing document: ', error);
-      });
+  //------------------------------------------------//
+  //----------------Open setting Function-----------//
+  //-----------------------------------------------//
+  const openSettingFunction = () => {
+    if (Platform.OS === 'ios') {
+      Linking.openURL('app-settings:');
+    } else {
+      IntentLauncher.startActivityAsync(
+        IntentLauncher.ACTION_LOCATION_SOURCE_SETTINGS
+      );
+    }
+    setOpenSetting(false);
   };
+  //------------------------------------------------//
+  //---------------get location Async---------------//
+  //-----------------------------------------------//
+  const getLocationAsync = async () => {
+    try {
+      console.log('inside get location async');
+      let { status } = await Permissions.askAsync(Permissions.LOCATION);
+      console.log('stauts : ', status);
+      if (status !== 'granted') {
+        setErrorMessage('لم يسمح بالولوج للموقع');
+        return;
+      }
+      let lc = await Location.getCurrentPositionAsync({});
+      setLocation(lc);
+    } catch (e) {
+      let status = Location.getProviderStatusAsync();
+      if (!status.locationServicesEnabled) {
+        setIsLocationModalVisible(true);
+      }
+    }
+  };
+  //------------------------------------------------//
+  //------------------------app State change Handler ------------------//
+  //-----------------------------------------------//
+  const handleAppStateChange = nextAppState => {
+    if (appStateNow.match(/inactive|background/) && nextAppState === 'active') {
+      console.log('App has come to the foreground!');
+      getLocationAsync();
+    }
+    setAppStateNow(nextAppState);
+  };
+  //------------------------------------------------//
+  //---------------------Use Effect-----------------//
+  //-----------------------------------------------//
+  useEffect(() => {
+    AppState.addEventListener('change', handleAppStateChange);
+    if (Platform.OS === 'android' && !Constants.isDevice) {
+      'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
+        setErrorMessage('لا يمكن أن يعمل على اندرويد ايميلايتور ');
+    } else {
+      getLocationAsync();
+    }
+    return () => {
+      // clean listener
+      AppState.removeEventListener('change', handleAppStateChange);
+    };
+  }, []);
   //-------------------- Render ----------------------//
   return (
     <View style={styles.container}>
+      <Modal
+        onModalHide={openSetting ? openSettingFunction : undefined}
+        isVisible={isLocationModalVisible}
+      >
+        <View
+          style={{
+            height: 300,
+            width: 300,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#ffffff'
+          }}
+        >
+          <Button
+            onPress={() => {
+              setIsLocationModalVisible(false);
+              setOpenSetting(true);
+            }}
+          >
+            <Text>تفعيل خدمة تحديد الموقع</Text>
+          </Button>
+        </View>
+      </Modal>
       <Input
         ref={nameRef}
         inputHandler={setNameHandler}
@@ -134,6 +236,8 @@ const Service = () => {
         errorMessage={DescriptionErrors}
         inputHandler={setDescriptionHandler}
         style={{ color: '#000000', textAlign: 'right' }}
+        multiline={true}
+        numberOflines={4}
         placeholder='وصف الخدمة'
         value={Description}
       />
@@ -192,7 +296,7 @@ const Service = () => {
               );
             }
           }}
-          itemCount='7'
+          itemCount={7}
           value={city}
           rippleCentered={true}
         />
@@ -204,10 +308,21 @@ const Service = () => {
             أضف{' '}
           </Text>
         </Button>
+        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+          <Text>
+            {location !== null
+              ? `your location is :${JSON.stringify(location)}`
+              : `للأسف  : ${errorMessage}`}
+          </Text>
+        </View>
       </View>
     </View>
   );
 };
+
+//------------------------------------------------//
+//----------------------Styling ------------------//
+//-----------------------------------------------//
 const styles = StyleSheet.create({
   container: {
     flex: 1,

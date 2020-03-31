@@ -195,6 +195,7 @@ const Login = ({ navigation }) => {
 
       <View style={styles.form}>
         <Input
+          autoFocus={true}
           ref={inputEmailRef}
           placeholder='اكتب بريدك الالكتروني هنا '
           onChangeText={handleEmail}

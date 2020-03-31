@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import * as CustomConstants from '../constants/constants';
 import { FontAwesome } from '@expo/vector-icons';
-import { Rating, AirbnbRating, Avatar } from 'react-native-elements';
+import { Rating, Avatar } from 'react-native-elements';
 const Service = props => {
   //-------------- state ----------------//
   const { children, title, phone, Description, userRating, ...others } = props;
@@ -85,23 +85,34 @@ const Service = props => {
               fontSize: CustomConstants.sizes.h1,
               textAlign: 'center',
               fontFamily: CustomConstants.ShebaYeFont,
-              color: '#ffffff'
+              color: CustomConstants.fourthColor
             }}
           >
             {title}
           </Text>
+          <Text
+            style={{
+              fontSize: CustomConstants.sizes.body,
+              textAlign: 'center',
+              color: 'gray'
+            }}
+          >
+            {Description}
+          </Text>
         </View>
-        <View
+
+        {/* <View
           style={{
-            backgroundColor: 'red',
+            borderColor: 'gray',
             borderWidth: 1,
             width: '70%',
-            borderRadius: 20
+            borderRadius: 20,
+            marginBottom: 5
           }}
-        ></View>
+        ></View> */}
         <View style={styles.description}>
           {/* Description */}
-          <View
+          {/* <View
             style={{
               height: 60,
               justifyContent: 'center',
@@ -116,12 +127,14 @@ const Service = props => {
               }}
             >
               {Description}
-            </Text>
+            </Text> 
           </View>
+            */}
 
           {/* -------------------- Phone------------------------- */}
           {/*---------------------------------------------------- */}
           <TouchableWithoutFeedback
+            hitSlop={{ right: 10 }}
             onFocus={() => console.log('hover')}
             style={{ width: '100%' }}
             onPress={() => animationHandler()}
@@ -130,34 +143,16 @@ const Service = props => {
               <View
                 style={{
                   flexDirection: 'row'
-                  // borderColor: 'blue',
-                  // borderWidth: 2
                 }}
               >
                 <View style={{ justifyContent: 'center' }}>
-                  <Text
-                    style={[
-                      styles.phoneText,
-                      {
-                        // borderColor: 'red',
-                        // borderWidth: 2
-                      }
-                    ]}
-                  >
-                    0665000000
-                  </Text>
+                  <Text style={[styles.phoneText, {}]}>0665000000</Text>
                 </View>
                 <View style={{ padding: 15 }}>
                   <FontAwesome name='mobile-phone' size={42} color='#ffffff' />
                 </View>
               </View>
             </Animated.View>
-
-            {/* {showPhone && ( */}
-            {/* <Animated.View style={animatedStyles.phoneNumber}>
-              
-              </Animated.View> */}
-            {/* )} */}
           </TouchableWithoutFeedback>
         </View>
       </View>
@@ -191,6 +186,11 @@ const Service = props => {
     </View>
   );
 };
+
+//------------------------------------------------//
+//---------------------Styling ------------------//
+//-----------------------------------------------//
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
@@ -221,8 +221,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flex: 0.5,
-    // borderColor: 'red',
-    // borderWidth: 2,
+
     borderBottomColor: '#ffffff',
     borderBottomWidth: 2
   },
@@ -231,20 +230,17 @@ const styles = StyleSheet.create({
     flex: 0.5,
     justifyContent: 'center',
     alignItems: 'center',
-    // borderColor: 'red',
-    // borderWidth: 2,
     opacity: 1
-    // backgroundColor: '#ffffff'
   },
   title: {
     flex: 0.5,
-    // borderColor: 'red',
-    // borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center'
   },
   description: {
-    flex: 0.5,
+    borderTopColor: 'gray',
+    borderTopWidth: 1,
+    flex: 0.4,
     justifyContent: 'center',
     alignItems: 'center'
   },
