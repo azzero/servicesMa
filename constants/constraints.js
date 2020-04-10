@@ -9,7 +9,13 @@ export const constraints = {
     service: {
       presence: {
         allowEmpty: false,
-        message: '^رجاء أدخل خدمة '
+        message: '^الرجاء اختيار نوع الخدمة المقدمة '
+      }
+    },
+    city: {
+      presence: {
+        allowEmpty: false,
+        message: '^رجاء اختر مدينة '
       }
     },
     tele: {

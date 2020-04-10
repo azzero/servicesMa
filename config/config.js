@@ -1,6 +1,7 @@
-import firebase from 'firebase';
+// import firebase from 'firebase';
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
 import 'firebase/firestore';
-
 var firebaseConfig = {
   apiKey: 'AIzaSyA7Xrti3uJIMonqO8HITaSsI9Bx-nrHe7Y',
   authDomain: 'servicesma-a9c76.firebaseapp.com',
@@ -13,9 +14,12 @@ var firebaseConfig = {
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
+import * as geofirex from 'geofirex';
+
 // firebase.analytics();
 export const f = firebase;
-export const db = firebase.database();
+// export const db = firebase.database();
 export const auth = firebase.auth();
-export const storage = firebase.storage();
+// export const storage = firebase.storage();
 export const fr = firebase.firestore();
+export const geo = geofirex.init(firebase);

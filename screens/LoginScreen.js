@@ -199,10 +199,11 @@ const Login = ({ navigation }) => {
           ref={inputEmailRef}
           placeholder='اكتب بريدك الالكتروني هنا '
           onChangeText={handleEmail}
-          rightIcon={{ type: 'MaterialCommunityIcons', name: 'mail-outline' }}
+          leftIcon={{ type: 'MaterialCommunityIcons', name: 'mail-outline' }}
           errorMessage={errorMessage}
           value={email}
           keyboardType='email-address'
+          style={{ fontFamily: CustomConstants.BoldFont }}
         />
         <Input
           ref={inputPasswordRef}
@@ -210,11 +211,11 @@ const Login = ({ navigation }) => {
           secureTextEntry={true}
           onChangeText={handlePassword}
           errorMessage={passwordError}
-          rightIcon={{ type: 'font-awesome', name: 'lock' }}
+          leftIcon={{ type: 'font-awesome', name: 'lock' }}
           value={password}
           autoCapitalize='none'
           autoCorrect={false}
-          keyboardType='number-pad'
+          style={{ fontFamily: CustomConstants.BoldFont }}
         />
 
         <View style={{ ...styles.input, width: '80%' }}>

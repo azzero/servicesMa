@@ -58,3 +58,29 @@ export const MoroccoCities = [
     value: 'الرباط'
   }
 ];
+export const services = [
+  {
+    value: 'كهربائي'
+  },
+  {
+    value: 'ميكانيكي'
+  },
+  {
+    value: 'بلومبي'
+  },
+  {
+    value: 'نجار'
+  },
+  {
+    value: 'حداد'
+  },
+  {
+    value: 'صباغ'
+  },
+  {
+    value: 'بناء'
+  },
+  {
+    value: 'حارس'
+  }
+];

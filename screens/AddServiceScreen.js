@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   StyleSheet,
   View,
@@ -10,7 +10,7 @@ import {
 import { Text, Input, Button } from '../components';
 import validate from 'validate.js';
 import constraints from '../constants/constraints';
-import { auth, db, f, fr } from '../config/config';
+import { f, fr, geo } from '../config/config';
 import { Dropdown } from 'react-native-material-dropdown';
 import * as customConstants from '../constants/constants';
 import { FontAwesome } from '@expo/vector-icons';
@@ -20,6 +20,8 @@ import Constants from 'expo-constants';
 import Modal from 'react-native-modal';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { Linking } from 'expo';
+import LocalisationContext from '../context/LocalisationContext';
+
 const Service = ({ navigation }) => {
   //---------------Some params ---------------------------//
   const currentUser = f.auth().currentUser;
@@ -31,9 +33,10 @@ const Service = ({ navigation }) => {
   const [nameErrors, setNameerrors] = useState('');
   const [serviceErrors, setServiceerrors] = useState('');
   const [teleErrors, setTeleerrors] = useState('');
+  const [cityErrors, setCityerrors] = useState('');
   const [DescriptionErrors, setDescriptionErrors] = useState('');
   const [city, setCity] = useState('');
-  const [location, setLocation] = useState(null);
+  // const [location, setLocation] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
@@ -41,10 +44,18 @@ const Service = ({ navigation }) => {
   const [EnableLocationServiceAsked, setEnableLocationServiceAsked] = useState(
     false
   );
+  // const [longitude, setLongitude] = useState(0);
+  // const [latitude, setLatitude] = useState(0);
+  const [selectedService, setSelectedService] = useState('');
+  //------------------------------------------------//
+  //-----------------------Context ----------------//
+  //-----------------------------------------------//
+  const { position } = useContext(LocalisationContext);
+  const { localisation, setlocalisation } = position;
 
   //------------------ REFERENCES --------------------------//
   const nameRef = React.createRef();
-  const serviceRef = React.createRef();
+  // const serviceRef = React.createRef();
   const teleRref = React.createRef();
   const DescriptionRref = React.createRef();
   //------------------SetState Handler --------------------//
@@ -64,16 +75,20 @@ const Service = ({ navigation }) => {
     setDescriptionErrors('');
     setDescription(text);
   };
-  //------------ Picker handler --------------------//
-  const pickerHandler = value => {
+  const citiesPickerHandler = value => {
+    setCityerrors('');
     setCity(value);
   };
+  //------------ Pickers handler --------------------//
+  // const ServicesPickerHandler = value => {
+  //   setSelectedService(value);
+  // };
   //------------------------------------------------//
-  //------------------Confirmation------------------//
+  //------------------validation and insertion------------------//
   //-----------------------------------------------//
   const confirm = () => {
     const validationResult = validate(
-      { name: name, service: serviceTitle, tele: tele },
+      { name: name, service: serviceTitle, tele: tele, city: city },
       constraints.services
     );
     if (typeof validationResult !== 'undefined' && validationResult.name) {
@@ -84,54 +99,50 @@ const Service = ({ navigation }) => {
     if (typeof validationResult !== 'undefined' && validationResult.service) {
       const error2 = validationResult.service[0];
       setServiceerrors(error2);
-      serviceRef.current.shake();
+      // serviceRef.current.shake();
     }
     if (typeof validationResult !== 'undefined' && validationResult.tele) {
       const error3 = validationResult.tele[0];
       setTeleerrors(error3);
       teleRref.current.shake();
     }
+    if (typeof validationResult !== 'undefined' && validationResult.city) {
+      const error4 = validationResult.city[0];
+      setCityerrors(error4);
+    }
     if (typeof validationResult === 'undefined') {
-      try {
-        const cityRef = f.database().ref('/services/' + name);
-        const newServiceRef = cityRef.push();
-        newServiceRef.set({
-          serviceTitle: serviceTitle,
-          tele: tele
+      const position = geo.point(localisation.latitude, localisation.longitude);
+      fr.collection('services')
+        .doc(city)
+        .collection(serviceTitle)
+        .add({
+          name: name,
+          Description: Description,
+          tele: tele,
+          location: position,
+          userID: currentUser.uid
+        })
+        .then(function() {
+          Alert.alert(
+            'ممتاز !!',
+            'تمت الإضافة بنجاح ',
+            [
+              {
+                text: 'البقاء هنا ',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel'
+              },
+              {
+                text: 'الرجوع للواجهة الرئيسية',
+                onPress: () => navigation.navigate('Home')
+              }
+            ],
+            { cancelable: false }
+          );
+        })
+        .catch(function(error) {
+          console.error('Error writing document: ', error);
         });
-        fr.collection('services')
-          .doc(city)
-          .collection(serviceTitle)
-          .add({
-            name: name,
-            Description: Description,
-            tele: tele,
-            userID: currentUser.uid
-          })
-          .then(function() {
-            Alert.alert(
-              'ممتاز !!',
-              'تمت الإضافة بنجاح ',
-              [
-                {
-                  text: 'البقاء هنا ',
-                  onPress: () => console.log('Cancel Pressed'),
-                  style: 'cancel'
-                },
-                {
-                  text: 'الرجوع للواجهة الرئيسية',
-                  onPress: () => navigation.navigate('Home')
-                }
-              ],
-              { cancelable: false }
-            );
-          })
-          .catch(function(error) {
-            console.error('Error writing document: ', error);
-          });
-      } catch (e) {
-        console.log(e);
-      }
     }
   };
   //------------------------------------------------//
@@ -154,8 +165,7 @@ const Service = ({ navigation }) => {
     try {
       let ProviderStatus = Location.hasServicesEnabledAsync();
       const locationIsEnbaled = await ProviderStatus;
-      console.log('provider status : ', locationIsEnbaled);
-      console.log('EnableLocationServiceAsked : ', EnableLocationServiceAsked);
+
       if (!locationIsEnbaled && !EnableLocationServiceAsked) {
         if (Platform.OS === 'ios') {
           setIsLocationModalVisible(true);
@@ -167,15 +177,22 @@ const Service = ({ navigation }) => {
         return;
       }
       let { status } = await Permissions.askAsync(Permissions.LOCATION);
-      // console.log('stauts : ', status);
       if (status !== 'granted') {
         setErrorMessage('لم يسمح بالولوج للموقع');
         return;
       }
       let lc = await Location.getCurrentPositionAsync({});
+      const { longitude, latitude } = lc.coords;
+      setlocalisation({ longitude, latitude });
+      // setLongitude(longitude);
+      // setLatitude(latitude);
+
+      console.log(`longitude : ${longitude} , latitude ${latitude}`);
       setLocation(lc);
     } catch (e) {
-      // setIsLocationModalVisible(true);
+      if (Platform.OS !== 'android') {
+        alert(e);
+      }
     }
   };
   //------------------------------------------------//
@@ -184,10 +201,6 @@ const Service = ({ navigation }) => {
   const handleAppStateChange = nextAppState => {
     console.log('AppStateNow :', appStateNow);
     console.log('AppStateNext :', nextAppState);
-    // if (appStateNow.match(/inactive|background/) && nextAppState === 'active') {
-    //   console.log('App has come to the foreground!');
-    //   getLocationAsync();
-    // }
     setAppStateNow(nextAppState);
   };
   //------------------------------------------------//
@@ -199,15 +212,18 @@ const Service = ({ navigation }) => {
       'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
         setErrorMessage('لا يمكن أن يعمل على اندرويد ايميلايتور ');
     } else {
-      getLocationAsync();
+      if (localisation === null) {
+        getLocationAsync();
+      }
     }
-    // console.log('appStateNow in effect', appStateNow);
     return () => {
       // clean listener
       AppState.removeEventListener('change', handleAppStateChange);
     };
   }, [appStateNow]);
-  //-------------------- Render ----------------------//
+  //------------------------------------------------//
+  //-----------------------Render------------------//
+  //-----------------------------------------------//
   return (
     <View style={styles.container}>
       <Modal
@@ -242,13 +258,33 @@ const Service = ({ navigation }) => {
         style={{ color: '#000000' }}
         placeholder='الاسم'
         value={name}
+        autoCorrect={false}
       />
-      <Input
-        ref={serviceRef}
-        errorMessage={serviceErrors}
-        inputHandler={setServiceTitleHandler}
-        style={{ color: '#000000', textAlign: 'right' }}
-        placeholder='نوع الخدمة'
+      <Dropdown
+        label='نوع الخدمة'
+        dropdownOffset={{ top: 20, left: 0 }}
+        rippleInsets={{ top: 0, bottom: 0 }}
+        data={customConstants.services}
+        containerStyle={{
+          justifyContent: 'center',
+          width: '90%',
+          paddingLeft: 10
+        }}
+        onChangeText={value => {
+          setServiceTitleHandler(value);
+        }}
+        pickerStyle={{ borderRadius: 10 }}
+        itemTextStyle={{
+          borderBottomColor: customConstants.grayColor,
+          borderBottomWidth: 1,
+          textAlign: 'center',
+          paddingBottom: 4,
+          margin: 1
+        }}
+        itemCount={8}
+        value={selectedService}
+        rippleCentered={true}
+        error={serviceErrors}
       />
       <Input
         ref={DescriptionRref}
@@ -256,6 +292,7 @@ const Service = ({ navigation }) => {
         inputHandler={setDescriptionHandler}
         style={{ color: '#000000', textAlign: 'right' }}
         multiline={true}
+        autoCorrect={false}
         numberOflines={4}
         placeholder='وصف الخدمة'
         value={Description}
@@ -267,59 +304,37 @@ const Service = ({ navigation }) => {
         style={{ color: '#000000', textAlign: 'right' }}
         placeholder='رقم الهاتف'
         value={tele}
+        autoCorrect={false}
       />
-      <View
-        style={{
-          height: 90,
-          width: '80%',
-          // justifyContent: 'center',
-          alignItems: 'center'
-        }}
-      >
-        <Dropdown
-          data={customConstants.MoroccoCities}
-          itemTextStyle={{ textAlign: 'right' }}
-          containerStyle={{
-            width: '100%'
-          }}
-          dropdownOffset={{ top: 10, left: 0 }}
-          onChangeText={value => {
-            pickerHandler(value);
-          }}
-          pickerStyle={{ borderRadius: 10 }}
-          itemTextStyle={{
-            borderBottomColor: customConstants.grayColor,
-            borderBottomWidth: 1,
-            textAlign: 'center',
-            paddingBottom: 4,
-            margin: 1
-          }}
-          rippleInsets={{ top: 0, bottom: 0 }}
-          renderAccessory={() => {
-            if (city === '') {
-              return (
-                <View style={{ flex: 1, width: '100%', flexDirection: 'row' }}>
-                  <View style={{ width: '80%', left: 0 }}>
-                    <FontAwesome name='chevron-down' size={20} color='gray' />
-                  </View>
 
-                  <Text
-                    style={{
-                      color: customConstants.grayColor,
-                      textAlign: 'right'
-                    }}
-                  >
-                    المدينة
-                  </Text>
-                </View>
-              );
-            }
-          }}
-          itemCount={7}
-          value={city}
-          rippleCentered={true}
-        />
-      </View>
+      <Dropdown
+        label='المدينة'
+        data={customConstants.MoroccoCities}
+        containerStyle={{
+          justifyContent: 'center',
+          width: '90%',
+          paddingLeft: 10
+        }}
+        dropdownOffset={{ top: 10, left: 0 }}
+        onChangeText={value => {
+          citiesPickerHandler(value);
+        }}
+        pickerStyle={{ borderRadius: 10 }}
+        itemTextStyle={{
+          borderBottomColor: customConstants.grayColor,
+          borderBottomWidth: 1,
+          textAlign: 'center',
+          paddingBottom: 4,
+          margin: 1,
+          color: 'green'
+        }}
+        rippleInsets={{ top: 0, bottom: 0 }}
+        itemCount={7}
+        value={city}
+        rippleCentered={true}
+        error={cityErrors}
+      />
+
       <View style={styles.buttonContainer}>
         <Button color='green' onPress={() => confirm()} shadow>
           <Text style={{ color: 'white' }} button>
@@ -329,8 +344,8 @@ const Service = ({ navigation }) => {
         </Button>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <Text>
-            {location !== null
-              ? `your location is :${JSON.stringify(location)}`
+            {localisation !== null
+              ? `your location is :${JSON.stringify(localisation)}`
               : `للأسف  : ${errorMessage}`}
           </Text>
         </View>

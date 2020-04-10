@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, I18nManager } from 'react-native';
 import { ThemeProvider } from 'react-native-elements';
 import * as Font from 'expo-font';
 import { AppLoading } from 'expo';
@@ -9,10 +9,12 @@ import { Asset } from 'expo-asset';
 import { f, database, auth } from './config/config.js';
 import UserContext from './context/UserContext';
 import DataContext from './context/DataContext';
+import LocalisationContext from './context/LocalisationContext';
 import { AsyncStorage } from 'react-native';
 import { YellowBox } from 'react-native';
 import _ from 'lodash';
-
+import { decode, encode } from 'base-64';
+global.crypto = require('@firebase/firestore');
 //-------------- disable setTimeOut warning :
 
 YellowBox.ignoreWarnings(['Setting a timer']);
@@ -22,6 +24,20 @@ console.warn = message => {
     _console.warn(message);
   }
 };
+
+global.crypto.getRandomValues = byteArray => {
+  for (let i = 0; i < byteArray.length; i++) {
+    byteArray[i] = Math.floor(256 * Math.random());
+  }
+};
+
+if (!global.btoa) {
+  global.btoa = encode;
+}
+
+if (!global.atob) {
+  global.atob = decode;
+}
 
 //--------------------------------
 
@@ -69,13 +85,17 @@ const loadingAssets = async () => {
 //---------------------------APP --------//
 
 export default function App({ navigation }) {
+  I18nManager.forceRTL(true);
+
   //----------------State Declaration ----------//
 
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
   const [data, setData] = useState(null);
+  const [localisation, setlocalisation] = useState(null);
   const [loadingToken, setloadingToken] = useState(true);
   const [isLoggedIn, setisLoggedIn] = useState(false);
+  const [asklocalisationpopup, setasklocalisationpopup] = useState(false);
 
   //-------------- User ContextProvider -------------------//
   const providerValue = useMemo(
@@ -86,8 +106,21 @@ export default function App({ navigation }) {
     }),
     [isLoggedIn, setisLoggedIn, token, setToken, loadingToken, setloadingToken]
   );
-  //-------------------Data Contex Provider -------------------//
+  //-------------------Data Context Provider -------------------//
   const DataProvider = useMemo(() => ({ data, setData }), [data, setData]);
+  //-------------------Data Context Provider -------------------//
+  const LocalisationProvider = useMemo(
+    () => ({
+      position: { localisation, setlocalisation },
+      askingPosition: { asklocalisationpopup, setasklocalisationpopup }
+    }),
+    [
+      localisation,
+      setlocalisation,
+      asklocalisationpopup,
+      setasklocalisationpopup
+    ]
+  );
   //----------------------Use Effect ------------------------//
   useEffect(() => {
     return async () => {
@@ -129,7 +162,9 @@ export default function App({ navigation }) {
       <ThemeProvider theme={theme}>
         <UserContext.Provider value={providerValue}>
           <DataContext.Provider value={DataProvider}>
-            <NavigationRoot />
+            <LocalisationContext.Provider value={LocalisationProvider}>
+              <NavigationRoot />
+            </LocalisationContext.Provider>
           </DataContext.Provider>
         </UserContext.Provider>
       </ThemeProvider>

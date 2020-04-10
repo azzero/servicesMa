@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import * as CustomConstants from '../constants/constants';
 import { FontAwesome } from '@expo/vector-icons';
-import { Rating, Avatar } from 'react-native-elements';
+import { Avatar } from 'react-native-elements';
+import Rating from './Rating';
 const Service = props => {
   //-------------- state ----------------//
   const { children, title, phone, Description, userRating, ...others } = props;
@@ -42,9 +43,9 @@ const Service = props => {
   const onStartAnimation = () => {
     const toValue = activated ? 0 : 1;
     setActivated(!activated);
+
     Animated.spring(animation, {
       toValue
-      // duration: 300
     }).start();
   };
   const off = ((windowWidth - 5) * 0.7) / 2;
@@ -54,17 +55,7 @@ const Service = props => {
         {
           translateX: animation.interpolate({
             inputRange: [0, 1],
-            outputRange: [-off, 0]
-          })
-        }
-      ]
-    },
-    phoneNumber: {
-      transform: [
-        {
-          translateX: animation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [-170, 0]
+            outputRange: [off, 0]
           })
         }
       ]
@@ -101,36 +92,7 @@ const Service = props => {
           </Text>
         </View>
 
-        {/* <View
-          style={{
-            borderColor: 'gray',
-            borderWidth: 1,
-            width: '70%',
-            borderRadius: 20,
-            marginBottom: 5
-          }}
-        ></View> */}
         <View style={styles.description}>
-          {/* Description */}
-          {/* <View
-            style={{
-              height: 60,
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}
-          >
-            <Text
-              style={{
-                fontSize: CustomConstants.sizes.body,
-                textAlign: 'center',
-                color: '#ffffff'
-              }}
-            >
-              {Description}
-            </Text> 
-          </View>
-            */}
-
           {/* -------------------- Phone------------------------- */}
           {/*---------------------------------------------------- */}
           <TouchableWithoutFeedback
@@ -170,7 +132,7 @@ const Service = props => {
         </View>
 
         <View style={styles.rating}>
-          <Rating
+          {/* <Rating
             tintColor={CustomConstants.PrimaryColor}
             type='custom'
             count={5}
@@ -180,7 +142,8 @@ const Service = props => {
             onFinishRating={val => ratingCompleted(val)}
             defaultRating={rating}
             // showReadOnlyText={true}
-          />
+          /> */}
+          <Rating rating={5} />
         </View>
       </View>
     </View>
@@ -199,13 +162,9 @@ const styles = StyleSheet.create({
     backgroundColor: CustomConstants.PrimaryColor,
     borderRadius: 6,
     marginTop: 10
-    // alignItems: 'center'
-    // justifyContent: 'center'
   },
   info: {
     flex: 0.6,
-    // borderColor: 'yellow',
-    // borderWidth: 2,
     borderRightColor: '#ffffff',
     borderRightWidth: 2,
     justifyContent: 'center',
@@ -229,8 +188,7 @@ const styles = StyleSheet.create({
   rating: {
     flex: 0.5,
     justifyContent: 'center',
-    alignItems: 'center',
-    opacity: 1
+    alignItems: 'center'
   },
   title: {
     flex: 0.5,

@@ -2,8 +2,13 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import * as Constants from '../constants/constants';
 const TextComponent = props => {
-  const { style, button, children, ...others } = props;
-  const textStyles = [styles.text, button && styles.button, style];
+  const { style, button, children, right, ...others } = props;
+  const textStyles = [
+    styles.text,
+    button && styles.button,
+    right && styles.right,
+    style
+  ];
   return (
     <Text style={textStyles} {...others}>
       {children}
@@ -19,6 +24,9 @@ const styles = StyleSheet.create({
   },
   button: {
     textAlign: 'center'
+  },
+  right: {
+    textAlign: 'left'
   }
 });
 

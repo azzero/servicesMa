@@ -5,15 +5,20 @@ import DataContext from '../context/DataContext';
 import { AsyncStorage } from 'react-native';
 import { Button, Text, Service } from '../components';
 import * as CustomConstants from '../constants/constants';
-import { auth, db, fr, f } from '../config/config';
-
+import { auth, fr, geo } from '../config/config';
+import LocalisationContext from '../context/LocalisationContext';
+import AskLocalisation from '../components/AskLocalisation';
+import { get } from 'geofirex';
 //-------------- Home Screen ---------------------//
-const Home = ({ navigation }) => {
+const Home = props => {
+  const { navigation } = props;
   const { data, setData } = useContext(DataContext);
-
+  const { position, askingPosition } = useContext(LocalisationContext);
+  const { localisation, setlocalisation } = position;
   // const [data, setData] = useState(null);
   const { logging, tokenManager } = useContext(UserContext);
   const { isLoggedIn, setisLoggedIn } = logging;
+  const { asklocalisationpopup, setasklocalisationpopup } = askingPosition;
   //----------- logout funcion ------------------//
   const logout = () => {
     auth
@@ -27,29 +32,48 @@ const Home = ({ navigation }) => {
   };
   const getdata = async () => {
     try {
-      const docs = await fr
+      const services = fr
         .collection('services')
         .doc('اسفي')
-        .collection('كهربائي')
-        .get();
-      let list = [];
-      docs.forEach(doc => {
-        list.push(doc.data());
-        // setData([...data, row]);
-      });
-      setData(list);
+        .collection('نجار');
+      // const center = geo.point(localisation.latitude, localisation.longitude);
+      const center = geo.point(32.2614456, -9.2475532);
+      const radius = 100;
+      const field = 'location';
+      const query = geo.query(services).within(center, radius, field);
+      const docs = await get(query);
+      // const docs = await fr
+      //   .collection('services')
+      //   .doc('اسفي')
+      //   .collection('نجار')
+      //   .get();
+      // let list = [];
+      // docs.forEach(doc => {
+      //   list.push(doc.data());
+      //   // setData([...data, row]);
+      // });
+      console.log('documents : ', docs);
+      setData(docs);
       navigation.navigate('DisplayServices');
     } catch (e) {
       console.log(e);
     }
   };
 
-  //---------------- USE EFFECT-------------//
-
   //----------------------------------------
+  if (asklocalisationpopup === false) {
+    console.log('inside popup condition');
+    return <AskLocalisation {...props} />;
+  }
+  console.log('lol : ', localisation);
   return (
     <View style={styles.container}>
-      <View style={styles.top}></View>
+      <View style={styles.top}>
+        <Text>
+          {localisation &&
+            `your localisation is longitude : ${localisation.longitude} latitude : ${localisation.latitude} `}
+        </Text>
+      </View>
       <View style={styles.buttonContainer}>
         <Button gradient onPress={() => navigation.navigate('AddService')}>
           <Text button> أضف خدمة </Text>
@@ -85,13 +109,3 @@ const styles = StyleSheet.create({
   }
 });
 export default Home;
-{
-  /* <Text>Home screen </Text>
-        <Button onPress={logout}>
-          <Text> logout </Text>
-        </Button>
-        <Button onPress={getdata}>
-          <Text> token </Text>
-        </Button>
-      </View> */
-}

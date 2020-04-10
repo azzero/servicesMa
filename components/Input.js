@@ -14,23 +14,23 @@ const InputComponent = React.forwardRef((props, ref) => {
       onChangeText={inputHandler}
       errorMessage={errorMessage !== '' ? errorMessage : ''}
       {...others}
+      errorStyle={{ textAlign: 'left' }}
     />
   );
 });
 const styles = StyleSheet.create({
   InputContainer: {
-    width: '80%'
+    width: '90%'
   },
   input: {
     color: 'white',
     width: '100%',
     textAlign: 'right',
     textDecorationLine: 'none',
-
+    // paddingLeft: 10,
     fontFamily: Constants.ShebaYeFont,
     fontWeight: '800',
-    fontSize: 16,
-    margin: 1
+    fontSize: 16
   }
 });
 
