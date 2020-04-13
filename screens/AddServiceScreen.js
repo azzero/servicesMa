@@ -13,7 +13,6 @@ import constraints from '../constants/constraints';
 import { f, fr, geo } from '../config/config';
 import { Dropdown } from 'react-native-material-dropdown';
 import * as customConstants from '../constants/constants';
-import { FontAwesome } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
@@ -282,7 +281,7 @@ const Service = ({ navigation }) => {
           margin: 1
         }}
         itemCount={8}
-        value={selectedService}
+        value={serviceTitle}
         rippleCentered={true}
         error={serviceErrors}
       />
@@ -315,7 +314,7 @@ const Service = ({ navigation }) => {
           width: '90%',
           paddingLeft: 10
         }}
-        dropdownOffset={{ top: 10, left: 0 }}
+        dropdownOffset={{ top: 20, left: 0 }}
         onChangeText={value => {
           citiesPickerHandler(value);
         }}

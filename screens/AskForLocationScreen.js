@@ -43,6 +43,9 @@ const AskLocalisation = ({ navigation }) => {
     }
     setOpenSetting(false);
   };
+  const goToHome = () => {
+    navigation.navigate('Home');
+  };
   //------------------------------------------------//
   //---------------get location Async---------------//
   //-----------------------------------------------//
@@ -52,22 +55,23 @@ const AskLocalisation = ({ navigation }) => {
       const locationIsEnbaled = await ProviderStatus;
 
       if (!locationIsEnbaled && !EnableLocationServiceAsked) {
-        if (Platform.OS === 'ios') {
-          setIsLocationModalVisible(true);
-        }
+        // if (Platform.OS === 'ios') {
+        //   setIsLocationModalVisible(true);
+        // }
         setIsLocationModalVisible(true);
-
         setEnableLocationServiceAsked(true);
         return;
       }
       if (!locationIsEnbaled && EnableLocationServiceAsked) {
         setasklocalisationpopup(true);
         // setErrorMessage('لم تسمح لنا بالوصول إلى موقعك');
+        goToHome();
         return;
       }
       let { status } = await Permissions.askAsync(Permissions.LOCATION);
       if (status !== 'granted') {
         setasklocalisationpopup(true);
+        goToHome();
         // setErrorMessage('لم يسمح بالولوج للموقع');
         return;
       }
@@ -79,6 +83,7 @@ const AskLocalisation = ({ navigation }) => {
       console.log(`longitude : ${longitude} , latitude ${latitude}`);
       setlocalisation({ longitude, latitude });
       setasklocalisationpopup(true);
+      goToHome();
     } catch (e) {
       alert(e);
       setasklocalisationpopup(true);
@@ -166,6 +171,7 @@ const AskLocalisation = ({ navigation }) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

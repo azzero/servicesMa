@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import AskForLocation from '../screens/AskForLocationScreen';
 import InscriptionScreen from '../screens/SignUpScreen';
 import Welcome from '../screens/Welcome';
 import ForgotScreen from '../screens/ForgotScreen';
@@ -67,6 +68,7 @@ const StackRouter = () => {
           <Stack.Screen name='Rating' component={Rating} />
           <Stack.Screen name='Profile' component={ProfileScreen} />
           <Stack.Screen name='AddService' component={AddService} />
+          <Stack.Screen name='AskForLocation' component={AskForLocation} />
         </>
       )}
     </Stack.Navigator>

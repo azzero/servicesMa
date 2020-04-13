@@ -4,7 +4,8 @@ import {
   View,
   TouchableWithoutFeedback,
   Animated,
-  Easing
+  Easing,
+  Dimensions
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import Button from './Button';
@@ -15,7 +16,6 @@ const Rating = props => {
   //-----------------------------------------------//
   const [rating, setRating] = useState(props.rating ? props.rating : 1);
   const [animation, setAnimation] = useState(new Animated.Value(1));
-
   const numStarts = props.numStarts ? props.numStarts : 5;
   const color = props.color ? props.color : 'yellow';
   let stars = [];
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative'
+    position: 'absolute'
   },
   star: {}
 });
