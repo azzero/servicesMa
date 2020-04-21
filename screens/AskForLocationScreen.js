@@ -8,10 +8,12 @@ import Modal from 'react-native-modal';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { Linking } from 'expo';
 import LocalisationContext from '../context/LocalisationContext';
-const AskLocalisation = ({ navigation }) => {
+const AskLocalisation = ({ navigation, route }) => {
+  const { fromScreen } = route.params;
   //------------------------------------------------//
   //------------------------state------------------//
   //-----------------------------------------------//
+  const [trackingAppState, settrackingAppState] = useState(null);
   const [location, setLocation] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
@@ -27,9 +29,9 @@ const AskLocalisation = ({ navigation }) => {
   const { asklocalisationpopup, setasklocalisationpopup } = askingPosition;
 
   //------------------------------------------------//
-  //------------------------context------------------//
+  //------------------------Ref------------------//
   //-----------------------------------------------//
-
+  const ModelRef = React.createRef();
   //------------------------------------------------//
   //----------------Open setting Function----------//
   //-----------------------------------------------//
@@ -43,9 +45,7 @@ const AskLocalisation = ({ navigation }) => {
     }
     setOpenSetting(false);
   };
-  const goToHome = () => {
-    navigation.navigate('Home');
-  };
+
   //------------------------------------------------//
   //---------------get location Async---------------//
   //-----------------------------------------------//
@@ -65,13 +65,21 @@ const AskLocalisation = ({ navigation }) => {
       if (!locationIsEnbaled && EnableLocationServiceAsked) {
         setasklocalisationpopup(true);
         // setErrorMessage('لم تسمح لنا بالوصول إلى موقعك');
-        goToHome();
+        if (fromScreen) {
+          navigation.navigate(fromScreen);
+        } else {
+          navigation.goBack();
+        }
         return;
       }
       let { status } = await Permissions.askAsync(Permissions.LOCATION);
       if (status !== 'granted') {
         setasklocalisationpopup(true);
-        goToHome();
+        if (fromScreen) {
+          navigation.navigate(fromScreen);
+        } else {
+          navigation.goBack();
+        }
         // setErrorMessage('لم يسمح بالولوج للموقع');
         return;
       }
@@ -83,7 +91,12 @@ const AskLocalisation = ({ navigation }) => {
       console.log(`longitude : ${longitude} , latitude ${latitude}`);
       setlocalisation({ longitude, latitude });
       setasklocalisationpopup(true);
-      goToHome();
+      console.log('from screen ', fromScreen);
+      if (fromScreen) {
+        navigation.navigate(fromScreen);
+      } else {
+        navigation.goBack();
+      }
     } catch (e) {
       alert(e);
       setasklocalisationpopup(true);
@@ -93,25 +106,40 @@ const AskLocalisation = ({ navigation }) => {
   //------------------------app State change Handler ------------------//
   //-----------------------------------------------//
   const handleAppStateChange = nextAppState => {
-    if (localisation === null) {
-      getLocationAsync();
-    }
-    console.log('AppStateNow :', appStateNow);
+    // setIsLocationModalVisible(false);
+    // setAppStateNow(nextAppState);
+    // if (localisation === null && nextAppState !== appStateNow) {
+    //   getLocationAsync();
+    //   console.log('call getlocationAsync inside handle app state');
+    // } else {
+    //   setAppStateNow(nextAppState);
+    // }
+    // if (appStateNow === 'background' && nextAppState === 'active') {
+    //   console.log('inside checking  ');
+    //   getLocationAsync();
+    // }
+    setAppStateNow(prev => {
+      if (
+        nextAppState === 'active' &&
+        nextAppState !== prev &&
+        localisation === null
+      ) {
+        getLocationAsync();
+
+        return nextAppState;
+      } else {
+        return nextAppState;
+      }
+    });
+
+    console.log('AppStateNow inside handler  :', appStateNow);
     console.log('AppStateNext :', nextAppState);
-    setAppStateNow(nextAppState);
   };
   //------------------------------------------------//
   //---------------------Use Effect-----------------//
   //-----------------------------------------------//
   useEffect(() => {
     AppState.addEventListener('change', handleAppStateChange);
-    if (Platform.OS === 'android' && !Constants.isDevice) {
-      'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
-        setErrorMessage('لا يمكن أن يعمل على اندرويد ايميلايتور ');
-    }
-    // else {
-    //   getLocationAsync();
-    // }
     return () => {
       // clean listener
       AppState.removeEventListener('change', handleAppStateChange);
@@ -124,6 +152,7 @@ const AskLocalisation = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Modal
+        ref={ModelRef}
         onModalHide={openSetting ? openSettingFunction : undefined}
         isVisible={isLocationModalVisible}
       >
@@ -150,6 +179,13 @@ const AskLocalisation = ({ navigation }) => {
       </Modal>
       <View style={styles.buttonContainer}>
         <View>
+          {asklocalisationpopup ? (
+            <Text style={{ color: 'red' }} right>
+              للأسف لم تفعل خدمة الوصول للموقع (GPS ) أعد المحاولة بالضغط على
+              الرابط أسفله ، و إذا تعدر الأمر فربما حضرت تطبيقنا من الوصول
+              لموقعك أعد السماح للتطبيق من الولوج لموقعك عن طريق إعدادات هاتفك
+            </Text>
+          ) : null}
           <Text right>لكي نوفر لك أفضل خدمة ممكنة نحتاج الوصول لموقعك</Text>
           <Text right>
             إذا كنت موافقك على استعمال موقعك حسب الشروط المدكورة في الرابط أسفله
@@ -161,11 +197,11 @@ const AskLocalisation = ({ navigation }) => {
         </Button>
         <Button
           onPress={() => {
-            setasklocalisationpopup(true), navigation.navigate('Home');
+            fromScreen ? navigation.navigate(fromScreen) : navigation.goBack();
           }}
           gradient
         >
-          <Text button>أو للذهاب للصفحة الرئيسية إضغط هنا </Text>
+          <Text button>للرجوع إضغط هنا </Text>
         </Button>
       </View>
     </View>

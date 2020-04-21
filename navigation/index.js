@@ -17,6 +17,7 @@ import Rating from '../components/Rating';
 import AskLocalisation from '../components/AskLocalisation';
 //-------------ROUTERS ------//
 const Stack = createStackNavigator();
+
 const StackRouter = () => {
   const { logging, tokenManager, splash } = useContext(UserContext);
   const { token, setToken } = tokenManager;
@@ -37,16 +38,18 @@ const StackRouter = () => {
           elevation: 0
         },
         headerBackTitle: null,
-        headerLeftContainerStyle: {
+        headerRightContainerStyle: {
           alignItems: 'center',
           marginLeft: 15,
           paddingRight: 16
         },
-        headerRightContainerStyle: {
+        headerLeftContainerStyle: {
           alignItems: 'center',
           paddingRight: 16
         }
       }}
+      mode='modal'
+      headerMode='none'
     >
       {token === null ? (
         <>

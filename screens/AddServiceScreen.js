@@ -5,8 +5,10 @@ import {
   Picker,
   Alert,
   Platform,
-  AppState
+  AppState,
+  KeyboardAvoidingView
 } from 'react-native';
+import UserContext from '../context/UserContext';
 import { Text, Input, Button } from '../components';
 import validate from 'validate.js';
 import constraints from '../constants/constraints';
@@ -20,7 +22,8 @@ import Modal from 'react-native-modal';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { Linking } from 'expo';
 import LocalisationContext from '../context/LocalisationContext';
-
+import { CheckBox } from 'react-native-elements';
+import * as CustomConstants from '../constants/constants';
 const Service = ({ navigation }) => {
   //---------------Some params ---------------------------//
   const currentUser = f.auth().currentUser;
@@ -36,20 +39,22 @@ const Service = ({ navigation }) => {
   const [DescriptionErrors, setDescriptionErrors] = useState('');
   const [city, setCity] = useState('');
   // const [location, setLocation] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
-  const [openSetting, setOpenSetting] = useState(false);
-  const [appStateNow, setAppStateNow] = useState(AppState.currentState);
-  const [EnableLocationServiceAsked, setEnableLocationServiceAsked] = useState(
-    false
-  );
+  // const [errorMessage, setErrorMessage] = useState('');
+  // const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
+  // const [openSetting, setOpenSetting] = useState(false);
+  // const [appStateNow, setAppStateNow] = useState(AppState.currentState);
+  // const [EnableLocationServiceAsked, setEnableLocationServiceAsked] = useState(
+  //   false
+  // );
+  const [isSearchByPosition, setisSearchByPosition] = useState(false);
   // const [longitude, setLongitude] = useState(0);
   // const [latitude, setLatitude] = useState(0);
-  const [selectedService, setSelectedService] = useState('');
+  // const [selectedService, setSelectedService] = useState('');
   //------------------------------------------------//
   //-----------------------Context ----------------//
   //-----------------------------------------------//
-  const { position } = useContext(LocalisationContext);
+  const { position, askingPosition } = useContext(LocalisationContext);
+  const { asklocalisationpopup, setasklocalisationpopup } = askingPosition;
   const { localisation, setlocalisation } = position;
 
   //------------------ REFERENCES --------------------------//
@@ -58,6 +63,13 @@ const Service = ({ navigation }) => {
   const teleRref = React.createRef();
   const DescriptionRref = React.createRef();
   //------------------SetState Handler --------------------//
+  const checkButtonHandler = () => {
+    if (localisation) {
+      setisSearchByPosition(!isSearchByPosition);
+    } else {
+      navigation.navigate('AskForLocation', { fromScreen: 'AddService' });
+    }
+  };
   const setNameHandler = text => {
     setNameerrors('');
     setName(text);
@@ -110,7 +122,12 @@ const Service = ({ navigation }) => {
       setCityerrors(error4);
     }
     if (typeof validationResult === 'undefined') {
-      const position = geo.point(localisation.latitude, localisation.longitude);
+      let position = null;
+      if (isSearchByPosition) {
+        position = geo.point(localisation.latitude, localisation.longitude);
+      } else {
+        position = geo.point(0, 0);
+      }
       fr.collection('services')
         .doc(city)
         .collection(serviceTitle)
@@ -147,85 +164,81 @@ const Service = ({ navigation }) => {
   //------------------------------------------------//
   //----------------Open setting Function-----------//
   //-----------------------------------------------//
-  const openSettingFunction = () => {
-    if (Platform.OS === 'ios') {
-      Linking.openURL('app-settings:');
-    } else {
-      IntentLauncher.startActivityAsync(
-        IntentLauncher.ACTION_LOCATION_SOURCE_SETTINGS
-      );
-    }
-    setOpenSetting(false);
-  };
-  //------------------------------------------------//
-  //---------------get location Async---------------//
-  //-----------------------------------------------//
-  const getLocationAsync = async () => {
-    try {
-      let ProviderStatus = Location.hasServicesEnabledAsync();
-      const locationIsEnbaled = await ProviderStatus;
+  // const openSettingFunction = () => {
+  //   if (Platform.OS === 'ios') {
+  //     Linking.openURL('app-settings:');
+  //   } else {
+  //     IntentLauncher.startActivityAsync(
+  //       IntentLauncher.ACTION_LOCATION_SOURCE_SETTINGS
+  //     );
+  //   }
+  //   setOpenSetting(false);
+  // };
+  // //------------------------------------------------//
+  // //---------------get location Async---------------//
+  // //-----------------------------------------------//
+  // const getLocationAsync = async () => {
+  //   try {
+  //     let ProviderStatus = Location.hasServicesEnabledAsync();
+  //     const locationIsEnbaled = await ProviderStatus;
 
-      if (!locationIsEnbaled && !EnableLocationServiceAsked) {
-        if (Platform.OS === 'ios') {
-          setIsLocationModalVisible(true);
-        }
-        setEnableLocationServiceAsked(true);
-      }
-      if (!locationIsEnbaled && EnableLocationServiceAsked) {
-        setErrorMessage('لم تسمح لنا بالوصول إلى موقعك');
-        return;
-      }
-      let { status } = await Permissions.askAsync(Permissions.LOCATION);
-      if (status !== 'granted') {
-        setErrorMessage('لم يسمح بالولوج للموقع');
-        return;
-      }
-      let lc = await Location.getCurrentPositionAsync({});
-      const { longitude, latitude } = lc.coords;
-      setlocalisation({ longitude, latitude });
-      // setLongitude(longitude);
-      // setLatitude(latitude);
+  //     if (!locationIsEnbaled && !EnableLocationServiceAsked) {
+  //       if (Platform.OS === 'ios') {
+  //         setIsLocationModalVisible(true);
+  //       }
+  //       setEnableLocationServiceAsked(true);
+  //     }
+  //     if (!locationIsEnbaled && EnableLocationServiceAsked) {
+  //       setErrorMessage('لم تسمح لنا بالوصول إلى موقعك');
+  //       return;
+  //     }
+  //     let { status } = await Permissions.askAsync(Permissions.LOCATION);
+  //     if (status !== 'granted') {
+  //       setErrorMessage('لم يسمح بالولوج للموقع');
+  //       return;
+  //     }
+  //     let lc = await Location.getCurrentPositionAsync({});
+  //     const { longitude, latitude } = lc.coords;
+  //     setlocalisation({ longitude, latitude });
+  //     // setLongitude(longitude);
+  //     // setLatitude(latitude);
 
-      console.log(`longitude : ${longitude} , latitude ${latitude}`);
-      setLocation(lc);
-    } catch (e) {
-      if (Platform.OS !== 'android') {
-        alert(e);
-      }
-    }
-  };
-  //------------------------------------------------//
-  //------------------------app State change Handler ------------------//
-  //-----------------------------------------------//
-  const handleAppStateChange = nextAppState => {
-    console.log('AppStateNow :', appStateNow);
-    console.log('AppStateNext :', nextAppState);
-    setAppStateNow(nextAppState);
-  };
+  //     console.log(`longitude : ${longitude} , latitude ${latitude}`);
+  //     setLocation(lc);
+  //   } catch (e) {
+  //     if (Platform.OS !== 'android') {
+  //       alert(e);
+  //     }
+  //   }
+  // };
+  // //------------------------------------------------//
+  // //------------------------app State change Handler ------------------//
+  // //-----------------------------------------------//
+  // const handleAppStateChange = nextAppState => {
+  //   console.log('AppStateNow :', appStateNow);
+  //   console.log('AppStateNext :', nextAppState);
+  //   setAppStateNow(nextAppState);
+  // };
   //------------------------------------------------//
   //---------------------Use Effect-----------------//
   //-----------------------------------------------//
   useEffect(() => {
-    AppState.addEventListener('change', handleAppStateChange);
-    if (Platform.OS === 'android' && !Constants.isDevice) {
-      'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
-        setErrorMessage('لا يمكن أن يعمل على اندرويد ايميلايتور ');
-    } else {
-      if (localisation === null) {
-        getLocationAsync();
-      }
+    if (asklocalisationpopup && localisation === null) {
+      setisSearchByPosition(false);
+      alert('للأسف تعدر علينا الوصول لموقعك');
     }
-    return () => {
-      // clean listener
-      AppState.removeEventListener('change', handleAppStateChange);
-    };
-  }, [appStateNow]);
+    if (asklocalisationpopup && localisation !== null) {
+      console.log('localisation updated', localisation);
+      setisSearchByPosition(true);
+    }
+  }, [asklocalisationpopup, localisation]);
   //------------------------------------------------//
   //-----------------------Render------------------//
   //-----------------------------------------------//
   return (
-    <View style={styles.container}>
-      <Modal
+    <KeyboardAvoidingView behavior='padding' enabled style={{ flex: 1 }}>
+      <View style={styles.container}>
+        {/* <Modal
         onModalHide={openSetting ? openSettingFunction : undefined}
         isVisible={isLocationModalVisible}
       >
@@ -249,107 +262,127 @@ const Service = ({ navigation }) => {
             <Text button>للقيام بذلك إضغط هنا</Text>
           </Button>
         </View>
-      </Modal>
-      <Input
-        ref={nameRef}
-        inputHandler={setNameHandler}
-        errorMessage={nameErrors}
-        style={{ color: '#000000' }}
-        placeholder='الاسم'
-        value={name}
-        autoCorrect={false}
-      />
-      <Dropdown
-        label='نوع الخدمة'
-        dropdownOffset={{ top: 20, left: 0 }}
-        rippleInsets={{ top: 0, bottom: 0 }}
-        data={customConstants.services}
-        containerStyle={{
-          justifyContent: 'center',
-          width: '90%',
-          paddingLeft: 10
-        }}
-        onChangeText={value => {
-          setServiceTitleHandler(value);
-        }}
-        pickerStyle={{ borderRadius: 10 }}
-        itemTextStyle={{
-          borderBottomColor: customConstants.grayColor,
-          borderBottomWidth: 1,
-          textAlign: 'center',
-          paddingBottom: 4,
-          margin: 1
-        }}
-        itemCount={8}
-        value={serviceTitle}
-        rippleCentered={true}
-        error={serviceErrors}
-      />
-      <Input
-        ref={DescriptionRref}
-        errorMessage={DescriptionErrors}
-        inputHandler={setDescriptionHandler}
-        style={{ color: '#000000', textAlign: 'right' }}
-        multiline={true}
-        autoCorrect={false}
-        numberOflines={4}
-        placeholder='وصف الخدمة'
-        value={Description}
-      />
-      <Input
-        ref={teleRref}
-        errorMessage={teleErrors}
-        inputHandler={setTeleHandler}
-        style={{ color: '#000000', textAlign: 'right' }}
-        placeholder='رقم الهاتف'
-        value={tele}
-        autoCorrect={false}
-      />
+      </Modal> */}
+        <View style={styles.form}>
+          <Input
+            ref={nameRef}
+            inputHandler={setNameHandler}
+            errorMessage={nameErrors}
+            placeholder='الاسم'
+            value={name}
+            autoCorrect={false}
+          />
+          <Dropdown
+            label='نوع الخدمة'
+            baseColor='#ffffff'
+            itemColor='#ffffff'
+            textColor={customConstants.fourthColor}
+            dropdownOffset={{ top: 20, left: 0 }}
+            rippleInsets={{ top: 0, bottom: 0 }}
+            data={customConstants.services}
+            containerStyle={{
+              justifyContent: 'center',
+              width: '100%',
+              paddingHorizontal: 10
+            }}
+            onChangeText={value => {
+              setServiceTitleHandler(value);
+            }}
+            pickerStyle={{
+              borderRadius: 15,
+              backgroundColor: customConstants.PrimaryColor,
+              borderColor: customConstants.fourthColor,
+              borderWidth: 1
+            }}
+            itemTextStyle={{
+              fontFamily: customConstants.ShebaYeFont,
+              textAlign: 'center',
+              margin: 1
+            }}
+            itemCount={8}
+            value={serviceTitle}
+            rippleCentered={true}
+            error={serviceErrors}
+          />
+          <Input
+            ref={DescriptionRref}
+            errorMessage={DescriptionErrors}
+            inputHandler={setDescriptionHandler}
+            multiline={true}
+            autoCorrect={false}
+            numberOflines={4}
+            placeholder='وصف الخدمة'
+            value={Description}
+          />
+          <Input
+            ref={teleRref}
+            errorMessage={teleErrors}
+            inputHandler={setTeleHandler}
+            placeholder='رقم الهاتف'
+            value={tele}
+            autoCorrect={false}
+          />
 
-      <Dropdown
-        label='المدينة'
-        data={customConstants.MoroccoCities}
-        containerStyle={{
-          justifyContent: 'center',
-          width: '90%',
-          paddingLeft: 10
-        }}
-        dropdownOffset={{ top: 20, left: 0 }}
-        onChangeText={value => {
-          citiesPickerHandler(value);
-        }}
-        pickerStyle={{ borderRadius: 10 }}
-        itemTextStyle={{
-          borderBottomColor: customConstants.grayColor,
-          borderBottomWidth: 1,
-          textAlign: 'center',
-          paddingBottom: 4,
-          margin: 1,
-          color: 'green'
-        }}
-        rippleInsets={{ top: 0, bottom: 0 }}
-        itemCount={7}
-        value={city}
-        rippleCentered={true}
-        error={cityErrors}
-      />
+          <Dropdown
+            label='المدينة'
+            baseColor='#ffffff'
+            itemColor='#ffffff'
+            textColor={customConstants.fourthColor}
+            data={customConstants.MoroccoCities}
+            containerStyle={{
+              justifyContent: 'center',
+              width: '100%',
+              paddingHorizontal: 10
+            }}
+            dropdownOffset={{ top: 20, left: 0 }}
+            onChangeText={value => {
+              citiesPickerHandler(value);
+            }}
+            pickerStyle={{
+              borderRadius: 15,
+              backgroundColor: customConstants.PrimaryColor,
+              borderColor: customConstants.fourthColor,
+              borderWidth: 1
+            }}
+            itemTextStyle={{
+              fontFamily: customConstants.ShebaYeFont,
+              textAlign: 'center',
+              margin: 1
+            }}
+            rippleInsets={{ top: 0, bottom: 0 }}
+            itemCount={7}
+            value={city}
+            rippleCentered={true}
+            error={cityErrors}
+          />
 
-      <View style={styles.buttonContainer}>
-        <Button color='green' onPress={() => confirm()} shadow>
-          <Text style={{ color: 'white' }} button>
-            {' '}
-            أضف{' '}
-          </Text>
-        </Button>
-        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <Text>
-            {localisation !== null
-              ? `your location is :${JSON.stringify(localisation)}`
-              : `للأسف  : ${errorMessage}`}
-          </Text>
+          <CheckBox
+            checkedIcon='dot-circle-o'
+            uncheckedIcon='circle-o'
+            containerStyle={{ backgroundColor: customConstants.PrimaryColor }}
+            textStyle={{ color: '#ffffff' }}
+            uncheckedColor='#ff0000'
+            checkedColor={customConstants.fourthColor}
+            onPress={() => checkButtonHandler()}
+            title=' موقعك ليس مربوط بالخدمة '
+            checkedTitle='موقعك مربوط بالخدمة'
+            checked={isSearchByPosition}
+          />
+
+          <View style={styles.buttonContainer}>
+            <Button
+              color={customConstants.fourthColor}
+              onPress={() => confirm()}
+              shadow
+            >
+              <Text style={{ color: '#000000' }} button>
+                أضف
+              </Text>
+            </Button>
+          </View>
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -358,14 +391,15 @@ const Service = ({ navigation }) => {
 //-----------------------------------------------//
 const styles = StyleSheet.create({
   container: {
+    paddingHorizontal: 15,
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    textAlign: 'right'
+    justifyContent: 'center',
+    backgroundColor: CustomConstants.PrimaryColor
   },
   buttonContainer: {
     marginVertical: 20,
-    width: '50%'
+    width: '100%'
   },
   pickerStyle: {
     flexDirection: 'row',
@@ -376,6 +410,9 @@ const styles = StyleSheet.create({
   },
   pickerItem: {
     textAlign: 'center'
+  },
+  form: {
+    width: '100%'
   }
 });
 export default Service;

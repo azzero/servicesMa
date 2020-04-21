@@ -20,7 +20,7 @@ const InputComponent = React.forwardRef((props, ref) => {
 });
 const styles = StyleSheet.create({
   InputContainer: {
-    width: '90%'
+    width: '100%'
   },
   input: {
     color: 'white',

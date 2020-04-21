@@ -8,7 +8,8 @@ import {
   KeyboardAvoidingView,
   TouchableOpacity,
   Alert,
-  StatusBar
+  StatusBar,
+  Platform
 } from 'react-native';
 import { Divider } from 'react-native-elements';
 import { Button, Input, Text } from '../components/';
@@ -185,7 +186,8 @@ const Login = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       style={styles.loginContainer}
-      behavior='padding'
+      behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffse={20}
       enabled
     >
       <StatusBar barStyle='light-content'></StatusBar>
@@ -347,7 +349,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: CustomConstants.PrimaryColor
   },
-  intro: { marginBottom: 30 },
+  intro: { marginBottom: 10 },
 
   button: {
     width: CustomConstants.screenWidth - 100,

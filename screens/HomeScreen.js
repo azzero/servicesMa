@@ -1,10 +1,16 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, StyleSheet, Slider, Platform } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Slider,
+  Platform,
+  TouchableWithoutFeedback
+} from 'react-native';
 import UserContext from '../context/UserContext';
 import DataContext from '../context/DataContext';
 import { Button, Text } from '../components';
 import * as CustomConstants from '../constants/constants';
-import { auth, fr, geo } from '../config/config';
+import { auth, f, fr, geo } from '../config/config';
 import LocalisationContext from '../context/LocalisationContext';
 import * as customConstants from '../constants/constants';
 import { get } from 'geofirex';
@@ -46,7 +52,7 @@ const Home = props => {
     if (localisation) {
       setisSearchByPosition(!isSearchByPosition);
     } else {
-      navigation.navigate('AskForLocation');
+      navigation.navigate('AskForLocation', { fromScreen: 'Home' });
     }
   };
   //----------- logout funcion ------------------//
@@ -71,13 +77,37 @@ const Home = props => {
       if (Platform.OS === 'android' && !Constants.isDevice) {
         setlocalisation({ latitude: 32.26114, longitude: -9.24752 });
       }
-      const center = geo.point(localisation.latitude, localisation.longitude);
-      const radius = distance;
-      const field = 'location';
-      const query = geo.query(services).within(center, radius, field);
-      const docs = await get(query);
-      setData(docs);
-      navigation.navigate('DisplayServices', { distance: distance });
+
+      if (isSearchByPosition) {
+        console.log('inside true ');
+        const center = geo.point(localisation.latitude, localisation.longitude);
+        const radius = distance;
+        const field = 'location';
+        const query = geo.query(services).within(center, radius, field);
+        const docs = await get(query);
+        setData(docs);
+        if (!docs.length) {
+          alert(' لا توجد أي خدمات موافقة للمعطيات التي أدخلت ');
+          return;
+        }
+      } else {
+        const response = await fr
+          .collection('services')
+          .doc(city)
+          .collection(serviceTitle)
+          .get();
+        setData(response.docs);
+        if (!response.docs.length) {
+          alert(' لا توجد أي خدمات موافقة للمعطيات التي أدخلت ');
+          return;
+        }
+      }
+
+      console.log('searching by inside home : ', isSearchByPosition);
+      navigation.navigate('DisplayServices', {
+        distance: distance,
+        searchingByPosition: isSearchByPosition
+      });
     } catch (e) {
       console.log(e);
     }
@@ -87,6 +117,7 @@ const Home = props => {
   //-----------------------------------------------//
   useEffect(() => {
     if (asklocalisationpopup && localisation === null) {
+      console.log('inside use effect ');
       setisSearchByPosition(false);
       alert('للأسف تعدر علينا الوصول لموقعك');
     }
@@ -101,10 +132,10 @@ const Home = props => {
       {/*------------------Top------------------- */}
       <View style={styles.top}>
         <View style={styles.form}>
-          {/* <Text>
+          <Text>
             {localisation &&
               `your localisation is longitude : ${localisation.longitude} latitude : ${localisation.latitude} `}
-          </Text> */}
+          </Text>
           <Dropdown
             label='نوع الخدمة'
             dropdownOffset={{ top: 20, left: 0 }}
@@ -169,40 +200,23 @@ const Home = props => {
             containerStyle={{ backgroundColor: customConstants.PrimaryColor }}
             textStyle={{ color: '#ffffff' }}
             uncheckedColor='#ff0000'
-            checkedColor='#00ff00'
+            checkedColor={customConstants.fourthColor}
             onPress={() => checkButtonHandler()}
             title=' البحث عبر موقعك الحالي'
             checked={isSearchByPosition}
           />
           {isSearchByPosition === false ? null : (
-            <View>
+            <View style={{ paddingLeft: 10 }}>
               <View
                 style={{
-                  flex: 1,
-                  alignItems: 'stretch',
-                  justifyContent: 'center',
-                  marginVertical: 15,
-                  width: '100%'
+                  flexDirection: 'row',
+                  alignItems: 'center'
                 }}
               >
-                <Slider
-                  style={{ flexDirection: 'row' }}
-                  onSlidingComplete={value => setDistance(value)}
-                  step={20}
-                  minimumValue={0}
-                  maximumValue={5000}
-                  thumbTintColor={customConstants.fourthColor}
-                  value={distance}
-                  onValueChange={value => setDispayDistance(value)}
-                  // animateTransitions={true}
-                />
-              </View>
-
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View>
                   <MaterialCommunityIcons
                     size={20}
-                    color='#ffffff'
+                    color={customConstants.fourthColor}
                     name='map-marker-distance'
                   />
                 </View>
@@ -232,6 +246,27 @@ const Home = props => {
                   </Text>
                 </View>
               </View>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: 'stretch',
+                  justifyContent: 'center',
+                  marginVertical: 15,
+                  width: '100%'
+                }}
+              >
+                <Slider
+                  style={{ borderRadius: 10, height: 20 }}
+                  onSlidingComplete={value => setDistance(value)}
+                  step={20}
+                  minimumValue={0}
+                  maximumValue={5000}
+                  thumbTintColor={customConstants.fourthColor}
+                  value={distance}
+                  onValueChange={value => setDispayDistance(value)}
+                  // animateTransitions={true}
+                />
+              </View>
             </View>
           )}
           <View style={{ marginTop: 20 }}>
@@ -244,14 +279,7 @@ const Home = props => {
 
       {/*------------BOTTOM -------------------- */}
       <View style={styles.buttonContainer}>
-        {/* <Button gradient onPress={() => navigation.navigate('AddService')}>
-          <Text button> أضف خدمة </Text>
-        </Button>
-        <View>
-          <Button roinded onPress={() => logout()}>
-            <Text button> logout </Text>
-          </Button>
-        </View> */}
+        <Button rounded style={{ bottom: 100 }} lastbtnfunction={logout} />
       </View>
     </View>
   );
@@ -260,7 +288,8 @@ const Home = props => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: CustomConstants.PrimaryColor
+    backgroundColor: CustomConstants.PrimaryColor,
+    justifyContent: 'center'
   },
   top: {
     flex: 1,
@@ -271,14 +300,24 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flex: 0.4,
-    alignSelf: 'center',
+    alignItems: 'center',
     marginVertical: 10,
-    bottom: 0,
-    width: '80%'
+    width: '100%',
+    justifyContent: 'center'
   },
   form: {
     marginVertical: 10,
     width: '90%'
+  },
+  roundedButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    bottom: 30,
+    height: 60,
+    width: 60,
+    position: 'absolute',
+    borderRadius: 30,
+    backgroundColor: customConstants.fourthColor
   }
 });
 export default Home;

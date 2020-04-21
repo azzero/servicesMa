@@ -184,7 +184,8 @@ const SignUp = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       style={styles.loginContainer}
-      behavior='padding'
+      behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffse={15}
       enabled
     >
       <StatusBar barStyle='light-content'></StatusBar>

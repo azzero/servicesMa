@@ -11,6 +11,7 @@ const DisplayServices = ({ route }) => {
   //------------------------state------------------//
   //-----------------------------------------------//
   const [selected, setSelected] = React.useState(new Map());
+
   //------------------------------------------------//
   //------------------------Context-----------------//
   //-----------------------------------------------//
@@ -33,76 +34,91 @@ const DisplayServices = ({ route }) => {
   //------------------------------------------------//
   //------------------------Return------------------//
   //-----------------------------------------------//
-  const { distance } = route.params;
-  console.log('distance : ', distance);
-  console.log(' cpmt : Display Services , data : ', data);
-  if (localisation === null) {
+  const { distance, searchingByPosition } = route.params;
+  console.log('searching by position ', searchingByPosition);
+  console.log('data', data);
+  if (!searchingByPosition) {
     return (
       <View style={styles.container}>
-        <Text> بحث بالمدينة فقط </Text>
-      </View>
-    );
-  }
-  return (
-    <View style={styles.container}>
-      <View style={{ flex: 1 }}>
-        <MapView
-          showsUserLocation
-          onMapReady={() => {
-            console.log('map is ready');
-          }}
-          style={{ flex: 1 }}
-          initialRegion={{
-            latitude: localisation.latitude,
-            longitude: localisation.longitude,
-            latitudeDelta: 0.0122,
-            longitudeDelta: 0.0081
-          }}
-        >
-          {data.map(doc => {
-            const { latitude, longitude } = doc.location.geopoint;
-            return (
-              <Marker
-                onPress={coordinate => handlerMarkerPress(coordinate, doc)}
-                key={doc.id}
-                coordinate={{ latitude: latitude, longitude: longitude }}
-                title={doc.name}
-                description={doc.Description}
-                // image={require('../assets/icons/markerresized.png')}
-              >
-                <View>
-                  <MaterialCommunityIcons
-                    name='home-map-marker'
-                    size={32}
-                    color={customConstants.PrimaryColor}
-                  />
-                </View>
-              </Marker>
-            );
-          })}
-          <Circle center={localisation} radius={distance} />
-        </MapView>
-      </View>
-
-      <View style={{ height: 220 }}>
         <FlatList
           ref={scrollRef}
           showsVerticalScrollIndicator={false}
           data={data}
           renderItem={({ item }) => (
             <Service
-              title={item.name}
-              phone={item.tele}
-              Description={item.Description}
+              title={item.data().name}
+              phone={item.data().tele}
+              Description={item.data().Description}
               userRating='4'
             />
           )}
-          keyExtractor={item => item.tele + item.name}
+          keyExtractor={item => item.tele}
           extraData={selected}
         />
       </View>
-    </View>
-  );
+    );
+  } else {
+    return (
+      <View style={styles.container}>
+        <View style={{ flex: 1 }}>
+          <MapView
+            showsUserLocation
+            onMapReady={() => {
+              console.log('map is ready');
+            }}
+            style={{ flex: 1 }}
+            initialRegion={{
+              latitude: localisation.latitude,
+              longitude: localisation.longitude,
+              latitudeDelta: 0.0122,
+              longitudeDelta: 0.0081
+            }}
+          >
+            {data.map(doc => {
+              const { latitude, longitude } = doc.location.geopoint;
+              return (
+                <Marker
+                  onPress={coordinate => handlerMarkerPress(coordinate, doc)}
+                  key={doc.id}
+                  coordinate={{ latitude: latitude, longitude: longitude }}
+                  title={doc.name}
+                  description={doc.Description}
+                  // image={require('../assets/icons/markerresized.png')}
+                >
+                  <View>
+                    <MaterialCommunityIcons
+                      name='home-map-marker'
+                      size={32}
+                      color={customConstants.PrimaryColor}
+                    />
+                  </View>
+                </Marker>
+              );
+            })}
+            <Circle center={localisation} radius={distance} />
+          </MapView>
+        </View>
+
+        <View style={{ height: 220 }}>
+          <FlatList
+            ref={scrollRef}
+            showsVerticalScrollIndicator={false}
+            data={data}
+            renderItem={({ item }) => (
+              <Service
+                title={item.name}
+                phone={item.tele}
+                Description={item.Description}
+                userRating='4'
+              />
+            )}
+            keyExtractor={item => item.tele + item.name}
+            extraData={selected}
+          />
+        </View>
+      </View>
+    );
+  }
 };
 
 export default DisplayServices;
