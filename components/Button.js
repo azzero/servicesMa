@@ -19,6 +19,7 @@ class Button extends Component {
     }).start();
     this.open = !this.open;
   };
+
   render() {
     const rotation = {
       transform: [
@@ -26,19 +27,6 @@ class Button extends Component {
           rotate: this.animation.interpolate({
             inputRange: [0, 1],
             outputRange: ['0deg', '90deg']
-          })
-        }
-      ]
-    };
-    const pinStyle = {
-      transform: [
-        {
-          scale: this.animation
-        },
-        {
-          translateY: this.animation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, -80]
           })
         }
       ]
@@ -51,7 +39,7 @@ class Button extends Component {
         {
           translateY: this.animation.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, -140]
+            outputRange: [0, -80]
           })
         }
       ]
@@ -64,15 +52,18 @@ class Button extends Component {
         {
           translateY: this.animation.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, -200]
+            outputRange: [0, -140]
           })
         }
       ]
     };
-    const opacityAnimation = this.animation.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [0, 0, 1]
-    });
+
+    const opacityAnimation = {
+      opacity: this.animation.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0, 0, 1]
+      })
+    };
     const {
       style,
       opacity,
@@ -89,6 +80,12 @@ class Button extends Component {
       facebook,
       rounded,
       lastbtnfunction,
+      firstbtnfunction,
+      numberOfChilds,
+      lastIconName,
+      firstIconName,
+      multiple,
+      innerRef,
       ...props
     } = this.props;
 
@@ -108,9 +105,6 @@ class Button extends Component {
             end={end}
             locations={locations}
             style={btnStyle}
-            // angle='60'
-            // useAngle='true'
-            // angleCenter={{ x: 0.5, y: 0.5 }}
             colors={[startColor, endColor]}
           >
             {children}
@@ -137,65 +131,73 @@ class Button extends Component {
       );
     }
     if (rounded) {
-      return (
-        <View style={[styles.roundedContainer, style]} {...props}>
-          <TouchableWithoutFeedback onPress={() => lastbtnfunction()}>
-            <Animated.View
-              style={[
-                styles.rounded,
-                styles.secondary,
-                logoutStyle,
-                opacityAnimation
-              ]}
-            >
-              <AntDesign
-                size={20}
-                name='logout'
-                color={CustomConstants.second}
-              />
-            </Animated.View>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback>
-            <Animated.View
-              style={[
-                styles.rounded,
-                styles.secondary,
-                addServiceStyle,
-                opacityAnimation
-              ]}
-            >
-              <AntDesign size={20} name='plus' color={CustomConstants.second} />
-            </Animated.View>
-          </TouchableWithoutFeedback>
+      if (multiple) {
+        return (
+          <View style={[styles.roundedContainer, style]} {...props}>
+            <TouchableWithoutFeedback onPress={() => lastbtnfunction()}>
+              <Animated.View
+                style={[
+                  styles.rounded,
+                  styles.secondary,
+                  logoutStyle,
+                  opacityAnimation
+                ]}
+              >
+                <AntDesign
+                  size={20}
+                  name={lastIconName}
+                  color={CustomConstants.second}
+                />
+              </Animated.View>
+            </TouchableWithoutFeedback>
 
-          <TouchableWithoutFeedback>
-            <Animated.View
-              style={[
-                styles.rounded,
-                styles.secondary,
-                pinStyle,
-                opacityAnimation
-              ]}
+            <TouchableWithoutFeedback
+              onPress={() => {
+                firstbtnfunction();
+              }}
             >
-              <Entypo
-                size={20}
-                name='location-pin'
-                color={CustomConstants.PrimaryColor}
-              />
-            </Animated.View>
-          </TouchableWithoutFeedback>
+              <Animated.View
+                style={[
+                  styles.rounded,
+                  styles.secondary,
+                  addServiceStyle,
+                  opacityAnimation
+                ]}
+              >
+                <Entypo
+                  size={20}
+                  name={firstIconName}
+                  color={CustomConstants.PrimaryColor}
+                />
+              </Animated.View>
+            </TouchableWithoutFeedback>
 
-          <TouchableWithoutFeedback onPress={this.toggleMenu}>
-            <Animated.View style={[styles.rounded, styles.menu, rotation]}>
-              <SimpleLineIcons
-                size={24}
-                name='menu'
-                color={CustomConstants.primary}
-              />
-            </Animated.View>
-          </TouchableWithoutFeedback>
-        </View>
-      );
+            <TouchableWithoutFeedback onPress={this.toggleMenu}>
+              <Animated.View style={[styles.rounded, styles.menu, rotation]}>
+                <SimpleLineIcons
+                  size={24}
+                  name='menu'
+                  color={CustomConstants.primary}
+                />
+              </Animated.View>
+            </TouchableWithoutFeedback>
+          </View>
+        );
+      } else {
+        return (
+          <View style={[styles.roundedContainer, style]} {...props}>
+            <TouchableWithoutFeedback onPress={() => firstbtnfunction()}>
+              <View style={[styles.rounded, styles.menu]}>
+                <AntDesign
+                  size={24}
+                  name={firstIconName}
+                  color={CustomConstants.primary}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        );
+      }
     }
     return (
       <TouchableOpacity
@@ -232,6 +234,7 @@ const styles = StyleSheet.create({
   },
   roundedContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
     position: 'absolute'
   },
   rounded: {

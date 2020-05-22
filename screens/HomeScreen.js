@@ -1,4 +1,10 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  createRef
+} from 'react';
 import {
   View,
   StyleSheet,
@@ -28,6 +34,7 @@ const Home = props => {
   const [isSearchByPosition, setisSearchByPosition] = useState(false);
   const [distance, setDistance] = useState(0);
   const [displayDistance, setDispayDistance] = useState(0);
+
   //------------------------------------------------//
   //----------------------Context------------------//
   //-----------------------------------------------//
@@ -66,7 +73,14 @@ const Home = props => {
         console.log('eror', error);
       });
   };
-
+  //-------------------Go To Profile -------------//
+  const GoToProfile = () => {
+    navigation.navigate('Profile');
+  };
+  // ------------------ADD Service ----------------------//
+  const goToAddService = () => {
+    navigation.navigate('AddService');
+  };
   const getdata = async () => {
     try {
       const services = fr
@@ -106,7 +120,9 @@ const Home = props => {
       console.log('searching by inside home : ', isSearchByPosition);
       navigation.navigate('DisplayServices', {
         distance: distance,
-        searchingByPosition: isSearchByPosition
+        searchingByPosition: isSearchByPosition,
+        service: serviceTitle,
+        city
       });
     } catch (e) {
       console.log(e);
@@ -132,10 +148,30 @@ const Home = props => {
       {/*------------------Top------------------- */}
       <View style={styles.top}>
         <View style={styles.form}>
-          <Text>
+          <View
+            style={{
+              borderBottomWidth: 1,
+              borderRadius: 20,
+              borderBottomColor: customConstants.fourthColor,
+              width: '70%',
+              marginBottom: 20
+            }}
+          >
+            <Text
+              h1
+              right
+              style={{
+                color: customConstants.fourthColor,
+                paddingHorizontal: 20
+              }}
+            >
+              إبحث عن خدمة
+            </Text>
+          </View>
+          {/* <Text>
             {localisation &&
               `your localisation is longitude : ${localisation.longitude} latitude : ${localisation.latitude} `}
-          </Text>
+          </Text> */}
           <Dropdown
             label='نوع الخدمة'
             dropdownOffset={{ top: 20, left: 0 }}
@@ -269,7 +305,7 @@ const Home = props => {
               </View>
             </View>
           )}
-          <View style={{ marginTop: 20 }}>
+          <View style={{ marginTop: 30 }}>
             <Button gradient onPress={() => getdata()}>
               <Text button>إبحث</Text>
             </Button>
@@ -279,7 +315,15 @@ const Home = props => {
 
       {/*------------BOTTOM -------------------- */}
       <View style={styles.buttonContainer}>
-        <Button rounded style={{ bottom: 100 }} lastbtnfunction={logout} />
+        <Button
+          multiple
+          firstIconName='plus'
+          lastIconName='logout'
+          rounded
+          style={{ bottom: 100 }}
+          lastbtnfunction={() => GoToProfile()}
+          firstbtnfunction={() => goToAddService()}
+        />
       </View>
     </View>
   );

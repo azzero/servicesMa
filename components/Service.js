@@ -5,26 +5,74 @@ import {
   Text,
   TouchableWithoutFeedback,
   Animated,
-  Dimensions,
-  TouchableOpacity
+  Dimensions
 } from 'react-native';
 import * as CustomConstants from '../constants/constants';
 import { FontAwesome } from '@expo/vector-icons';
 import { Avatar } from 'react-native-elements';
 import Rating from './Rating';
+import { fr, auth } from '../config/config';
 const Service = props => {
   //-------------- state ----------------//
-  const { children, title, phone, Description, userRating, ...others } = props;
+  const {
+    children,
+    title,
+    phone,
+    Description,
+    service,
+    city,
+    id,
+    userRating,
+    ...others
+  } = props;
   const [showPhone, setShowPhone] = useState(true);
   var windowWidth = Dimensions.get('window').width;
   // animation State
   const [activated, setActivated] = useState(new Animated.Value(0));
   const [animation, setAnimation] = useState(new Animated.Value(0));
-  const [rating, setRating] = useState(userRating);
+  const [customRating, setCustomRating] = useState(userRating);
   const [RatingAlertShowed, setRatingAlertShowed] = useState(true);
-  const ratingCompleted = rate => {
-    // alert(rate);
-    setRating(rate);
+
+  const handleRating = value => {
+    if (typeof customRating !== 'undefined') {
+      var newRating = customRating.map((item, i) => {
+        if (i == value - 1) {
+          return (item = item + 1);
+        } else {
+          return item;
+        }
+      });
+    } else {
+      const empty_array = [0, 0, 0, 0, 0];
+      var newRating = empty_array.map((item, i) => {
+        if (i == value - 1) {
+          return (item = item + 1);
+        } else {
+          return item;
+        }
+      });
+    }
+
+    setCustomRating(newRating);
+    console.log('city:', city);
+    console.log('service : ', service);
+    console.log('id : ', id);
+    console.log('new array :', newRating);
+    var docRef = fr
+      .collection('services')
+      .doc(city)
+      .collection(service)
+      .doc(id);
+    docRef
+      .update({
+        rating: newRating
+      })
+      .then(() => {
+        alert('rating updated');
+      })
+      .catch(e => {
+        alert('error');
+      });
   };
   //--------------- Function --------------//
   const handleRatingClick = () => {
@@ -45,10 +93,11 @@ const Service = props => {
     setActivated(!activated);
 
     Animated.spring(animation, {
-      toValue
+      toValue,
+      useNativeDriver: true
     }).start();
   };
-  const off = ((windowWidth - 5) * 0.7) / 2;
+  const off = windowWidth / 2 + 10;
   const animatedStyles = {
     phoneIcon: {
       transform: [
@@ -62,93 +111,60 @@ const Service = props => {
     }
   };
   //---------------- UseEffect ----------------//
-  // useEffect(() => {
-  //   var key = title + phone;
-  //   console.log('key value : ', key);
-  // }, []);
   //rendering
   return (
     <View style={styles.container} {...others}>
-      <View style={{ flex: 0.8, flexDirection: 'row' }}>
-        <View style={styles.info}>
-          <View style={styles.title}>
-            <Text
-              style={{
-                fontSize: CustomConstants.sizes.h1,
-                textAlign: 'center',
-                fontFamily: CustomConstants.ShebaYeFont,
-                color: CustomConstants.fourthColor
-              }}
-            >
-              {title}
-            </Text>
-            <Text
-              style={{
-                fontSize: CustomConstants.sizes.body,
-                textAlign: 'center',
-                color: 'gray'
-              }}
-            >
-              {Description}
-            </Text>
-          </View>
-
-          <View style={styles.description}>
-            {/* -------------------- Phone------------------------- */}
-            {/*---------------------------------------------------- */}
-            <TouchableWithoutFeedback
-              hitSlop={{ right: 10 }}
-              onFocus={() => console.log('hover')}
-              style={{ width: '100%' }}
-              onPress={() => animationHandler()}
-            >
-              <Animated.View style={[animatedStyles.phoneIcon]}>
-                <View
-                  style={{
-                    flexDirection: 'row'
-                  }}
-                >
-                  <View style={{ justifyContent: 'center' }}>
-                    <Text style={[styles.phoneText, {}]}>0665000000</Text>
-                  </View>
-                  <View style={{ padding: 15 }}>
-                    <FontAwesome
-                      name='mobile-phone'
-                      size={42}
-                      color='#ffffff'
-                    />
-                  </View>
-                </View>
-              </Animated.View>
-            </TouchableWithoutFeedback>
-          </View>
+      {/* <View style={{ flex: 0.8, flexDirection: 'row' }}> */}
+      <View style={styles.info}>
+        <View style={styles.title}>
+          <Text
+            style={{
+              fontSize: CustomConstants.sizes.h1,
+              textAlign: 'center',
+              fontFamily: CustomConstants.ShebaYeFont,
+              color: CustomConstants.fourthColor
+            }}
+          >
+            {title}
+          </Text>
+          <Text
+            style={{
+              fontSize: CustomConstants.sizes.body,
+              textAlign: 'center',
+              color: 'gray'
+            }}
+          >
+            {Description}
+          </Text>
         </View>
 
-        {/*--------------Rating ---------*/}
-        <View style={styles.first}>
-          <View style={styles.avatar}>
-            <Avatar
-              rounded
-              size='medium'
-              title='BP'
-              onPress={() => console.log('Works!')}
-              activeOpacity={0.7}
-            />
-          </View>
-
-          {/* <View style={styles.rating}> */}
-          {/* <Rating
-            tintColor={CustomConstants.PrimaryColor}
-            type='custom'
-            count={5}
-            onStartRating={handleRatingClick}
-            defaultRating={5}
-            imageSize={20}
-            onFinishRating={val => ratingCompleted(val)}
-            defaultRating={rating}
-            // showReadOnlyText={true}
-          /> */}
-          {/* </View> */}
+        <View style={styles.description}>
+          {/* -------------------- Phone------------------------- */}
+          {/*---------------------------------------------------- */}
+          <TouchableWithoutFeedback
+            hitSlop={{ right: 20 }}
+            onFocus={() => console.log('hover')}
+            style={{
+              width: '100%',
+              paddingHorizontal: 10
+            }}
+            onPress={() => animationHandler()}
+          >
+            <Animated.View style={[animatedStyles.phoneIcon]}>
+              <View
+                style={{
+                  flexDirection: 'row'
+                }}
+              >
+                <View style={{ justifyContent: 'center' }}>
+                  <Text style={[styles.phoneText, {}]}>0665000000</Text>
+                </View>
+                <View style={{ padding: 15 }}>
+                  <FontAwesome name='mobile-phone' size={42} color='#ffffff' />
+                </View>
+              </View>
+            </Animated.View>
+          </TouchableWithoutFeedback>
         </View>
       </View>
       <View
@@ -160,7 +176,11 @@ const Service = props => {
           borderWidth: 1
         }}
       >
-        <Rating rating={5} />
+        <Rating
+          userRating={customRating}
+          handleRating={handleRating}
+          {...others}
+        />
       </View>
     </View>
   );
@@ -179,37 +199,16 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   info: {
-    flex: 0.6,
-    borderRightColor: '#ffffff',
-    borderRightWidth: 2,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
   },
-  first: {
-    justifyContent: 'center',
-    flex: 0.4
-    // borderColor: 'blue',
-    // borderWidth: 2
-  },
-  avatar: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flex: 1
 
-    // borderBottomColor: '#ffffff',
-    // borderBottomWidth: 2
-  },
-
-  rating: {
-    flex: 0.5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative'
-  },
   title: {
-    flex: 0.5,
-    justifyContent: 'center',
-    alignItems: 'center'
+    flex: 0.6,
+    // justifyContent: 'center',
+    // alignItems: 'center'
+    width: '100%'
   },
   description: {
     borderTopColor: 'gray',

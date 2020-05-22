@@ -1,12 +1,13 @@
 import React, { useContext, useRef, useState, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList } from 'react-native';
 import DataContext from '../context/DataContext';
-import { Service } from '../components';
+import { Service, Button } from '../components';
 import MapView, { Marker, Circle } from 'react-native-maps';
+import Constants from 'expo-constants';
 import LocalisationContext from '../context/LocalisationContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as customConstants from '../constants/constants';
-const DisplayServices = ({ route }) => {
+const DisplayServices = ({ navigation, route }) => {
   //------------------------------------------------//
   //------------------------state------------------//
   //-----------------------------------------------//
@@ -34,9 +35,7 @@ const DisplayServices = ({ route }) => {
   //------------------------------------------------//
   //------------------------Return------------------//
   //-----------------------------------------------//
-  const { distance, searchingByPosition } = route.params;
-  console.log('searching by position ', searchingByPosition);
-  console.log('data', data);
+  const { distance, searchingByPosition, service, city } = route.params;
   if (!searchingByPosition) {
     return (
       <View style={styles.container}>
@@ -46,15 +45,26 @@ const DisplayServices = ({ route }) => {
           data={data}
           renderItem={({ item }) => (
             <Service
+              id={item.id}
               title={item.data().name}
               phone={item.data().tele}
               Description={item.data().Description}
-              userRating='4'
+              userRating={item.data().rating}
+              service={service}
+              city={city}
             />
           )}
-          keyExtractor={item => item.tele}
+          keyExtractor={item => item.id}
           extraData={selected}
         />
+        <View style={{ height: 80 }}>
+          <Button
+            rounded
+            firstIconName='arrowleft'
+            style={{ bottom: 40, right: 30 }}
+            firstbtnfunction={() => navigation.goBack()}
+          />
+        </View>
       </View>
     );
   } else {
@@ -89,7 +99,7 @@ const DisplayServices = ({ route }) => {
                     <MaterialCommunityIcons
                       name='home-map-marker'
                       size={32}
-                      color={customConstants.PrimaryColor}
+                      color='#f00'
                     />
                   </View>
                 </Marker>
@@ -106,14 +116,25 @@ const DisplayServices = ({ route }) => {
             data={data}
             renderItem={({ item }) => (
               <Service
+                id={item.id}
+                service={service}
+                city={city}
                 title={item.name}
                 phone={item.tele}
                 Description={item.Description}
-                userRating='4'
+                userRating={item.rating}
               />
             )}
             keyExtractor={item => item.tele + item.name}
             extraData={selected}
+          />
+        </View>
+        <View style={{ height: 80 }}>
+          <Button
+            rounded
+            firstIconName='arrowleft'
+            style={{ bottom: 40, right: 30 }}
+            firstbtnfunction={() => navigation.goBack()}
           />
         </View>
       </View>
@@ -124,6 +145,7 @@ const DisplayServices = ({ route }) => {
 export default DisplayServices;
 const styles = StyleSheet.create({
   container: {
+    marginTop: Constants.statusBarHeight,
     marginHorizontal: 10,
     width: '90%',
     flex: 1

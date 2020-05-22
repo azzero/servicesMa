@@ -2,25 +2,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import {
   StyleSheet,
   View,
-  Picker,
   Alert,
   Platform,
-  AppState,
   KeyboardAvoidingView
 } from 'react-native';
-import UserContext from '../context/UserContext';
 import { Text, Input, Button } from '../components';
 import validate from 'validate.js';
 import constraints from '../constants/constraints';
-import { f, fr, geo } from '../config/config';
+import { f, fr, geo, auth } from '../config/config';
 import { Dropdown } from 'react-native-material-dropdown';
 import * as customConstants from '../constants/constants';
-import * as Location from 'expo-location';
-import * as Permissions from 'expo-permissions';
-import Constants from 'expo-constants';
-import Modal from 'react-native-modal';
-import * as IntentLauncher from 'expo-intent-launcher';
-import { Linking } from 'expo';
 import LocalisationContext from '../context/LocalisationContext';
 import { CheckBox } from 'react-native-elements';
 import * as CustomConstants from '../constants/constants';
@@ -38,18 +29,21 @@ const Service = ({ navigation }) => {
   const [cityErrors, setCityerrors] = useState('');
   const [DescriptionErrors, setDescriptionErrors] = useState('');
   const [city, setCity] = useState('');
-  // const [location, setLocation] = useState(null);
-  // const [errorMessage, setErrorMessage] = useState('');
-  // const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
-  // const [openSetting, setOpenSetting] = useState(false);
-  // const [appStateNow, setAppStateNow] = useState(AppState.currentState);
-  // const [EnableLocationServiceAsked, setEnableLocationServiceAsked] = useState(
-  //   false
-  // );
   const [isSearchByPosition, setisSearchByPosition] = useState(false);
-  // const [longitude, setLongitude] = useState(0);
-  // const [latitude, setLatitude] = useState(0);
-  // const [selectedService, setSelectedService] = useState('');
+
+  //------------------------------------------------//
+  //-----------------------functions----------------//
+  //-----------------------------------------------//
+  const logout = () => {
+    auth
+      .signOut()
+      .then(() => {
+        setisLoggedIn(false);
+      })
+      .catch(error => {
+        console.log('eror', error);
+      });
+  };
   //------------------------------------------------//
   //-----------------------Context ----------------//
   //-----------------------------------------------//
@@ -63,6 +57,7 @@ const Service = ({ navigation }) => {
   const teleRref = React.createRef();
   const DescriptionRref = React.createRef();
   //------------------SetState Handler --------------------//
+
   const checkButtonHandler = () => {
     if (localisation) {
       setisSearchByPosition(!isSearchByPosition);
@@ -90,10 +85,7 @@ const Service = ({ navigation }) => {
     setCityerrors('');
     setCity(value);
   };
-  //------------ Pickers handler --------------------//
-  // const ServicesPickerHandler = value => {
-  //   setSelectedService(value);
-  // };
+
   //------------------------------------------------//
   //------------------validation and insertion------------------//
   //-----------------------------------------------//
@@ -162,70 +154,12 @@ const Service = ({ navigation }) => {
     }
   };
   //------------------------------------------------//
-  //----------------Open setting Function-----------//
-  //-----------------------------------------------//
-  // const openSettingFunction = () => {
-  //   if (Platform.OS === 'ios') {
-  //     Linking.openURL('app-settings:');
-  //   } else {
-  //     IntentLauncher.startActivityAsync(
-  //       IntentLauncher.ACTION_LOCATION_SOURCE_SETTINGS
-  //     );
-  //   }
-  //   setOpenSetting(false);
-  // };
-  // //------------------------------------------------//
-  // //---------------get location Async---------------//
-  // //-----------------------------------------------//
-  // const getLocationAsync = async () => {
-  //   try {
-  //     let ProviderStatus = Location.hasServicesEnabledAsync();
-  //     const locationIsEnbaled = await ProviderStatus;
-
-  //     if (!locationIsEnbaled && !EnableLocationServiceAsked) {
-  //       if (Platform.OS === 'ios') {
-  //         setIsLocationModalVisible(true);
-  //       }
-  //       setEnableLocationServiceAsked(true);
-  //     }
-  //     if (!locationIsEnbaled && EnableLocationServiceAsked) {
-  //       setErrorMessage('لم تسمح لنا بالوصول إلى موقعك');
-  //       return;
-  //     }
-  //     let { status } = await Permissions.askAsync(Permissions.LOCATION);
-  //     if (status !== 'granted') {
-  //       setErrorMessage('لم يسمح بالولوج للموقع');
-  //       return;
-  //     }
-  //     let lc = await Location.getCurrentPositionAsync({});
-  //     const { longitude, latitude } = lc.coords;
-  //     setlocalisation({ longitude, latitude });
-  //     // setLongitude(longitude);
-  //     // setLatitude(latitude);
-
-  //     console.log(`longitude : ${longitude} , latitude ${latitude}`);
-  //     setLocation(lc);
-  //   } catch (e) {
-  //     if (Platform.OS !== 'android') {
-  //       alert(e);
-  //     }
-  //   }
-  // };
-  // //------------------------------------------------//
-  // //------------------------app State change Handler ------------------//
-  // //-----------------------------------------------//
-  // const handleAppStateChange = nextAppState => {
-  //   console.log('AppStateNow :', appStateNow);
-  //   console.log('AppStateNext :', nextAppState);
-  //   setAppStateNow(nextAppState);
-  // };
-  //------------------------------------------------//
   //---------------------Use Effect-----------------//
   //-----------------------------------------------//
   useEffect(() => {
     if (asklocalisationpopup && localisation === null) {
       setisSearchByPosition(false);
-      alert('للأسف تعدر علينا الوصول لموقعك');
+      // alert('للأسف تعدر علينا الوصول لموقعك');
     }
     if (asklocalisationpopup && localisation !== null) {
       console.log('localisation updated', localisation);
@@ -236,34 +170,34 @@ const Service = ({ navigation }) => {
   //-----------------------Render------------------//
   //-----------------------------------------------//
   return (
-    <KeyboardAvoidingView behavior='padding' enabled style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffse={15}
+      enabled
+      style={{ flex: 1 }}
+    >
       <View style={styles.container}>
-        {/* <Modal
-        onModalHide={openSetting ? openSettingFunction : undefined}
-        isVisible={isLocationModalVisible}
-      >
-        <View
-          style={{
-            height: 300,
-            width: 300,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: '#ffffff'
-          }}
-        >
-          <Text> تحتاج لتفعيل خدمة تحديد الموقع </Text>
-          <Button
-            gradient
-            onPress={() => {
-              setIsLocationModalVisible(false);
-              setOpenSetting(true);
+        <View style={styles.form}>
+          <View
+            style={{
+              borderBottomWidth: 1,
+              borderBottomColor: customConstants.fourthColor,
+              marginBottom: 20,
+              width: '50%',
+              borderRadius: 20
             }}
           >
-            <Text button>للقيام بذلك إضغط هنا</Text>
-          </Button>
-        </View>
-      </Modal> */}
-        <View style={styles.form}>
+            <Text
+              style={{
+                color: CustomConstants.fourthColor,
+                paddingHorizontal: 20
+              }}
+              h1
+              right
+            >
+              أضف خدمة
+            </Text>
+          </View>
           <Input
             ref={nameRef}
             inputHandler={setNameHandler}
@@ -359,7 +293,10 @@ const Service = ({ navigation }) => {
           <CheckBox
             checkedIcon='dot-circle-o'
             uncheckedIcon='circle-o'
-            containerStyle={{ backgroundColor: customConstants.PrimaryColor }}
+            containerStyle={{
+              backgroundColor: customConstants.PrimaryColor,
+              marginTop: 15
+            }}
             textStyle={{ color: '#ffffff' }}
             uncheckedColor='#ff0000'
             checkedColor={customConstants.fourthColor}
@@ -381,6 +318,32 @@ const Service = ({ navigation }) => {
             </Button>
           </View>
         </View>
+        <View
+          style={{
+            flex: 0.3,
+
+            width: '100%',
+            justifyContent: 'center'
+          }}
+        >
+          <Button
+            firstIconName='magnifying-glass'
+            lastIconName='logout'
+            style={{ bottom: 100, left: 30 }}
+            rounded
+            firstbtnfunction={() => navigation.navigate('Home')}
+            lastbtnfunction={() => {
+              logout();
+            }}
+            multiple
+          />
+          <Button
+            rounded
+            firstIconName='arrowleft'
+            style={{ bottom: 100, right: 30 }}
+            firstbtnfunction={() => navigation.goBack()}
+          />
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -398,7 +361,7 @@ const styles = StyleSheet.create({
     backgroundColor: CustomConstants.PrimaryColor
   },
   buttonContainer: {
-    marginVertical: 20,
+    marginTop: 20,
     width: '100%'
   },
   pickerStyle: {
@@ -412,7 +375,9 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   form: {
-    width: '100%'
+    justifyContent: 'center',
+    width: '100%',
+    flex: 0.7
   }
 });
 export default Service;

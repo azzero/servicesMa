@@ -8,16 +8,14 @@ import {
   Dimensions
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import Button from './Button';
 
-const Rating = props => {
+const Rating = ({ userRating, numStarts, color, handleRating }) => {
   //------------------------------------------------//
   //------------------------State------------------//
   //-----------------------------------------------//
-  const [rating, setRating] = useState(props.rating ? props.rating : 1);
+
+  const [rating, setRating] = useState([0, 0, 0, 0, 0]);
   const [animation, setAnimation] = useState(new Animated.Value(1));
-  const numStarts = props.numStarts ? props.numStarts : 5;
-  const color = props.color ? props.color : 'yellow';
   let stars = [];
   //   const animation = new Animated.Value(1);
   //------------------------------------------------//
@@ -53,6 +51,23 @@ const Rating = props => {
     opacity: animationOpacity
   };
   //------------------------------------------------//
+  //-----------------------UseEffect---------------//
+  //-----------------------------------------------//
+  useEffect(() => {
+    // var stars = [0, 0, 2, 3, 5],
+    if (typeof userRating !== 'undefined') {
+      var count = 0,
+        sum = userRating.reduce(function(sum, item, index) {
+          count += item;
+          return sum + item * (index + 1);
+        }, 0),
+        result = Math.round(sum / count);
+
+      setRating(result);
+    }
+  }, [userRating]);
+
+  //------------------------------------------------//
   //----------------Star Component------------------//
   //-----------------------------------------------//
   const Star = props => (
@@ -68,6 +83,7 @@ const Rating = props => {
   //-----------------------------------------------//
   const handleClick = star => {
     setRating(star);
+    handleRating(star);
   };
   for (let x = 1; x <= numStarts; x++) {
     stars.push(
@@ -99,7 +115,9 @@ const Rating = props => {
 };
 
 Rating.defaultProps = {
-  rating: 1
+  rating: 1,
+  numStarts: 5,
+  color: 'yellow'
 };
 
 const styles = StyleSheet.create({
