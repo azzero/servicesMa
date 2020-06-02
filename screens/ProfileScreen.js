@@ -1,28 +1,97 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { f, fr } from '../config/config';
 import { Button, Text } from '../components';
 import Constants from 'expo-constants';
 import * as customConstants from '../constants/constants';
+import { Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
+
 const Profile = ({ navigation }) => {
   const [services, setServices] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
-
+  //render service componenents
   const renderServices = () => {
     const response = services.map(service => {
       return (
-        <View style={styles.displayService} key={service.id}>
-          <Text style={{ color: '#fff' }}>الإسم : {service.data().name} </Text>
-          <Text style={{ color: '#fff' }}>
-            الخدمة:
-            {service.data().CategoryName}
-          </Text>
-          <Text style={{ color: '#fff' }}> الهاتف: {service.data().tele}</Text>
-          <Text style={{ color: '#fff' }}>
-            المدينة:
-            {service.data().cityName}
-          </Text>
-        </View>
+        <TouchableOpacity
+          key={service.id}
+          // go to addService screen to modify service
+          onPress={() =>
+            navigation.navigate('AddService', { serviceData: service.data() })
+          }
+        >
+          {/*  display service attributs name , phone number , service title , city  */}
+          <View style={styles.displayService}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View>
+                <Entypo name='user' size={20} color='#fff' />
+              </View>
+              <View>
+                <Text
+                  style={{
+                    color: '#fff',
+                    paddingHorizontal: 6,
+                    paddingBottom: 3
+                  }}
+                >
+                  الإسم : {service.data().name}
+                </Text>
+              </View>
+              <View>
+                <MaterialCommunityIcons name='worker' size={20} color='#fff' />
+              </View>
+              <View>
+                <Text
+                  style={{
+                    color: '#fff',
+                    paddingHorizontal: 6,
+                    paddingBottom: 3
+                  }}
+                >
+                  الخدمة:
+                  {service.data().CategoryName}
+                </Text>
+              </View>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingLeft: 6
+              }}
+            >
+              <View>
+                <Entypo name='phone' size={20} color='#fff' />
+              </View>
+              <View>
+                <Text
+                  style={{
+                    paddingHorizontal: 6,
+                    paddingBottom: 3,
+                    color: '#fff'
+                  }}
+                >
+                  الهاتف: {service.data().tele}
+                </Text>
+              </View>
+              <View>
+                <Entypo name='location' size={20} color='#fff' />
+              </View>
+              <View>
+                <Text
+                  style={{
+                    color: '#fff',
+                    paddingHorizontal: 6,
+                    paddingBottom: 3
+                  }}
+                >
+                  المدينة:
+                  {service.data().cityName}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </TouchableOpacity>
       );
     });
     return <View>{response}</View>;
@@ -33,12 +102,15 @@ const Profile = ({ navigation }) => {
   //-----------------------------------------------//
   useEffect(() => {
     try {
+      // get all user services
       async function getServices() {
         const { uid } = f.auth().currentUser;
+        //get all user data by id
         const userDocRef = fr.collection('users').doc(uid);
         const servicesList = await userDocRef.collection('services').get();
         const userInfo = await userDocRef.get();
-        setUserProfile(userInfo.data());
+        const userData = userInfo.data();
+        setUserProfile(userData);
         if (servicesList.docs.length) {
           setServices(servicesList.docs);
           servicesList.docs.forEach(doc => {
@@ -57,6 +129,13 @@ const Profile = ({ navigation }) => {
   //------------------------------------------------//
   //-----------------------Render------------------//
   //-----------------------------------------------//
+  if (userProfile === null) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: 'white' }}> في طور التحميل ... </Text>
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       {/* top  */}
@@ -68,7 +147,7 @@ const Profile = ({ navigation }) => {
             </Text>
             <View style={{ paddingRight: 5 }}>
               <Text h1 style={{ color: customConstants.fourthColor }}>
-                {userProfile.name}
+                {userProfile['name']}
               </Text>
             </View>
           </View>
@@ -78,7 +157,13 @@ const Profile = ({ navigation }) => {
         </View>
       </View>
       {/* middle */}
-      <View style={{ backgroundColor: 'red', flex: 0.7 }}>
+      <View
+        style={{
+          backgroundColor: 'red',
+          flex: 0.7,
+          paddingVertical: 10
+        }}
+      >
         {services === null ? (
           <Text>لا توجد أي خدمات لك حاليا </Text>
         ) : (
@@ -122,11 +207,13 @@ const styles = StyleSheet.create({
   displayService: {
     justifyContent: 'center',
     alignItems: 'center',
-    height: 220,
-    width: 200,
+    marginHorizontal: 10,
+    padding: 5,
+    height: 100,
+    width: '90%',
     borderColor: '#fff',
     borderWidth: 1,
-    borderRadius: 30
+    borderRadius: 20
   }
 });
 export default Profile;

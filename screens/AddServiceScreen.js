@@ -15,7 +15,7 @@ import * as customConstants from '../constants/constants';
 import LocalisationContext from '../context/LocalisationContext';
 import { CheckBox } from 'react-native-elements';
 import * as CustomConstants from '../constants/constants';
-const Service = ({ navigation }) => {
+const Service = ({ route, navigation }) => {
   //---------------Some params ---------------------------//
   const currentUser = f.auth().currentUser;
   //----------------State --------------------------------//
@@ -23,13 +23,24 @@ const Service = ({ navigation }) => {
   const [serviceTitle, setServiceTitle] = useState('');
   const [tele, setTele] = useState('');
   const [Description, setDescription] = useState('');
+  const [city, setCity] = useState('');
+  const [isSearchByPosition, setisSearchByPosition] = useState(false);
   const [nameErrors, setNameerrors] = useState('');
   const [serviceErrors, setServiceerrors] = useState('');
   const [teleErrors, setTeleerrors] = useState('');
   const [cityErrors, setCityerrors] = useState('');
   const [DescriptionErrors, setDescriptionErrors] = useState('');
-  const [city, setCity] = useState('');
-  const [isSearchByPosition, setisSearchByPosition] = useState(false);
+  //------------------------------------------------//
+  //-----------------------Context ----------------//
+  //-----------------------------------------------//
+  const { position, askingPosition } = useContext(LocalisationContext);
+  const { asklocalisationpopup, setasklocalisationpopup } = askingPosition;
+  const { localisation, setlocalisation } = position;
+  //------------------ REFERENCES --------------------------//
+  const nameRef = React.createRef();
+  // const serviceRef = React.createRef();
+  const teleRref = React.createRef();
+  const DescriptionRref = React.createRef();
 
   //------------------------------------------------//
   //-----------------------functions----------------//
@@ -44,18 +55,7 @@ const Service = ({ navigation }) => {
         console.log('eror', error);
       });
   };
-  //------------------------------------------------//
-  //-----------------------Context ----------------//
-  //-----------------------------------------------//
-  const { position, askingPosition } = useContext(LocalisationContext);
-  const { asklocalisationpopup, setasklocalisationpopup } = askingPosition;
-  const { localisation, setlocalisation } = position;
 
-  //------------------ REFERENCES --------------------------//
-  const nameRef = React.createRef();
-  // const serviceRef = React.createRef();
-  const teleRref = React.createRef();
-  const DescriptionRref = React.createRef();
   //------------------SetState Handler --------------------//
 
   const checkButtonHandler = () => {
@@ -156,6 +156,32 @@ const Service = ({ navigation }) => {
   //------------------------------------------------//
   //---------------------Use Effect-----------------//
   //-----------------------------------------------//
+  useEffect(() => {
+    try {
+      async function getService() {
+        const { serviceData } = route.params;
+        const { cityName, categoryName, name, tele, serviceId } = serviceData;
+        const service = await fr
+          .collection('services')
+          .doc(cityName)
+          .collection(categoryName)
+          .doc(serviceId)
+          .get();
+        console.log('Service : ', service.data());
+        // if it's update get data and set all values
+        // if (typeof serviceData !== 'undefined') {
+        //   setCity(cityName)
+        //   setName(name)
+        //   setTele(tele)
+        //   setServiceTitle()
+        // }
+      }
+      getService();
+    } catch (e) {
+      alert('حدث خطأ ما ');
+      console.log('error : ', e);
+    }
+  }, []);
   useEffect(() => {
     if (asklocalisationpopup && localisation === null) {
       setisSearchByPosition(false);

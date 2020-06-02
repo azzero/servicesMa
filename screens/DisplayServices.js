@@ -1,5 +1,5 @@
-import React, { useContext, useRef, useState, useEffect } from 'react';
-import { StyleSheet, View, Text, FlatList } from 'react-native';
+import React, { useContext, useRef } from 'react';
+import { StyleSheet, View, FlatList } from 'react-native';
 import DataContext from '../context/DataContext';
 import { Service, Button } from '../components';
 import MapView, { Marker, Circle } from 'react-native-maps';

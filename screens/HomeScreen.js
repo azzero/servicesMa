@@ -1,17 +1,5 @@
-import React, {
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-  createRef
-} from 'react';
-import {
-  View,
-  StyleSheet,
-  Slider,
-  Platform,
-  TouchableWithoutFeedback
-} from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { View, StyleSheet, Slider, Platform } from 'react-native';
 import UserContext from '../context/UserContext';
 import DataContext from '../context/DataContext';
 import { Button, Text } from '../components';
