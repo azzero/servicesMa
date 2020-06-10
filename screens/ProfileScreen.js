@@ -1,101 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator
+} from 'react-native';
 import { f, fr } from '../config/config';
-import { Button, Text } from '../components';
+import { Button, Text, ProfileService } from '../components';
 import Constants from 'expo-constants';
 import * as customConstants from '../constants/constants';
-import { Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Profile = ({ navigation }) => {
   const [services, setServices] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
-  //render service componenents
-  const renderServices = () => {
-    const response = services.map(service => {
-      return (
-        <TouchableOpacity
-          key={service.id}
-          // go to addService screen to modify service
-          onPress={() =>
-            navigation.navigate('AddService', { serviceData: service.data() })
-          }
-        >
-          {/*  display service attributs name , phone number , service title , city  */}
-          <View style={styles.displayService}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View>
-                <Entypo name='user' size={20} color='#fff' />
-              </View>
-              <View>
-                <Text
-                  style={{
-                    color: '#fff',
-                    paddingHorizontal: 6,
-                    paddingBottom: 3
-                  }}
-                >
-                  الإسم : {service.data().name}
-                </Text>
-              </View>
-              <View>
-                <MaterialCommunityIcons name='worker' size={20} color='#fff' />
-              </View>
-              <View>
-                <Text
-                  style={{
-                    color: '#fff',
-                    paddingHorizontal: 6,
-                    paddingBottom: 3
-                  }}
-                >
-                  الخدمة:
-                  {service.data().CategoryName}
-                </Text>
-              </View>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingLeft: 6
-              }}
-            >
-              <View>
-                <Entypo name='phone' size={20} color='#fff' />
-              </View>
-              <View>
-                <Text
-                  style={{
-                    paddingHorizontal: 6,
-                    paddingBottom: 3,
-                    color: '#fff'
-                  }}
-                >
-                  الهاتف: {service.data().tele}
-                </Text>
-              </View>
-              <View>
-                <Entypo name='location' size={20} color='#fff' />
-              </View>
-              <View>
-                <Text
-                  style={{
-                    color: '#fff',
-                    paddingHorizontal: 6,
-                    paddingBottom: 3
-                  }}
-                >
-                  المدينة:
-                  {service.data().cityName}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </TouchableOpacity>
-      );
-    });
-    return <View>{response}</View>;
-  };
+  const [selected, setSelected] = useState(null);
 
   //------------------------------------------------//
   //-------------------Use Efeect-------------------//
@@ -105,12 +24,14 @@ const Profile = ({ navigation }) => {
       // get all user services
       async function getServices() {
         const { uid } = f.auth().currentUser;
+        console.log('user id : ', uid);
         //get all user data by id
         const userDocRef = fr.collection('users').doc(uid);
         const servicesList = await userDocRef.collection('services').get();
         const userInfo = await userDocRef.get();
         const userData = userInfo.data();
         setUserProfile(userData);
+        console.log('length:', servicesList.docs.length);
         if (servicesList.docs.length) {
           setServices(servicesList.docs);
           servicesList.docs.forEach(doc => {
@@ -129,16 +50,27 @@ const Profile = ({ navigation }) => {
   //------------------------------------------------//
   //-----------------------Render------------------//
   //-----------------------------------------------//
+
   if (userProfile === null) {
+    // loading ...
     return (
-      <View style={styles.container}>
-        <Text style={{ color: 'white' }}> في طور التحميل ... </Text>
+      <View
+        style={{
+          ...styles.container,
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
+        {/* <Text style={{ color: 'white' }}> في طور التحميل ... </Text> */}
+        <ActivityIndicator size='large' color={customConstants.fourthColor} />
       </View>
     );
   }
   return (
     <View style={styles.container}>
-      {/* top  */}
+      {/*
+        // everything it's OKay .. dislay profile
+       -----------------Top of profile - title -welcome ... ----------------*/}
       <View style={styles.top}>
         <View style={styles.welcome}>
           <View>
@@ -156,7 +88,7 @@ const Profile = ({ navigation }) => {
           <Text>info</Text>
         </View>
       </View>
-      {/* middle */}
+      {/* --------------------middle : display services , informations ..  ------------------*/}
       <View
         style={{
           backgroundColor: 'red',
@@ -167,7 +99,15 @@ const Profile = ({ navigation }) => {
         {services === null ? (
           <Text>لا توجد أي خدمات لك حاليا </Text>
         ) : (
-          renderServices()
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            data={services}
+            renderItem={({ item }) => (
+              <ProfileService service={item} navigation={navigation} />
+            )}
+            keyExtractor={item => item.id}
+            extraData={selected}
+          />
         )}
       </View>
       <View style={{ flex: 0.2 }}>
@@ -203,17 +143,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderColor: '#808080',
     borderWidth: 1
-  },
-  displayService: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 10,
-    padding: 5,
-    height: 100,
-    width: '90%',
-    borderColor: '#fff',
-    borderWidth: 1,
-    borderRadius: 20
   }
 });
 export default Profile;

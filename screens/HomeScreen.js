@@ -67,7 +67,7 @@ const Home = props => {
   };
   // ------------------ADD Service ----------------------//
   const goToAddService = () => {
-    navigation.navigate('AddService');
+    navigation.navigate('AddService', { is_update: false });
   };
   const getdata = async () => {
     try {

@@ -159,22 +159,40 @@ const Service = ({ route, navigation }) => {
   useEffect(() => {
     try {
       async function getService() {
-        const { serviceData } = route.params;
-        const { cityName, categoryName, name, tele, serviceId } = serviceData;
-        const service = await fr
-          .collection('services')
-          .doc(cityName)
-          .collection(categoryName)
-          .doc(serviceId)
-          .get();
-        console.log('Service : ', service.data());
-        // if it's update get data and set all values
-        // if (typeof serviceData !== 'undefined') {
-        //   setCity(cityName)
-        //   setName(name)
-        //   setTele(tele)
-        //   setServiceTitle()
-        // }
+        const { is_update } = route.params;
+        console.log('route params : ', route.params);
+        console.log('value of is update ', is_update);
+        if (is_update) {
+          // if it's comming for an update
+          const { serviceData } = route.params;
+          const {
+            cityName,
+            categoryName,
+            name,
+            tele,
+            Description,
+            serviceId
+          } = serviceData;
+          const service = await fr
+            .collection('services')
+            .doc(cityName)
+            .collection(categoryName)
+            .doc(serviceId)
+            .get();
+          console.log('Service : ', service.data());
+          // if it's update get data and set all values
+          if (
+            typeof serviceData !== 'undefined' &&
+            typeof service !== 'undefined'
+          ) {
+            const { Description } = service.data();
+            setCity(cityName);
+            setName(name);
+            setTele(tele);
+            setDescription(Description);
+            setServiceTitle();
+          }
+        }
       }
       getService();
     } catch (e) {
