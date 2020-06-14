@@ -15,7 +15,12 @@ const Profile = ({ navigation }) => {
   const [services, setServices] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [is_needUpdate, setIs_needUpdate] = useState(false);
 
+  const handleTriggerUpdate = () => {
+    setIs_needUpdate(!is_needUpdate);
+    console.log('is update changed : ', is_needUpdate);
+  };
   //------------------------------------------------//
   //-------------------Use Efeect-------------------//
   //-----------------------------------------------//
@@ -31,12 +36,10 @@ const Profile = ({ navigation }) => {
         const userInfo = await userDocRef.get();
         const userData = userInfo.data();
         setUserProfile(userData);
-        console.log('length:', servicesList.docs.length);
+
+        // get services from docs
         if (servicesList.docs.length) {
           setServices(servicesList.docs);
-          servicesList.docs.forEach(doc => {
-            console.log('document : ', doc.data());
-          });
         } else {
           console.log('document doesnt exist ');
         }
@@ -45,7 +48,8 @@ const Profile = ({ navigation }) => {
     } catch (e) {
       console.log('error : ', e);
     }
-  }, []);
+    console.log('is update inside use effect : ', is_needUpdate);
+  }, [is_needUpdate, setIs_needUpdate]);
 
   //------------------------------------------------//
   //-----------------------Render------------------//
@@ -91,11 +95,31 @@ const Profile = ({ navigation }) => {
       {/* --------------------middle : display services , informations ..  ------------------*/}
       <View
         style={{
-          backgroundColor: 'red',
+          // backgroundColor: 'red',
           flex: 0.7,
           paddingVertical: 10
         }}
       >
+        <View
+          style={{
+            borderBottomWidth: 1,
+            borderRadius: 20,
+            borderBottomColor: customConstants.fourthColor,
+            width: '50%',
+            marginBottom: 20
+          }}
+        >
+          <Text
+            h1
+            right
+            style={{
+              color: customConstants.fourthColor,
+              paddingHorizontal: 20
+            }}
+          >
+            خدماتك :
+          </Text>
+        </View>
         {services === null ? (
           <Text>لا توجد أي خدمات لك حاليا </Text>
         ) : (
@@ -103,7 +127,11 @@ const Profile = ({ navigation }) => {
             showsVerticalScrollIndicator={false}
             data={services}
             renderItem={({ item }) => (
-              <ProfileService service={item} navigation={navigation} />
+              <ProfileService
+                service={item}
+                navigation={navigation}
+                triggerUpdate={handleTriggerUpdate}
+              />
             )}
             keyExtractor={item => item.id}
             extraData={selected}
@@ -121,7 +149,9 @@ const Profile = ({ navigation }) => {
     </View>
   );
 };
-
+//------------------------------------------------//
+//------------------------Styling----------------//
+//-----------------------------------------------//
 const styles = StyleSheet.create({
   container: {
     marginTop: Constants.statusBarHeight,

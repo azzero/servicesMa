@@ -15,6 +15,7 @@ import * as customConstants from '../constants/constants';
 import LocalisationContext from '../context/LocalisationContext';
 import { CheckBox } from 'react-native-elements';
 import * as CustomConstants from '../constants/constants';
+var is_update = false;
 const Service = ({ route, navigation }) => {
   //---------------Some params ---------------------------//
   const currentUser = f.auth().currentUser;
@@ -24,7 +25,10 @@ const Service = ({ route, navigation }) => {
   const [tele, setTele] = useState('');
   const [Description, setDescription] = useState('');
   const [city, setCity] = useState('');
+  const [serviceID, setserviceID] = useState(null);
   const [isSearchByPosition, setisSearchByPosition] = useState(false);
+  const [originalService, setOriginalService] = useState(null);
+  const [originalCity, setOriginalCity] = useState(null);
   const [nameErrors, setNameerrors] = useState('');
   const [serviceErrors, setServiceerrors] = useState('');
   const [teleErrors, setTeleerrors] = useState('');
@@ -89,68 +93,103 @@ const Service = ({ route, navigation }) => {
   //------------------------------------------------//
   //------------------validation and insertion------------------//
   //-----------------------------------------------//
-  const confirm = () => {
-    const validationResult = validate(
-      { name: name, service: serviceTitle, tele: tele, city: city },
-      constraints.services
-    );
-    if (typeof validationResult !== 'undefined' && validationResult.name) {
-      const error1 = validationResult.name[0];
-      setNameerrors(error1);
-      nameRef.current.shake();
-    }
-    if (typeof validationResult !== 'undefined' && validationResult.service) {
-      const error2 = validationResult.service[0];
-      setServiceerrors(error2);
-      // serviceRef.current.shake();
-    }
-    if (typeof validationResult !== 'undefined' && validationResult.tele) {
-      const error3 = validationResult.tele[0];
-      setTeleerrors(error3);
-      teleRref.current.shake();
-    }
-    if (typeof validationResult !== 'undefined' && validationResult.city) {
-      const error4 = validationResult.city[0];
-      setCityerrors(error4);
-    }
-    if (typeof validationResult === 'undefined') {
-      let position = null;
-      if (isSearchByPosition) {
-        position = geo.point(localisation.latitude, localisation.longitude);
-      } else {
-        position = geo.point(0, 0);
+  const confirm = async () => {
+    try {
+      const validationResult = validate(
+        { name: name, service: serviceTitle, tele: tele, city: city },
+        constraints.services
+      );
+      if (typeof validationResult !== 'undefined' && validationResult.name) {
+        const error1 = validationResult.name[0];
+        setNameerrors(error1);
+        nameRef.current.shake();
       }
-      fr.collection('services')
-        .doc(city)
-        .collection(serviceTitle)
-        .add({
-          name: name,
-          Description: Description,
-          tele: tele,
-          location: position,
-          userID: currentUser.uid
-        })
-        .then(function() {
-          Alert.alert(
-            'ممتاز !!',
-            'تمت الإضافة بنجاح ',
-            [
-              {
-                text: 'البقاء هنا ',
-                onPress: () => console.log('Cancel Pressed'),
-                style: 'cancel'
-              },
-              {
-                text: 'الرجوع للواجهة الرئيسية',
-                onPress: () => navigation.navigate('Home')
-              }
-            ],
-            { cancelable: false }
-          );
-        })
-        .catch(function(error) {
-          console.error('Error writing document: ', error);
-        });
+      if (typeof validationResult !== 'undefined' && validationResult.service) {
+        const error2 = validationResult.service[0];
+        setServiceerrors(error2);
+        // serviceRef.current.shake();
+      }
+      if (typeof validationResult !== 'undefined' && validationResult.tele) {
+        const error3 = validationResult.tele[0];
+        setTeleerrors(error3);
+        teleRref.current.shake();
+      }
+      if (typeof validationResult !== 'undefined' && validationResult.city) {
+        const error4 = validationResult.city[0];
+        setCityerrors(error4);
+      }
+      if (typeof validationResult === 'undefined') {
+        let position = null;
+        if (isSearchByPosition) {
+          position = geo.point(localisation.latitude, localisation.longitude);
+        } else {
+          position = geo.point(0, 0);
+        }
+        if (
+          is_update &&
+          originalCity === city &&
+          originalService === serviceTitle
+        ) {
+          const serviceDocRef = fr
+            .collection('services')
+            .doc(city)
+            .collection(serviceTitle)
+            .doc(serviceID);
+          const response = await serviceDocRef.update({
+            name: name,
+            Description: Description,
+            tele: tele,
+            location: position,
+            userID: currentUser.uid
+          });
+          console.log('response : ', response);
+          alert('تم التعديل بنجاح ');
+        } else {
+          if (is_update) {
+            fr.collection('services')
+              .doc(city)
+              .collection(serviceTitle)
+              .doc(serviceID)
+              .delete()
+              .then(() => console.log('deleted with success '))
+              .catch(e => console.log('error : ', e));
+          }
+          fr.collection('services')
+            .doc(city)
+            .collection(serviceTitle)
+            .add({
+              name: name,
+              Description: Description,
+              tele: tele,
+              location: position,
+              userID: currentUser.uid
+            })
+            .then(function() {
+              Alert.alert(
+                'ممتاز !!',
+                'تمت الإضافة بنجاح ',
+                [
+                  {
+                    text: 'البقاء هنا ',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel'
+                  },
+                  {
+                    text: 'الرجوع للواجهة الرئيسية',
+                    onPress: () => navigation.navigate('Home')
+                  }
+                ],
+                { cancelable: false }
+              );
+            })
+            .catch(function(error) {
+              console.error('Error writing document: ', error);
+            });
+        }
+      }
+    } catch (e) {
+      console.log('error : ', e);
+      alert('وقع خطأ ما  ، المرجو اعادة المحاولة  ');
     }
   };
   //------------------------------------------------//
@@ -159,27 +198,17 @@ const Service = ({ route, navigation }) => {
   useEffect(() => {
     try {
       async function getService() {
-        const { is_update } = route.params;
-        console.log('route params : ', route.params);
-        console.log('value of is update ', is_update);
+        is_update = route.params.is_update;
         if (is_update) {
           // if it's comming for an update
           const { serviceData } = route.params;
-          const {
-            cityName,
-            categoryName,
-            name,
-            tele,
-            Description,
-            serviceId
-          } = serviceData;
-          const service = await fr
+          const { cityName, categoryName, name, tele, serviceId } = serviceData;
+          const serviceDocRef = fr
             .collection('services')
             .doc(cityName)
             .collection(categoryName)
-            .doc(serviceId)
-            .get();
-          console.log('Service : ', service.data());
+            .doc(serviceId);
+          const service = await serviceDocRef.get();
           // if it's update get data and set all values
           if (
             typeof serviceData !== 'undefined' &&
@@ -187,10 +216,13 @@ const Service = ({ route, navigation }) => {
           ) {
             const { Description } = service.data();
             setCity(cityName);
+            setOriginalCity(cityName);
             setName(name);
             setTele(tele);
             setDescription(Description);
-            setServiceTitle();
+            setserviceID(serviceId);
+            setServiceTitle(categoryName);
+            setOriginalService(categoryName);
           }
         }
       }
@@ -357,7 +389,7 @@ const Service = ({ route, navigation }) => {
               shadow
             >
               <Text style={{ color: '#000000' }} button>
-                أضف
+                حفظ
               </Text>
             </Button>
           </View>
