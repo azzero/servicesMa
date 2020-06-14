@@ -201,8 +201,21 @@ const Service = ({ route, navigation }) => {
         is_update = route.params.is_update;
         if (is_update) {
           // if it's comming for an update
-          const { serviceData } = route.params;
-          const { cityName, categoryName, name, tele, serviceId } = serviceData;
+          const { serviceData, id } = route.params;
+          const { cityName, categoryName, name, tele } = serviceData;
+          console.log(
+            'city name value : ' +
+              cityName +
+              'categoryName' +
+              categoryName +
+              'name :' +
+              name +
+              'tele:' +
+              tele +
+              ' ID : ',
+            id
+          );
+          const serviceId = id;
           const serviceDocRef = fr
             .collection('services')
             .doc(cityName)

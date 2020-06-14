@@ -61,6 +61,20 @@ const ProfileService = ({ service, navigation, triggerUpdate }) => {
           );
         }
       }
+    ],
+    left: [
+      {
+        text: 'تعديل',
+        backgroundColor: '#00ff00',
+        type: 'update',
+        onPress: () => {
+          navigation.navigate('AddService', {
+            is_update: true,
+            serviceData: service.data(),
+            id: service.id
+          });
+        }
+      }
     ]
   };
   return (
@@ -70,7 +84,8 @@ const ProfileService = ({ service, navigation, triggerUpdate }) => {
       onPress={() =>
         navigation.navigate('AddService', {
           is_update: true,
-          serviceData: service.data()
+          serviceData: service.data(),
+          id: service.id
         })
       }
     >
