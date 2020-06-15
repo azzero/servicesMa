@@ -143,8 +143,10 @@ const Service = ({ route, navigation }) => {
             userID: currentUser.uid
           });
           console.log('response : ', response);
-          alert('تم التعديل بنجاح ');
+          // alert('تم التعديل بنجاح ');
+          navigation.navigate('Profile');
         } else {
+          // if it's an update and the user change city or service category we need to delete the first record and create new one to respect db modeling
           if (is_update) {
             fr.collection('services')
               .doc(city)
@@ -152,7 +154,10 @@ const Service = ({ route, navigation }) => {
               .doc(serviceID)
               .delete()
               .then(() => console.log('deleted with success '))
-              .catch(e => console.log('error : ', e));
+              .catch(e => {
+                console.log('error : ', e);
+                alert('وقع خطأ ما ، الرجاء إعادة المحاولة ');
+              });
           }
           fr.collection('services')
             .doc(city)

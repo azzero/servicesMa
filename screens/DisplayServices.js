@@ -1,7 +1,7 @@
 import React, { useContext, useRef } from 'react';
 import { StyleSheet, View, FlatList } from 'react-native';
 import DataContext from '../context/DataContext';
-import { Service, Button } from '../components';
+import { Service, Button, Text } from '../components';
 import MapView, { Marker, Circle } from 'react-native-maps';
 import Constants from 'expo-constants';
 import LocalisationContext from '../context/LocalisationContext';
@@ -39,6 +39,26 @@ const DisplayServices = ({ navigation, route }) => {
   if (!searchingByPosition) {
     return (
       <View style={styles.container}>
+        <View
+          style={{
+            borderBottomWidth: 1,
+            borderRadius: 20,
+            borderBottomColor: customConstants.PrimaryColor,
+            width: '70%',
+            marginBottom: 20
+          }}
+        >
+          <Text
+            h1
+            right
+            style={{
+              color: customConstants.PrimaryColor,
+              paddingHorizontal: 20
+            }}
+          >
+            الخدمات المتوفرة :
+          </Text>
+        </View>
         <FlatList
           ref={scrollRef}
           showsVerticalScrollIndicator={false}

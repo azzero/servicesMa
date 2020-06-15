@@ -54,10 +54,6 @@ const Service = props => {
     }
 
     setCustomRating(newRating);
-    console.log('city:', city);
-    console.log('service : ', service);
-    console.log('id : ', id);
-    console.log('new array :', newRating);
     var docRef = fr
       .collection('services')
       .doc(city)
@@ -68,7 +64,7 @@ const Service = props => {
         rating: newRating
       })
       .then(() => {
-        alert('rating updated');
+        console.log('rating updated ');
       })
       .catch(e => {
         alert('error');
@@ -206,8 +202,6 @@ const styles = StyleSheet.create({
 
   title: {
     flex: 0.6,
-    // justifyContent: 'center',
-    // alignItems: 'center'
     width: '100%'
   },
   description: {

@@ -5,9 +5,12 @@ import { Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as customConstants from '../constants/constants';
 import Swipeout from 'react-native-swipeout';
 import { f, fr } from '../config/config';
+import SwipeOutButton from '../components/SwipeOutButton';
 const ProfileService = ({ service, navigation, triggerUpdate }) => {
   // states
   const [activeRowKey, setactiveRowKey] = useState(null);
+
+  // delete service function -------------------------------------------->
   const deleteService = () => {
     const { cityName, categoryName } = service.data();
     const serviceId = service.id;
@@ -17,12 +20,16 @@ const ProfileService = ({ service, navigation, triggerUpdate }) => {
       .collection(categoryName)
       .doc(serviceId)
       .delete()
-      .then(() => console.log('deleted with success '), triggerUpdate())
+      .then(
+        () => console.log('deleted with success '),
+        triggerUpdate(activeRowKey)
+      )
       .catch(e => {
         alert('وقع خطأ ما !');
         console.log('delete service failed error message  : ', e);
       });
   };
+  //----------------------------------------------------------------------->
   var swipeoutsettings = {
     //swipeout component settings
     backgroundColor: customConstants.PrimaryColor,
@@ -38,7 +45,8 @@ const ProfileService = ({ service, navigation, triggerUpdate }) => {
     right: [
       {
         text: 'حدف',
-        backgroundColor: 'red',
+        backgroundColor: customConstants.PrimaryColor,
+        component: <SwipeOutButton color='red' name='cross' text='حدف' />,
         type: 'delete',
         onPress: () => {
           Alert.alert(
@@ -60,13 +68,11 @@ const ProfileService = ({ service, navigation, triggerUpdate }) => {
             { cancelable: true }
           );
         }
-      }
-    ],
-    left: [
+      },
       {
         text: 'تعديل',
-        backgroundColor: '#00ff00',
-        type: 'update',
+        backgroundColor: customConstants.PrimaryColor,
+        component: <SwipeOutButton color='#00ff00' name='edit' text='تعديل' />,
         onPress: () => {
           navigation.navigate('AddService', {
             is_update: true,
@@ -77,18 +83,9 @@ const ProfileService = ({ service, navigation, triggerUpdate }) => {
       }
     ]
   };
+
   return (
-    <TouchableOpacity
-      key={service.id}
-      // go to addService screen to modify service
-      onPress={() =>
-        navigation.navigate('AddService', {
-          is_update: true,
-          serviceData: service.data(),
-          id: service.id
-        })
-      }
-    >
+    <View>
       <Swipeout {...swipeoutsettings}>
         {/*  display service attributs name , phone number , service title , city  */}
         <View style={styles.displayService}>
@@ -186,7 +183,7 @@ const ProfileService = ({ service, navigation, triggerUpdate }) => {
           </View>
         </View>
       </Swipeout>
-    </TouchableOpacity>
+    </View>
   );
 };
 const styles = StyleSheet.create({

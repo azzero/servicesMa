@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-  ActivityIndicator
-} from 'react-native';
+import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { f, fr } from '../config/config';
 import { Button, Text, ProfileService } from '../components';
 import Constants from 'expo-constants';
@@ -16,10 +10,15 @@ const Profile = ({ navigation }) => {
   const [userProfile, setUserProfile] = useState(null);
   const [selected, setSelected] = useState(null);
   const [is_needUpdate, setIs_needUpdate] = useState(false);
+  const [deletedRowKey, setDeletedRowKey] = useState(null);
 
-  const handleTriggerUpdate = () => {
+  //------------------------------------------------//
+  //----------------------functions----------------//
+  //-----------------------------------------------//
+
+  const handleTriggerUpdate = id => {
+    setDeletedRowKey(id);
     setIs_needUpdate(!is_needUpdate);
-    console.log('is update changed : ', is_needUpdate);
   };
   //------------------------------------------------//
   //-------------------Use Efeect-------------------//
@@ -48,7 +47,6 @@ const Profile = ({ navigation }) => {
     } catch (e) {
       console.log('error : ', e);
     }
-    console.log('is update inside use effect : ', is_needUpdate);
   }, [is_needUpdate, setIs_needUpdate]);
 
   //------------------------------------------------//
