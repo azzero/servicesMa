@@ -117,8 +117,8 @@ const DisplayServices = ({ navigation, route }) => {
                 >
                   <View>
                     <MaterialCommunityIcons
-                      name='home-map-marker'
-                      size={32}
+                      name='human-handsup'
+                      size={42}
                       color='#f00'
                     />
                   </View>

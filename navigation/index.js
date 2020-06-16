@@ -12,6 +12,7 @@ import ForgotScreen from '../screens/ForgotScreen';
 import UserContext from '../context/UserContext';
 import AddService from '../screens/AddServiceScreen';
 import DisplayServices from '../screens/DisplayServices';
+import EditProfile from '../screens/EditProfileScreen';
 import { AsyncStorage } from 'react-native';
 import Rating from '../components/Rating';
 import AskLocalisation from '../components/AskLocalisation';
@@ -72,6 +73,7 @@ const StackRouter = () => {
           <Stack.Screen name='Profile' component={ProfileScreen} />
           <Stack.Screen name='AddService' component={AddService} />
           <Stack.Screen name='AskForLocation' component={AskForLocation} />
+          <Stack.Screen name='EditProfile' component={EditProfile} />
         </>
       )}
     </Stack.Navigator>

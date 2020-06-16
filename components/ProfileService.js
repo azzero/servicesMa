@@ -83,7 +83,9 @@ const ProfileService = ({ service, navigation, triggerUpdate }) => {
       }
     ]
   };
-
+  //------------------------------------------------//
+  //------------------------render-----------------//
+  //-----------------------------------------------//
   return (
     <View>
       <Swipeout {...swipeoutsettings}>
@@ -196,7 +198,7 @@ const styles = StyleSheet.create({
     height: 100,
     width: '100%',
     borderColor: '#fff',
-    borderTopWidth: 1
+    borderBottomWidth: 1
     // borderRadius: 20
   },
   entity: {

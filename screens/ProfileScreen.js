@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  TouchableWithoutFeedback
+} from 'react-native';
 import { f, fr } from '../config/config';
 import { Button, Text, ProfileService } from '../components';
 import Constants from 'expo-constants';
 import * as customConstants from '../constants/constants';
+import { Entypo } from '@expo/vector-icons';
 
 const Profile = ({ navigation }) => {
   const [services, setServices] = useState(null);
@@ -28,7 +35,6 @@ const Profile = ({ navigation }) => {
       // get all user services
       async function getServices() {
         const { uid } = f.auth().currentUser;
-        console.log('user id : ', uid);
         //get all user data by id
         const userDocRef = fr.collection('users').doc(uid);
         const servicesList = await userDocRef.collection('services').get();
@@ -47,7 +53,8 @@ const Profile = ({ navigation }) => {
     } catch (e) {
       console.log('error : ', e);
     }
-  }, [is_needUpdate, setIs_needUpdate]);
+    console.log('rendering ');
+  }, [is_needUpdate, setIs_needUpdate, deletedRowKey]);
 
   //------------------------------------------------//
   //-----------------------Render------------------//
@@ -72,9 +79,16 @@ const Profile = ({ navigation }) => {
     <View style={styles.container}>
       {/*
         // everything it's OKay .. dislay profile
-       -----------------Top of profile - title -welcome ... ----------------*/}
+       //-----------------Top of profile - title -welcome ... ----------------*/}
       <View style={styles.top}>
         <View style={styles.welcome}>
+          <View style={{ position: 'absolute', left: 5, top: 5 }}>
+            <TouchableWithoutFeedback
+              onPress={() => navigation.navigate('EditProfile')}
+            >
+              <Entypo name='edit' size={22} color='#fff' />
+            </TouchableWithoutFeedback>
+          </View>
           <View>
             <Text center white>
               مرحبا بك
@@ -85,9 +99,6 @@ const Profile = ({ navigation }) => {
               </Text>
             </View>
           </View>
-        </View>
-        <View style={{ width: '100%', backgroundColor: '#fff' }}>
-          <Text>info</Text>
         </View>
       </View>
       {/* --------------------middle : display services , informations ..  ------------------*/}
@@ -119,7 +130,9 @@ const Profile = ({ navigation }) => {
           </Text>
         </View>
         {services === null ? (
-          <Text>لا توجد أي خدمات لك حاليا </Text>
+          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ color: '#fff' }}>لا توجد أي خدمات لك حاليا </Text>
+          </View>
         ) : (
           <FlatList
             showsVerticalScrollIndicator={false}
@@ -154,10 +167,12 @@ const styles = StyleSheet.create({
   container: {
     marginTop: Constants.statusBarHeight,
     flex: 1,
+    justifyContent: 'center',
     backgroundColor: customConstants.PrimaryColor
   },
   top: {
     flex: 0.3,
+    backgroundColor: customConstants.PrimaryColor,
     // justifyContent: 'center',
     alignItems: 'center'
   },
