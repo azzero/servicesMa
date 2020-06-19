@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import * as CustomConstants from '../constants/constants';
-import { f, auth } from '../config/config.js';
+import { fr, f } from '../config/config.js';
 import {
   StyleSheet,
   View,
@@ -9,42 +9,64 @@ import {
   Alert,
   StatusBar
 } from 'react-native';
-import Constants from 'expo-constants';
 import { Input, Text, Divider } from 'react-native-elements';
 import Button from '../components/Button';
-import validate from 'validate.js';
+import { Dropdown } from 'react-native-material-dropdown';
+import Constants from 'expo-constants';
 import constraints from '../constants/constraints';
-import UserContext from '../context/UserContext.js';
+import validate from 'validate.js';
 import { Entypo } from '@expo/vector-icons';
-const inputEmailRef = React.createRef();
-const inputPasswordRef = React.createRef();
-const SignUp = ({ navigation }) => {
+const EditProfile = ({ navigation }) => {
   //----------- initialisation ---------- //
   const [username, setUsername] = useState(null);
   const [phoneNumber, setPhoneNumber] = useState(null);
+  const [serviceCategory, setServiceCategory] = useState('');
+  const [city, setCity] = useState('');
   const [phoneError, setPhoneError] = useState(null);
   const [usernameError, setUsernameError] = useState(null);
-  const { isLoggedIn, setisLoggedIn } = useContext(UserContext);
+  const [serviceErrors, setServiceErrors] = useState(null);
+  const [cityErrors, setCityErrors] = useState('');
+  //------------- global use ----------------- //
+  const { uid } = f.auth().currentUser;
+  const userDocRef = fr.collection('users').doc(uid);
+  //------------ references ------------------//
+  const nameRef = React.createRef();
+  const phoneRef = React.createRef();
+
+  // ------------ validation -----------------//
   const onConfirm = () => {
-    if (matchPasswordError !== '') {
-      Alert.alert(matchPasswordError);
-      return;
-    }
     // ----- validation  -------:
-    setValidation(1);
     const validationResult = validate(
-      { email: email, password: password },
-      constraints.login
+      {
+        name: username,
+        tele: phoneNumber,
+        service: serviceCategory,
+        city: city
+      },
+      constraints.services
     );
-    if (typeof validationResult !== 'undefined' && validationResult.email) {
-      const emailErrors = validationResult.email[0];
-      setValidation(0);
-      errorHandler(emailErrors, 'email');
-    }
-    if (typeof validationResult !== 'undefined' && validationResult.password) {
-      const passwordErrors = validationResult.password[0];
-      setValidation(0);
-      errorHandler(passwordErrors, 'password');
+    if (typeof validationResult !== 'undefined') {
+      //unvalide data
+      if (validationResult.name) {
+        const nameError = validationResult.name[0];
+        setUsernameError(nameError);
+        nameRef.current.shake();
+      }
+      if (validationResult.service) {
+        const serviceErrorMessage = validationResult.service[0];
+        setServiceerrors(serviceErrorMessage);
+      }
+      if (validationResult.tele) {
+        const phoneErrorMessage = validationResult.tele[0];
+        setPhoneError(phoneErrorMessage);
+        phoneRef.current.shake();
+      }
+      if (validationResult.city) {
+        const cityErrorMessage = validationResult.city[0];
+        setCityerrors(cityErrorMessage);
+      }
+    } else {
+      updateProfile();
     }
   };
   //-------------Validation End ----------//
@@ -58,6 +80,45 @@ const SignUp = ({ navigation }) => {
     setPhoneError('');
     setPhoneNumber(number);
   };
+  const setServiceCategoryHandler = text => {
+    setServiceCategory(text);
+  };
+  const citiesPickerHandler = text => {
+    setCity(text);
+  };
+  //------------------------------------------------//
+  //--------------------update Profile--------------//
+  //-----------------------------------------------//
+  const updateProfile = async () => {
+    try {
+      await userDocRef.update({
+        city,
+        name: username,
+        service: serviceCategory,
+        tele: phoneNumber
+      });
+      console.log('updated');
+    } catch (e) {
+      console.log('error while updating : ', e);
+      alert('وقع خطأ ما أثناء التحديث ، المرجو إعادة المحاولة');
+    }
+  };
+  //------------------------------------------------//
+  //------------------------useEffect------------------//
+  //-----------------------------------------------//
+  useEffect(() => {
+    async function getServices() {
+      //get all user data by id
+      const userInfo = await userDocRef.get();
+      const userData = userInfo.data();
+      console.log('user data :', userData);
+      setCity(userData.city);
+      setUsername(userData.name);
+      setServiceCategory(userData.service);
+      setPhoneNumber(userData.tele);
+    }
+    getServices();
+  }, []);
   //--------------------- Components ------------ //
 
   return (
@@ -70,16 +131,31 @@ const SignUp = ({ navigation }) => {
       <StatusBar barStyle='light-content'></StatusBar>
       <View style={styles.intro}>
         <Text style={styles.introText}>تعديل معلومات حسابك</Text>
-        <View style={{ position: 'absolute', left: 5, top: 5 }}>
-          <Entypo name='check' size={32} color={CustomConstants.fifthColor} />
-        </View>
-        <View style={{ position: 'absolute', right: 5, top: 5 }}>
-          <Entypo name='cross' size={32} color='#fff' />
-        </View>
+        <TouchableOpacity
+          onPress={() => {
+            onConfirm();
+          }}
+          style={{ position: 'absolute', left: 5, top: 5 }}
+        >
+          <View>
+            <Entypo name='check' size={32} color={CustomConstants.fifthColor} />
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Home');
+          }}
+          style={{ position: 'absolute', right: 5, top: 5 }}
+        >
+          <View>
+            <Entypo name='cross' size={32} color='#fff' />
+          </View>
+        </TouchableOpacity>
       </View>
+      {/*---------- form-------  */}
       <View style={styles.form}>
         <Input
-          ref={inputEmailRef}
+          ref={nameRef}
           placeholder='اكتب اسمك هنا'
           placeholderTextColor='#bbc3c7'
           inputStyle={styles.input}
@@ -88,11 +164,11 @@ const SignUp = ({ navigation }) => {
             <Entypo name='user' size={22} color={CustomConstants.fifthColor} />
           }
           onChangeText={handleUsername}
-          //   errorMessage={errorMessage !== '' ? errorMessage : ''}
+          errorMessage={usernameError !== '' ? usernameError : ''}
           value={username}
         />
         <Input
-          ref={inputEmailRef}
+          ref={phoneRef}
           placeholder='0xxxxxxxxx '
           placeholderTextColor='#bbc3c7'
           inputStyle={styles.input}
@@ -101,28 +177,74 @@ const SignUp = ({ navigation }) => {
             <Entypo name='phone' size={22} color={CustomConstants.fifthColor} />
           }
           onChangeText={handlePhoneNumber}
-          //   errorMessage={errorMessage !== '' ? errorMessage : ''}
+          errorMessage={phoneError !== '' ? phoneError : ''}
           value={phoneNumber}
           keyboardType='phone-pad'
         />
-
-        <Divider
-          style={{
-            height: 0,
-            marginVertical: 20
+        <Dropdown
+          label=' نوع الخدمة التي تقدم '
+          baseColor='#ffffff'
+          itemColor='#ffffff'
+          textColor={CustomConstants.fourthColor}
+          dropdownOffset={{ top: 20, left: 0 }}
+          rippleInsets={{ top: 0, bottom: 0 }}
+          data={CustomConstants.services}
+          containerStyle={{
+            justifyContent: 'center',
+            width: '80%',
+            paddingHorizontal: 10
           }}
+          onChangeText={value => {
+            setServiceCategoryHandler(value);
+          }}
+          pickerStyle={{
+            borderRadius: 15,
+            backgroundColor: CustomConstants.PrimaryColor,
+            borderColor: CustomConstants.fourthColor,
+            borderWidth: 1
+          }}
+          itemTextStyle={{
+            fontFamily: CustomConstants.ShebaYeFont,
+            textAlign: 'center',
+            margin: 1
+          }}
+          itemCount={8}
+          value={serviceCategory}
+          rippleCentered={true}
+          error={serviceErrors}
         />
-        <Button gradient onPress={onConfirm} style={styles.button}>
-          <Text
-            style={{
-              textAlign: 'center',
-              width: '100%',
-              color: 'black'
-            }}
-          >
-            تسجيل
-          </Text>
-        </Button>
+        <Dropdown
+          label='المدينة'
+          baseColor='#ffffff'
+          itemColor='#ffffff'
+          textColor={CustomConstants.fourthColor}
+          data={CustomConstants.MoroccoCities}
+          containerStyle={{
+            justifyContent: 'center',
+            width: '80%',
+            paddingHorizontal: 10
+          }}
+          dropdownOffset={{ top: 20, left: 0 }}
+          onChangeText={value => {
+            citiesPickerHandler(value);
+          }}
+          pickerStyle={{
+            borderRadius: 15,
+            backgroundColor: CustomConstants.PrimaryColor,
+            borderColor: CustomConstants.fourthColor,
+            borderWidth: 1
+          }}
+          itemTextStyle={{
+            fontFamily: CustomConstants.ShebaYeFont,
+            textAlign: 'center',
+            margin: 1
+          }}
+          rippleInsets={{ top: 0, bottom: 0 }}
+          itemCount={7}
+          value={city}
+          rippleCentered={true}
+          error={cityErrors}
+        />
       </View>
     </KeyboardAvoidingView>
   );
@@ -197,4 +319,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default SignUp;
+export default EditProfile;

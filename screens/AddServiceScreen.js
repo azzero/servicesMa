@@ -119,12 +119,14 @@ const Service = ({ route, navigation }) => {
         setCityerrors(error4);
       }
       if (typeof validationResult === 'undefined') {
+        // if everything is okay and pass validation
         let position = null;
         if (isSearchByPosition) {
           position = geo.point(localisation.latitude, localisation.longitude);
         } else {
           position = geo.point(0, 0);
         }
+        // if it's and update  and the use didnt change city or service category we update the same document
         if (
           is_update &&
           originalCity === city &&
@@ -147,10 +149,18 @@ const Service = ({ route, navigation }) => {
           navigation.navigate('Profile');
         } else {
           // if it's an update and the user change city or service category we need to delete the first record and create new one to respect db modeling
+          console.log(
+            'city : ' +
+              city +
+              ' serviceCategory : ' +
+              serviceTitle +
+              ' service ID : ' +
+              serviceID
+          );
           if (is_update) {
             fr.collection('services')
-              .doc(city)
-              .collection(serviceTitle)
+              .doc(originalCity)
+              .collection(originalService)
               .doc(serviceID)
               .delete()
               .then(() => console.log('deleted with success '))
@@ -188,6 +198,7 @@ const Service = ({ route, navigation }) => {
               );
             })
             .catch(function(error) {
+              alert('وقع خطأ ما ، المرجو إعادة المحاولة');
               console.error('Error writing document: ', error);
             });
         }
@@ -208,6 +219,7 @@ const Service = ({ route, navigation }) => {
           // if it's comming for an update
           const { serviceData, id } = route.params;
           const { cityName, categoryName, name, tele } = serviceData;
+          const serviceId = id;
           console.log(
             'city name value : ' +
               cityName +
@@ -220,7 +232,6 @@ const Service = ({ route, navigation }) => {
               ' ID : ',
             id
           );
-          const serviceId = id;
           const serviceDocRef = fr
             .collection('services')
             .doc(cityName)
@@ -242,8 +253,21 @@ const Service = ({ route, navigation }) => {
             setServiceTitle(categoryName);
             setOriginalService(categoryName);
           }
+        } else {
+          // if it's an creation of new service put user info as default values
+          console.log('add service party ');
+          const { uid } = f.auth().currentUser;
+          const userDocRef = fr.collection('users').doc(uid);
+          const userInfo = await userDocRef.get();
+          const userData = userInfo.data();
+          console.log('user data :', userData);
+          setCity(userData.city);
+          setName(userData.name);
+          setServiceTitle(userData.service);
+          setTele(userData.tele);
         }
       }
+
       getService();
     } catch (e) {
       alert('حدث خطأ ما ');
