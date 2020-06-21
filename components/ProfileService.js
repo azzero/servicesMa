@@ -40,7 +40,7 @@ const ProfileService = ({ service, navigation, triggerUpdate }) => {
       }
     },
     onOpen: (secId, rowId, direction) => {
-      setactiveRowKey(service.data().id);
+      setactiveRowKey(service.id);
     },
     right: [
       {

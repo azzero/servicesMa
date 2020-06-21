@@ -97,6 +97,18 @@ const EditProfile = ({ navigation }) => {
         service: serviceCategory,
         tele: phoneNumber
       });
+      Alert.alert(
+        'جيد',
+        'تم التعديل بنجاح ',
+        [
+          {
+            text: 'رجوع',
+            onPress: () => console.log('cancel pressed'),
+            style: 'cancel'
+          }
+        ],
+        { cancelable: true }
+      );
       console.log('updated');
     } catch (e) {
       console.log('error while updating : ', e);

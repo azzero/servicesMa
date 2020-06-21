@@ -52,6 +52,19 @@ class Button extends Component {
         {
           translateY: this.animation.interpolate({
             inputRange: [0, 1],
+            outputRange: [0, -200]
+          })
+        }
+      ]
+    };
+    const secondStyle = {
+      transform: [
+        {
+          scale: this.animation
+        },
+        {
+          translateY: this.animation.interpolate({
+            inputRange: [0, 1],
             outputRange: [0, -140]
           })
         }
@@ -81,9 +94,11 @@ class Button extends Component {
       rounded,
       lastbtnfunction,
       firstbtnfunction,
+      secondbtnfunction,
       numberOfChilds,
       lastIconName,
       firstIconName,
+      secondIconName,
       multiple,
       innerRef,
       ...props
@@ -150,7 +165,22 @@ class Button extends Component {
                 />
               </Animated.View>
             </TouchableWithoutFeedback>
-
+            <TouchableWithoutFeedback onPress={() => secondbtnfunction()}>
+              <Animated.View
+                style={[
+                  styles.rounded,
+                  styles.secondary,
+                  secondStyle,
+                  opacityAnimation
+                ]}
+              >
+                <AntDesign
+                  size={20}
+                  name={secondIconName}
+                  color={CustomConstants.second}
+                />
+              </Animated.View>
+            </TouchableWithoutFeedback>
             <TouchableWithoutFeedback
               onPress={() => {
                 firstbtnfunction();

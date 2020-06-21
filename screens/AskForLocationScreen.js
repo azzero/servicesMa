@@ -177,33 +177,50 @@ const AskLocalisation = ({ navigation, route }) => {
           </Button>
         </View>
       </Modal>
-      <View style={styles.buttonContainer}>
+      <View style={styles.body}>
         <View>
           {asklocalisationpopup ? (
-            <Text style={{ color: 'red' }} right>
+            <Text style={{ color: 'red' }} center>
               للأسف لم تفعل خدمة الوصول للموقع (GPS ) أعد المحاولة بالضغط على
               الرابط أسفله ، و إذا تعدر الأمر فربما حضرت تطبيقنا من الوصول
               لموقعك أعد السماح للتطبيق من الولوج لموقعك عن طريق إعدادات هاتفك
             </Text>
           ) : null}
-          <Text right>لكي نوفر لك أفضل خدمة ممكنة نحتاج الوصول لموقعك</Text>
-          <Text right>
-            إذا كنت موافقك على استعمال موقعك حسب الشروط المدكورة في الرابط أسفله
-            المرجو الضغط
+          <Text center>لكي نوفر لك أفضل خدمة ممكنة نحتاج الوصول لموقعك</Text>
+          <Text center>
+            إذا كنت موافقك على استعمال موقعك لنوفر لك أفضل النتائج الممكنة و
+            ربطه بالخدمات التي ستقوم بإنشائها مستقبلا ، إضغط على فعل
           </Text>
         </View>
-        <Button onPress={() => getLocationAsync()} gradient>
-          <Text button>هنا</Text>
-        </Button>
-        <Button
-          onPress={() => {
-            fromScreen ? navigation.navigate(fromScreen) : navigation.goBack();
-          }}
-          gradient
-        >
-          <Text button>للرجوع إضغط هنا </Text>
-        </Button>
+        {/*  buttons  */}
+        <View style={styles.buttons}>
+          <Button onPress={() => getLocationAsync()} color='#00dd00'>
+            <Text button> تفعيل خدمة تحديد المواقع </Text>
+          </Button>
+          <Text center body>
+            * يمكنك تعطيل هذه الخاصية في أي وقت أردت
+          </Text>
+
+          {/* <Button
+            onPress={() => {
+              fromScreen
+              ? navigation.navigate(fromScreen)
+              : navigation.goBack();
+            }}
+            gradient
+            >
+            <Text button>للرجوع إضغط هنا </Text>
+          </Button> */}
+        </View>
       </View>
+      <Button
+        rounded
+        firstIconName='arrowright'
+        style={{ bottom: 50, left: 50 }}
+        firstbtnfunction={() => {
+          fromScreen ? navigation.navigate(fromScreen) : navigation.goBack();
+        }}
+      />
     </View>
   );
 };
@@ -214,11 +231,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
-  buttonContainer: {
+  body: {
     alignSelf: 'center',
     justifyContent: 'center',
     marginVertical: 10,
     width: '80%'
+  },
+  buttons: {
+    marginVertical: 20
   }
 });
 export default AskLocalisation;

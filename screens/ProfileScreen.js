@@ -26,6 +26,12 @@ const Profile = ({ navigation }) => {
   const handleTriggerUpdate = id => {
     setDeletedRowKey(id);
     setIs_needUpdate(!is_needUpdate);
+    let new_list = null;
+    new_list = services.filter(service => {
+      return service.id !== id;
+    });
+    setServices(new_list);
+    console.log('handle trigger update ', new_list);
   };
   //------------------------------------------------//
   //-------------------Use Efeect-------------------//
@@ -54,7 +60,7 @@ const Profile = ({ navigation }) => {
       console.log('error : ', e);
     }
     console.log('rendering ');
-  }, [is_needUpdate, setIs_needUpdate, deletedRowKey]);
+  }, []);
 
   //------------------------------------------------//
   //-----------------------Render------------------//
@@ -78,8 +84,9 @@ const Profile = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {/*
-        // everything it's OKay .. dislay profile
-       //-----------------Top of profile - title -welcome ... ----------------*/}
+         everything it's OKay .. dislay profile
+          Top of profile - title - welcome 
+      */}
       <View style={styles.top}>
         <View style={styles.welcome}>
           <View style={{ position: 'absolute', left: 5, top: 5 }}>
@@ -104,7 +111,6 @@ const Profile = ({ navigation }) => {
       {/* --------------------middle : display services , informations ..  ------------------*/}
       <View
         style={{
-          // backgroundColor: 'red',
           flex: 0.7,
           paddingVertical: 10
         }}
@@ -129,7 +135,7 @@ const Profile = ({ navigation }) => {
             خدماتك :
           </Text>
         </View>
-        {services === null ? (
+        {services === null || services.length === 0 ? (
           <View style={{ justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ color: '#fff' }}>لا توجد أي خدمات لك حاليا </Text>
           </View>
@@ -153,7 +159,7 @@ const Profile = ({ navigation }) => {
         <Button
           rounded
           firstIconName='arrowleft'
-          style={{ bottom: 100, right: 30 }}
+          style={{ bottom: 35, right: 45 }}
           firstbtnfunction={() => navigation.goBack()}
         />
       </View>

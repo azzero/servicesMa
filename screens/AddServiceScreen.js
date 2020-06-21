@@ -412,8 +412,7 @@ const Service = ({ route, navigation }) => {
             checkedIcon='dot-circle-o'
             uncheckedIcon='circle-o'
             containerStyle={{
-              backgroundColor: customConstants.PrimaryColor,
-              marginTop: 15
+              backgroundColor: customConstants.PrimaryColor
             }}
             textStyle={{ color: '#ffffff' }}
             uncheckedColor='#ff0000'
@@ -439,17 +438,19 @@ const Service = ({ route, navigation }) => {
         <View
           style={{
             flex: 0.3,
-
+            marginTop: 20,
             width: '100%',
             justifyContent: 'center'
           }}
         >
           <Button
             firstIconName='magnifying-glass'
+            secondIconName='profile'
             lastIconName='logout'
-            style={{ bottom: 100, left: 30 }}
+            style={{ bottom: 35, left: 30 }}
             rounded
             firstbtnfunction={() => navigation.navigate('Home')}
+            secondbtnfunction={() => GoToProfile()}
             lastbtnfunction={() => {
               logout();
             }}
@@ -458,7 +459,7 @@ const Service = ({ route, navigation }) => {
           <Button
             rounded
             firstIconName='arrowleft'
-            style={{ bottom: 100, right: 30 }}
+            style={{ bottom: 35, right: 30 }}
             firstbtnfunction={() => navigation.goBack()}
           />
         </View>
@@ -479,8 +480,9 @@ const styles = StyleSheet.create({
     backgroundColor: CustomConstants.PrimaryColor
   },
   buttonContainer: {
-    marginTop: 20,
-    width: '100%'
+    width: '100%',
+    marginBottom: 15,
+    marginTop: 10
   },
   pickerStyle: {
     flexDirection: 'row',

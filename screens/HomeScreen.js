@@ -4,7 +4,9 @@ import UserContext from '../context/UserContext';
 import DataContext from '../context/DataContext';
 import { Button, Text } from '../components';
 import * as CustomConstants from '../constants/constants';
-import { auth, f, fr, geo } from '../config/config';
+import validate from 'validate.js';
+import constraints from '../constants/constraints';
+import { auth, fr, geo } from '../config/config';
 import LocalisationContext from '../context/LocalisationContext';
 import * as customConstants from '../constants/constants';
 import { get } from 'geofirex';
@@ -21,7 +23,9 @@ const Home = props => {
   const [city, setCity] = useState('');
   const [isSearchByPosition, setisSearchByPosition] = useState(false);
   const [distance, setDistance] = useState(0);
-  const [displayDistance, setDispayDistance] = useState(0);
+  const [displayDistance, setDisplayDistance] = useState(0);
+  const [serviceErrors, setServiceerrors] = useState('');
+  const [cityErrors, setCityerrors] = useState('');
 
   //------------------------------------------------//
   //----------------------Context------------------//
@@ -38,9 +42,11 @@ const Home = props => {
   //---------------------Handlers-------------------//
   //-----------------------------------------------//
   const citiesPickerHandler = value => {
+    setCityerrors('');
     setCity(value);
   };
   const setServiceTitleHandler = text => {
+    setServiceerrors('');
     setServiceTitle(text);
   };
   const checkButtonHandler = () => {
@@ -50,6 +56,32 @@ const Home = props => {
       navigation.navigate('AskForLocation', { fromScreen: 'Home' });
     }
   };
+  //--------------- validation -------------------//
+  const checkInputs = () => {
+    const validationResult = validate(
+      {
+        service: serviceTitle,
+        city: city,
+        tele: '06666666',
+        name: 'fakedatatopassvalidation'
+      },
+      constraints.services
+    );
+    if (typeof validationResult !== 'undefined' && validationResult.service) {
+      const error2 = validationResult.service[0];
+      setServiceerrors(error2);
+    }
+    if (typeof validationResult !== 'undefined' && validationResult.city) {
+      const error4 = validationResult.city[0];
+      setCityerrors(error4);
+    }
+    console.log('validation result : ', validationResult);
+    if (typeof validationResult === 'undefined') {
+      console.log('everyhing is okay');
+      getdata();
+    }
+  };
+
   //----------- logout funcion ------------------//
   const logout = () => {
     auth
@@ -61,14 +93,15 @@ const Home = props => {
         console.log('eror', error);
       });
   };
-  //-------------------Go To Profile -------------//
+  //-------------------Go To Profile  function-------------//
   const GoToProfile = () => {
     navigation.navigate('Profile');
   };
-  // ------------------ADD Service ----------------------//
+  // ------------------ADD Service function ----------------------//
   const goToAddService = () => {
     navigation.navigate('AddService', { is_update: false });
   };
+  //-------------- make search function ------------------------------>
   const getdata = async () => {
     try {
       const services = fr
@@ -161,6 +194,7 @@ const Home = props => {
               `your localisation is longitude : ${localisation.longitude} latitude : ${localisation.latitude} `}
           </Text> */}
           <Dropdown
+            error={serviceErrors}
             label='نوع الخدمة'
             dropdownOffset={{ top: 20, left: 0 }}
             data={customConstants.services}
@@ -190,6 +224,7 @@ const Home = props => {
             rippleCentered={true}
           />
           <Dropdown
+            error={cityErrors}
             label='المدينة'
             data={customConstants.MoroccoCities}
             baseColor='#ffffff'
@@ -226,7 +261,8 @@ const Home = props => {
             uncheckedColor='#ff0000'
             checkedColor={customConstants.fourthColor}
             onPress={() => checkButtonHandler()}
-            title=' البحث عبر موقعك الحالي'
+            title=' البحث من خلال موقعك غير مفعل '
+            checkedTitle='البحث انطلاقا من موقعك مفعل '
             checked={isSearchByPosition}
           />
           {isSearchByPosition === false ? null : (
@@ -287,14 +323,14 @@ const Home = props => {
                   maximumValue={5000}
                   thumbTintColor={customConstants.fourthColor}
                   value={distance}
-                  onValueChange={value => setDispayDistance(value)}
+                  onValueChange={value => setDisplayDistance(value)}
                   // animateTransitions={true}
                 />
               </View>
             </View>
           )}
           <View style={{ marginTop: 30 }}>
-            <Button gradient onPress={() => getdata()}>
+            <Button gradient onPress={() => checkInputs()}>
               <Text button>إبحث</Text>
             </Button>
           </View>
@@ -307,9 +343,11 @@ const Home = props => {
           multiple
           firstIconName='plus'
           lastIconName='logout'
+          secondIconName='profile'
           rounded
-          style={{ bottom: 100 }}
-          lastbtnfunction={() => GoToProfile()}
+          style={{ bottom: 30 }}
+          lastbtnfunction={() => logout()}
+          secondbtnfunction={() => GoToProfile()}
           firstbtnfunction={() => goToAddService()}
         />
       </View>
@@ -333,7 +371,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flex: 0.4,
     alignItems: 'center',
-    marginVertical: 10,
+    marginVertical: 20,
     width: '100%',
     justifyContent: 'center'
   },

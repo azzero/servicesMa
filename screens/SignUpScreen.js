@@ -200,7 +200,7 @@ const SignUp = ({ navigation }) => {
           placeholderTextColor='#bbc3c7'
           inputStyle={styles.input}
           containerStyle={styles.InputContainer}
-          rightIcon={{ type: 'MaterialCommunityIcons', name: 'mail-outline' }}
+          leftIcon={{ type: 'MaterialCommunityIcons', name: 'mail-outline' }}
           onChangeText={handleEmail}
           errorMessage={errorMessage !== '' ? errorMessage : ''}
           value={email}
@@ -212,13 +212,12 @@ const SignUp = ({ navigation }) => {
           placeholderTextColor='#bbc3c7'
           inputStyle={styles.input}
           containerStyle={styles.InputContainer}
-          rightIcon={{ type: 'font-awesome', name: 'lock' }}
+          leftIcon={{ type: 'font-awesome', name: 'lock' }}
           secureTextEntry={true}
           errorMessage={passwordError !== '' ? passwordError : ''}
           onChangeText={handlePassword}
           value={password}
           autoCapitalize='none'
-          keyboardType='number-pad'
           autoCorrect={false}
         />
         <Input
@@ -226,7 +225,7 @@ const SignUp = ({ navigation }) => {
           placeholderTextColor='#bbc3c7'
           inputStyle={styles.input}
           containerStyle={styles.InputContainer}
-          rightIcon={{ type: 'font-awesome', name: 'lock' }}
+          leftIcon={{ type: 'font-awesome', name: 'lock' }}
           secureTextEntry={true}
           errorMessage={matchPasswordError !== '' ? matchPasswordError : ''}
           onChangeText={handlePasswordConfirmation}
@@ -326,7 +325,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'none',
     fontFamily: 'openSans',
     fontSize: 18,
-    margin: 5
+    paddingHorizontal: 10
   },
   InputContainer: {
     width: '80%'

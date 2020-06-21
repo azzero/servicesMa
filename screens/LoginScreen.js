@@ -205,7 +205,10 @@ const Login = ({ navigation }) => {
           errorMessage={errorMessage}
           value={email}
           keyboardType='email-address'
-          style={{ fontFamily: CustomConstants.BoldFont }}
+          style={{
+            fontFamily: CustomConstants.BoldFont,
+            paddingHorizontal: 10
+          }}
         />
         <Input
           ref={inputPasswordRef}
@@ -217,7 +220,10 @@ const Login = ({ navigation }) => {
           value={password}
           autoCapitalize='none'
           autoCorrect={false}
-          style={{ fontFamily: CustomConstants.BoldFont }}
+          style={{
+            fontFamily: CustomConstants.BoldFont,
+            paddingHorizontal: 10
+          }}
         />
 
         <View style={{ ...styles.input, width: '80%' }}>
