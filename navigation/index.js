@@ -15,15 +15,12 @@ import DisplayServices from '../screens/DisplayServices';
 import EditProfile from '../screens/EditProfileScreen';
 import { AsyncStorage } from 'react-native';
 import Rating from '../components/Rating';
-import AskLocalisation from '../components/AskLocalisation';
 //-------------ROUTERS ------//
 const Stack = createStackNavigator();
 
 const StackRouter = () => {
   const { logging, tokenManager, splash } = useContext(UserContext);
   const { token, setToken } = tokenManager;
-  // console.log('isloggedIn value : ', isLoggedIn);
-  console.log('token navigator : ', token);
   useEffect(() => {}, [token]);
   return (
     <Stack.Navigator
@@ -82,29 +79,45 @@ const StackRouter = () => {
 const NavigationRoot = () => {
   // const { splash } = useContext(UserContext);
   const [loadingToken, setloadingToken] = useState(true);
-  console.log('loadingToken : ', loadingToken);
-
   const Splash = () => {
-    const { logging, tokenManager } = useContext(UserContext);
+    const { logging, tokenManager, ratingServicesManager } = useContext(
+      UserContext
+    );
     const { token, setToken } = tokenManager;
     const { isLoggedIn, setisLoggedIn } = logging;
+    const { ratedServices, setRatedServices } = ratingServicesManager;
 
     useEffect(() => {
+      const getStoredRatedServices = async () => {
+        try {
+          // get all services ID rated by user
+          let RatedServicesList = await AsyncStorage.getItem(
+            '@zizuAppStore:services'
+          );
+          if (RatedServicesList !== null) {
+            const list = JSON.parse(RatedServicesList);
+            setRatedServices(list);
+          }
+        } catch (error) {
+          console.log('error while getting rated services list ', error);
+        }
+      };
       AsyncStorage.getItem('token').then(value => {
         if (value !== null) {
           setToken(value);
           setisLoggedIn(true);
+          getStoredRatedServices();
         }
         setloadingToken(false);
       });
     }, []);
     return (
       <View style={styles.splash}>
-        {/* <Text style={{ color: '#fff70a' }}>Loading ... !!</Text> */}
         <ActivityIndicator size='large' />
       </View>
     );
   };
+
   if (loadingToken) {
     return <Splash />;
   }

@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   StyleSheet,
   View,
   Text,
   TouchableWithoutFeedback,
   Animated,
-  Dimensions
+  Dimensions,
+  AsyncStorage
 } from 'react-native';
 import * as CustomConstants from '../constants/constants';
 import { FontAwesome } from '@expo/vector-icons';
-import { Avatar } from 'react-native-elements';
+import UserContext from '../context/UserContext';
 import Rating from './Rating';
-import { fr, auth } from '../config/config';
+import { fr } from '../config/config';
 const Service = props => {
   //-------------- state ----------------//
   const {
@@ -32,8 +33,15 @@ const Service = props => {
   const [animation, setAnimation] = useState(new Animated.Value(0));
   const [customRating, setCustomRating] = useState(userRating);
   const [RatingAlertShowed, setRatingAlertShowed] = useState(true);
-
+  // ------------------- Context--------------------------//
+  const { ratingServicesManager } = useContext(UserContext);
+  const { ratedServices, setRatedServices } = ratingServicesManager;
+  //---------------- handle rating function ----------------- //
   const handleRating = value => {
+    if (ratedServices.includes(id)) {
+      alert('سبق لك تقييم هذه الخدمة ');
+      return;
+    }
     if (typeof customRating !== 'undefined') {
       var newRating = customRating.map((item, i) => {
         if (i == value - 1) {
@@ -63,8 +71,21 @@ const Service = props => {
       .update({
         rating: newRating
       })
-      .then(() => {
-        console.log('rating updated ');
+      .then(async () => {
+        try {
+          console.log('rating updated ');
+
+          let ratedServicesNewList = ratedServices;
+          ratedServicesNewList.push(id);
+          setRatedServices(ratedServicesNewList);
+          await AsyncStorage.setItem(
+            '@zizuAppStore:services',
+            JSON.stringify(ratedServicesNewList)
+          );
+        } catch (error) {
+          // Error saving data
+          console.log('error while saving data :', e);
+        }
       })
       .catch(e => {
         alert('error');

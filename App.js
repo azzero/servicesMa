@@ -95,6 +95,7 @@ export default function App({ navigation }) {
   const [localisation, setlocalisation] = useState(null);
   const [loadingToken, setloadingToken] = useState(true);
   const [isLoggedIn, setisLoggedIn] = useState(false);
+  const [ratedServices, setRatedServices] = useState(null);
   const [asklocalisationpopup, setasklocalisationpopup] = useState(false);
 
   //-------------- User ContextProvider -------------------//
@@ -102,9 +103,19 @@ export default function App({ navigation }) {
     () => ({
       logging: { isLoggedIn, setisLoggedIn },
       tokenManager: { token, setToken },
-      splash: { loadingToken, setloadingToken }
+      splash: { loadingToken, setloadingToken },
+      ratingServicesManager: { ratedServices, setRatedServices }
     }),
-    [isLoggedIn, setisLoggedIn, token, setToken, loadingToken, setloadingToken]
+    [
+      isLoggedIn,
+      setisLoggedIn,
+      token,
+      setToken,
+      loadingToken,
+      setloadingToken,
+      ratedServices,
+      setRatedServices
+    ]
   );
   //-------------------Data Context Provider -------------------//
   const DataProvider = useMemo(() => ({ data, setData }), [data, setData]);
