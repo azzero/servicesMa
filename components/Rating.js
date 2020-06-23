@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   StyleSheet,
   View,
   TouchableWithoutFeedback,
   Animated,
-  Easing,
-  Dimensions
+  Easing
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import UserContext from '../context/UserContext';
 
-const Rating = ({ userRating, numStarts, color, handleRating }) => {
+const Rating = ({ userRating, numStarts, color, handleRating, id }) => {
   //------------------------------------------------//
   //------------------------State------------------//
   //-----------------------------------------------//
@@ -17,6 +17,9 @@ const Rating = ({ userRating, numStarts, color, handleRating }) => {
   const [rating, setRating] = useState([0, 0, 0, 0, 0]);
   const [animation, setAnimation] = useState(new Animated.Value(1));
   let stars = [];
+  //-------------------- Context -----------------//
+  const { ratingServicesManager } = useContext(UserContext);
+  const { ratedServices, setRatedServices } = ratingServicesManager;
   //   const animation = new Animated.Value(1);
   //------------------------------------------------//
   //---------------------Animation------------------//
@@ -82,6 +85,11 @@ const Rating = ({ userRating, numStarts, color, handleRating }) => {
   //---------------handling Click-------------------//
   //-----------------------------------------------//
   const handleClick = star => {
+    console.log('list of services :', ratedServices);
+    if (ratedServices !== null && ratedServices.includes(id)) {
+      alert('سبق لك تقييم هذه الخدمة ');
+      return;
+    }
     setRating(star);
     handleRating(star);
   };

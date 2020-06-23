@@ -38,10 +38,11 @@ const Service = props => {
   const { ratedServices, setRatedServices } = ratingServicesManager;
   //---------------- handle rating function ----------------- //
   const handleRating = value => {
-    if (ratedServices.includes(id)) {
-      alert('سبق لك تقييم هذه الخدمة ');
-      return;
-    }
+    // console.log('list of services :', ratedServices);
+    // if (ratedServices !== null && ratedServices.includes(id)) {
+    //   alert('سبق لك تقييم هذه الخدمة ');
+    //   return;
+    // }
     if (typeof customRating !== 'undefined') {
       var newRating = customRating.map((item, i) => {
         if (i == value - 1) {
@@ -73,9 +74,10 @@ const Service = props => {
       })
       .then(async () => {
         try {
-          console.log('rating updated ');
-
-          let ratedServicesNewList = ratedServices;
+          let ratedServicesNewList = [];
+          if (ratedServices !== null) {
+            ratedServicesNewList = ratedServices;
+          }
           ratedServicesNewList.push(id);
           setRatedServices(ratedServicesNewList);
           await AsyncStorage.setItem(
@@ -84,11 +86,12 @@ const Service = props => {
           );
         } catch (error) {
           // Error saving data
-          console.log('error while saving data :', e);
+          console.log('error while saving data :', error);
         }
       })
       .catch(e => {
         alert('error');
+        console.log('error : ', e);
       });
   };
   //--------------- Function --------------//
@@ -159,15 +162,17 @@ const Service = props => {
           {/* -------------------- Phone------------------------- */}
           {/*---------------------------------------------------- */}
           <TouchableWithoutFeedback
-            hitSlop={{ right: 20 }}
-            onFocus={() => console.log('hover')}
+            // hitSlop={{ right: 50 }}
             style={{
               width: '100%',
               paddingHorizontal: 10
             }}
-            onPress={() => animationHandler()}
+            onPress={() => {
+              console.log('clicked');
+              // animationHandler();
+            }}
           >
-            <Animated.View style={[animatedStyles.phoneIcon]}>
+            <Animated.View style={[styles.phoneZone, animatedStyles.phoneIcon]}>
               <View
                 style={{
                   flexDirection: 'row'
@@ -196,6 +201,7 @@ const Service = props => {
         <Rating
           userRating={customRating}
           handleRating={handleRating}
+          id={id}
           {...others}
         />
       </View>
@@ -235,6 +241,10 @@ const styles = StyleSheet.create({
   phoneText: {
     fontSize: CustomConstants.sizes.title,
     color: '#ffffff'
+  },
+  phoneZone: {
+    borderColor: 'red',
+    borderWidth: 2
   }
 });
 export default Service;
