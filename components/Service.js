@@ -13,6 +13,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import UserContext from '../context/UserContext';
 import Rating from './Rating';
 import { fr } from '../config/config';
+var windowWidth = Dimensions.get('window').width;
 const Service = props => {
   //-------------- state ----------------//
   const {
@@ -27,7 +28,6 @@ const Service = props => {
     ...others
   } = props;
   const [showPhone, setShowPhone] = useState(true);
-  var windowWidth = Dimensions.get('window').width;
   // animation State
   const [activated, setActivated] = useState(new Animated.Value(0));
   const [animation, setAnimation] = useState(new Animated.Value(0));
@@ -36,13 +36,20 @@ const Service = props => {
   // ------------------- Context--------------------------//
   const { ratingServicesManager } = useContext(UserContext);
   const { ratedServices, setRatedServices } = ratingServicesManager;
+  //---------- phone number Formate -------------- //
+  const phoneNumber = () => {
+    let result = [phone[0].toString()];
+    for (let i = 1; i <= phone.length; i++) {
+      if (i % 2 === 0) {
+        result.push('-', phone[i]);
+      } else {
+        result.push(phone[i]);
+      }
+    }
+    return result;
+  };
   //---------------- handle rating function ----------------- //
   const handleRating = value => {
-    // console.log('list of services :', ratedServices);
-    // if (ratedServices !== null && ratedServices.includes(id)) {
-    //   alert('سبق لك تقييم هذه الخدمة ');
-    //   return;
-    // }
     if (typeof customRating !== 'undefined') {
       var newRating = customRating.map((item, i) => {
         if (i == value - 1) {
@@ -117,7 +124,7 @@ const Service = props => {
       useNativeDriver: true
     }).start();
   };
-  const off = windowWidth / 2 + 10;
+  const off = windowWidth / 2 - 45;
   const animatedStyles = {
     phoneIcon: {
       transform: [
@@ -159,33 +166,48 @@ const Service = props => {
         </View>
 
         <View style={styles.description}>
-          {/* -------------------- Phone------------------------- */}
+          {/* -------------------- Phone animation------------------------- */}
           {/*---------------------------------------------------- */}
           <TouchableWithoutFeedback
-            // hitSlop={{ right: 50 }}
+            hitSlop={{ top: 20, bottom: 20, left: 50, right: 50 }}
             style={{
-              width: '100%',
-              paddingHorizontal: 10
+              width: '100%'
             }}
             onPress={() => {
-              console.log('clicked');
-              // animationHandler();
+              animationHandler();
             }}
           >
-            <Animated.View style={[styles.phoneZone, animatedStyles.phoneIcon]}>
-              <View
-                style={{
-                  flexDirection: 'row'
-                }}
+            <View
+              style={{
+                width: '100%'
+              }}
+            >
+              <Animated.View
+                style={[styles.phoneZone, animatedStyles.phoneIcon]}
               >
-                <View style={{ justifyContent: 'center' }}>
-                  <Text style={[styles.phoneText, {}]}>0665000000</Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                    alignItems: 'center'
+                    // marginBottom: 5
+                  }}
+                >
+                  <View style={{ justifyContent: 'center' }}>
+                    <Text style={[styles.phoneText, {}]}>
+                      {phone && phoneNumber()}
+                    </Text>
+                  </View>
+                  <View style={{}}>
+                    <FontAwesome
+                      name='mobile-phone'
+                      size={42}
+                      color='#ffffff'
+                    />
+                  </View>
                 </View>
-                <View style={{ padding: 15 }}>
-                  <FontAwesome name='mobile-phone' size={42} color='#ffffff' />
-                </View>
-              </View>
-            </Animated.View>
+              </Animated.View>
+            </View>
           </TouchableWithoutFeedback>
         </View>
       </View>
@@ -232,6 +254,8 @@ const styles = StyleSheet.create({
     width: '100%'
   },
   description: {
+    backgroundColor: '#F92660',
+    width: '100%',
     borderTopColor: 'gray',
     borderTopWidth: 1,
     flex: 0.4,
@@ -243,8 +267,7 @@ const styles = StyleSheet.create({
     color: '#ffffff'
   },
   phoneZone: {
-    borderColor: 'red',
-    borderWidth: 2
+    width: windowWidth / 2
   }
 });
 export default Service;

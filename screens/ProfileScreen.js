@@ -65,7 +65,7 @@ const Profile = ({ navigation }) => {
   //------------------------------------------------//
   //-----------------------Render------------------//
   //-----------------------------------------------//
-
+  console.log('user profile data : ', userProfile);
   if (userProfile === null) {
     // loading ...
     return (
@@ -101,8 +101,8 @@ const Profile = ({ navigation }) => {
               مرحبا بك
             </Text>
             <View style={{ paddingRight: 5 }}>
-              <Text h1 style={{ color: customConstants.fourthColor }}>
-                {userProfile['name']}
+              <Text h1 style={{ color: customConstants.fourthColor }} center>
+                {userProfile ? userProfile['name'] : 'في ملفك الشخصي'}
               </Text>
             </View>
           </View>

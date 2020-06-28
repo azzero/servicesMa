@@ -28,8 +28,8 @@ export const constraints = {
         message: '^الرجاء إدخال  رقم '
       },
       length: {
-        maximum: 15,
-        message: '^رقم الهاتف يجب يجب ألا يتعدى خمسة عشر رقما '
+        is: 10,
+        message: '^رقم الهاتف يجب أن يكون طوله عشرة أرقام '
       }
     }
   },

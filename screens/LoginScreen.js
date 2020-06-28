@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import * as Facebook from 'expo-facebook';
 import * as CustomConstants from '../constants/constants';
 import { f, auth } from '../config/config.js';
@@ -108,12 +108,29 @@ const Login = ({ navigation }) => {
           );
         }
         return;
-      case 'auth/invalid-email':
+      case 'auth/invalid-email': {
+        setValidation(0);
+        Alert.alert(
+          'تعدر الدخول ',
+          ' المرجو ادخال بريد الكتروني فعال !',
+
+          [
+            {
+              text: 'Cancel',
+              onPress: () => console.log('Cancel Pressed'),
+              style: 'cancel'
+            },
+            { text: 'OK', onPress: () => console.log('OK Pressed') }
+          ],
+          { cancelable: false }
+        );
+      }
+      case 'auth/network-request-failed':
         {
           setValidation(0);
           Alert.alert(
             'تعدر الدخول ',
-            ' المرجو ادخال بريد الكتروني فعال !',
+            ' غير متصل بشبكة الأنترنت  !',
 
             [
               {
@@ -128,7 +145,7 @@ const Login = ({ navigation }) => {
         }
         return;
       default:
-        Alert.alert(error);
+        Alert.alert('نأسف ، وقد خطأ ما ، المرجو إعادة المحاولة ');
         return;
     }
   };
@@ -139,10 +156,6 @@ const Login = ({ navigation }) => {
       await auth.signInWithEmailAndPassword(email, password);
       const currentUser = f.auth().currentUser;
       console.log('current user : ', currentUser);
-      setisLoggedIn(true);
-      // const tokenn = await response.getToken();
-      // console.log('access  : ', tokenn);
-      // navigation.navigate('Home');
     } catch (error) {
       var errorCode = error.code;
       errorHandler('', errorCode);
@@ -157,21 +170,19 @@ const Login = ({ navigation }) => {
       const response = await Facebook.logInWithReadPermissionsAsync({
         permissions: ['public_profile']
       });
-      console.log('response : ', response);
       const { type, token } = response;
-
       if (type === 'success') {
         // Get the user's name using Facebook's Graph API
         const credentials = f.auth.FacebookAuthProvider.credential(token);
-        console.log('facebook credentials : ', credentials);
         f.auth()
           .signInWithCredential(credentials)
           .then(() => {
-            setisLoggedIn(true);
+            // setisLoggedIn(true);
             const currentUser = f.auth().currentUser;
             console.log('CURRENT USER : ', currentUser);
           })
           .catch(error => {
+            alert('وقع خطأ ما المرجو إعادة المحاولة ');
             alert('Loging with facebook error : ', error);
           });
       } else {

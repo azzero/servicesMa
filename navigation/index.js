@@ -13,13 +13,14 @@ import UserContext from '../context/UserContext';
 import AddService from '../screens/AddServiceScreen';
 import DisplayServices from '../screens/DisplayServices';
 import EditProfile from '../screens/EditProfileScreen';
+import SignUpProfile from '../screens/SignUpProfileScreen';
 import { AsyncStorage } from 'react-native';
 import Rating from '../components/Rating';
 //-------------ROUTERS ------//
 const Stack = createStackNavigator();
 
 const StackRouter = () => {
-  const { logging, tokenManager, splash } = useContext(UserContext);
+  const { tokenManager } = useContext(UserContext);
   const { token, setToken } = tokenManager;
   useEffect(() => {}, [token]);
   return (
@@ -71,53 +72,46 @@ const StackRouter = () => {
           <Stack.Screen name='AddService' component={AddService} />
           <Stack.Screen name='AskForLocation' component={AskForLocation} />
           <Stack.Screen name='EditProfile' component={EditProfile} />
+          <Stack.Screen name='SignUpProfile' component={SignUpProfile} />
         </>
       )}
     </Stack.Navigator>
   );
 };
+//------------------------------------------------//
+//------------------------Splash------------------//
+//-----------------------------------------------//
+
+const Splash = () => {
+  const { ratingServicesManager } = useContext(UserContext);
+  const { ratedServices, setRatedServices } = ratingServicesManager;
+
+  useEffect(() => {
+    const getStoredRatedServices = async () => {
+      try {
+        // get all services ID rated by user
+        let RatedServicesList = await AsyncStorage.getItem(
+          '@zizuAppStore:services'
+        );
+        if (RatedServicesList !== null) {
+          const list = JSON.parse(RatedServicesList);
+          setRatedServices(list);
+        }
+      } catch (error) {
+        console.log('error while getting rated services list ', error);
+      }
+    };
+  }, []);
+  return (
+    <View style={styles.splash}>
+      <ActivityIndicator size='large' />
+    </View>
+  );
+};
+// ------------- Main component --------------------------
 const NavigationRoot = () => {
-  // const { splash } = useContext(UserContext);
-  const [loadingToken, setloadingToken] = useState(true);
-  const Splash = () => {
-    const { logging, tokenManager, ratingServicesManager } = useContext(
-      UserContext
-    );
-    const { token, setToken } = tokenManager;
-    const { isLoggedIn, setisLoggedIn } = logging;
-    const { ratedServices, setRatedServices } = ratingServicesManager;
-
-    useEffect(() => {
-      const getStoredRatedServices = async () => {
-        try {
-          // get all services ID rated by user
-          let RatedServicesList = await AsyncStorage.getItem(
-            '@zizuAppStore:services'
-          );
-          if (RatedServicesList !== null) {
-            const list = JSON.parse(RatedServicesList);
-            setRatedServices(list);
-          }
-        } catch (error) {
-          console.log('error while getting rated services list ', error);
-        }
-      };
-      AsyncStorage.getItem('token').then(value => {
-        if (value !== null) {
-          setToken(value);
-          setisLoggedIn(true);
-          getStoredRatedServices();
-        }
-        setloadingToken(false);
-      });
-    }, []);
-    return (
-      <View style={styles.splash}>
-        <ActivityIndicator size='large' />
-      </View>
-    );
-  };
-
+  const { splash } = useContext(UserContext);
+  const { loadingToken, setloadingToken } = splash;
   if (loadingToken) {
     return <Splash />;
   }
@@ -127,6 +121,10 @@ const NavigationRoot = () => {
     </NavigationContainer>
   );
 };
+
+//------------------------------------------------//
+//------------------------Styling------------------//
+//-----------------------------------------------//
 const styles = StyleSheet.create({
   splash: {
     flex: 1,

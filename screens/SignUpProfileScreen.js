@@ -14,6 +14,7 @@ import { Input, Text, Divider } from 'react-native-elements';
 import Button from '../components/Button';
 import validate from 'validate.js';
 import constraints from '../constants/constraints';
+import UserContext from '../context/UserContext.js';
 const inputEmailRef = React.createRef();
 const inputPasswordRef = React.createRef();
 const SignUp = ({ navigation }) => {
@@ -25,6 +26,7 @@ const SignUp = ({ navigation }) => {
   const [validation, setValidation] = useState(0);
   const [passwordError, setPasswordError] = useState('');
   const [matchPasswordError, setMatchPasswordError] = useState('');
+  const { isLoggedIn, setisLoggedIn } = useContext(UserContext);
   const onConfirm = () => {
     if (matchPasswordError !== '') {
       Alert.alert(matchPasswordError);

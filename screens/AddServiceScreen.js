@@ -260,11 +260,13 @@ const Service = ({ route, navigation }) => {
           const userDocRef = fr.collection('users').doc(uid);
           const userInfo = await userDocRef.get();
           const userData = userInfo.data();
-          console.log('user data :', userData);
-          setCity(userData.city);
-          setName(userData.name);
-          setServiceTitle(userData.service);
-          setTele(userData.tele);
+          console.log(' userinfo : ', userData);
+          if (typeof userData !== 'undefined') {
+            setCity(userData.city);
+            setName(userData.name);
+            setServiceTitle(userData.service);
+            setTele(userData.tele);
+          }
         }
       }
 

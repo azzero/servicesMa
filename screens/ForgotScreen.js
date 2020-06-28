@@ -14,11 +14,13 @@ const Forgot = ({ navigation }) => {
     auth
       .sendPasswordResetEmail(email)
       .then(function() {
-        alert('أرسل الايميل بنجاح !!');
+        alert(
+          'لقد تم إرسال رسالة إلى ايميلك ، رجاءا راجع علبة بريدك الالتكروني  !!'
+        );
       })
       .catch(function(error) {
         console.log(error);
-        alert('هناك خطأ ما ');
+        alert('هناك خطأ ما تأكد من اتصالك بالأنترنت ');
       });
   };
   return (

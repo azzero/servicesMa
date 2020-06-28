@@ -5,7 +5,7 @@ import { Service, Button, Text } from '../components';
 import MapView, { Marker, Circle } from 'react-native-maps';
 import Constants from 'expo-constants';
 import LocalisationContext from '../context/LocalisationContext';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
 import * as customConstants from '../constants/constants';
 const DisplayServices = ({ navigation, route }) => {
   //------------------------------------------------//
@@ -116,11 +116,7 @@ const DisplayServices = ({ navigation, route }) => {
                   // image={require('../assets/icons/markerresized.png')}
                 >
                   <View>
-                    <MaterialCommunityIcons
-                      name='human-handsup'
-                      size={42}
-                      color='#f00'
-                    />
+                    <Entypo name='location-pin' size={42} color='#f00' />
                   </View>
                 </Marker>
               );

@@ -111,7 +111,7 @@ class Button extends Component {
       color && !styles[color] && { backgroundColor: color },
       style
     ];
-
+    //---------------- gradient simple button -----------
     if (gradient && !facebook) {
       return (
         <TouchableOpacity style={btnStyle} activeOpacity={opacity} {...props}>
@@ -127,6 +127,7 @@ class Button extends Component {
         </TouchableOpacity>
       );
     }
+    // ------------- facebook button ---------------
     if (facebook) {
       return (
         <TouchableOpacity style={btnStyle} activeOpacity={opacity} {...props}>
@@ -145,8 +146,10 @@ class Button extends Component {
         </TouchableOpacity>
       );
     }
+    //-------------------- rounded button ------------------
     if (rounded) {
       if (multiple) {
+        // ----------- multiple rounded button  - menu -----------
         return (
           <View style={[styles.roundedContainer, style]} {...props}>
             <TouchableWithoutFeedback onPress={() => lastbtnfunction()}>
@@ -214,6 +217,7 @@ class Button extends Component {
           </View>
         );
       } else {
+        //------------- rounded button with one function only --------------
         return (
           <View style={[styles.roundedContainer, style]} {...props}>
             <TouchableWithoutFeedback onPress={() => firstbtnfunction()}>

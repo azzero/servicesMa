@@ -83,7 +83,7 @@ const loadingAssets = async () => {
 };
 
 //---------------------------APP --------//
-
+// RTL configuration
 export default function App({ navigation }) {
   I18nManager.forceRTL(true);
 
@@ -94,20 +94,17 @@ export default function App({ navigation }) {
   const [data, setData] = useState(null);
   const [localisation, setlocalisation] = useState(null);
   const [loadingToken, setloadingToken] = useState(true);
-  const [isLoggedIn, setisLoggedIn] = useState(false);
   const [ratedServices, setRatedServices] = useState(null);
   const [asklocalisationpopup, setasklocalisationpopup] = useState(false);
 
   //-------------- User ContextProvider -------------------//
   const providerValue = useMemo(
     () => ({
-      logging: { isLoggedIn, setisLoggedIn },
       tokenManager: { token, setToken },
       splash: { loadingToken, setloadingToken },
       ratingServicesManager: { ratedServices, setRatedServices }
     }),
     [
-      isLoggedIn,
       setisLoggedIn,
       token,
       setToken,
@@ -134,29 +131,44 @@ export default function App({ navigation }) {
   );
   //----------------------Use Effect ------------------------//
   useEffect(() => {
-    return async () => {
-      f.auth().onAuthStateChanged(async user => {
-        if (user) {
-          var currentUser = f.auth().currentUser;
-          if (currentUser !== null) {
-            const userToken = await currentUser.getIdToken();
-            try {
-              AsyncStorage.setItem('token', userToken);
-            } catch (e) {
-              console.log('get token error :', e);
-            }
-            setToken(userToken);
-            // store token async
-          }
-        } else {
-          currentUser = null;
-          setToken(null);
-          AsyncStorage.removeItem('token');
-          console.log('no user : ', token);
-        }
-      });
+    const authSubscription = f.auth().onAuthStateChanged(authUser => {
+      console.log('loading  before  : ', loadingToken);
+      setloadingToken(false);
+      console.log('loading  after  : ', loadingToken);
+      if (authUser) {
+        setToken(authUser);
+      } else {
+        setToken(null);
+      }
+    });
+    //   if (user) {
+    //     var currentUser = f.auth().currentUser;
+    //     if (currentUser !== null) {
+    //       const userToken = await currentUser.getIdToken();
+    //       try {
+    //         AsyncStorage.setItem('token', userToken);
+    //       } catch (e) {
+    //         alert('وقع خطأ ما المرجو إعادة المحاولة ');
+    //         console.log('get token error :', e);
+    //       }
+    //       setToken(currentUser);
+    //       // store token async
+    //     }
+    //   } else {
+    //     currentUser = null;
+    //     setToken(null);
+    //     AsyncStorage.removeItem('token');
+    //     console.log('no user : ', token);
+    //   }
+    // });
+
+    // authSubscription();
+
+    return () => {
+      authSubscription();
     };
-  }, [isLoggedIn, setisLoggedIn]);
+  }, []);
+
   //--------------- Loading assets -------------//
   if (loading) {
     return (
