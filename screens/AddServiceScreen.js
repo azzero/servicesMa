@@ -91,9 +91,38 @@ const Service = ({ route, navigation }) => {
       })
       .then(
         () => console.log('service updated in profile successfully '),
-        navigation.navigate('Profile')
+        Alert.alert(
+          'ممتاز !!',
+          'تمت تعديل بنجاح   ',
+          [
+            {
+              text: 'البقاء هنا ',
+              onPress: () => console.log('Cancel Pressed'),
+              style: 'cancel'
+            },
+            {
+              text: 'الرجوع لملفك الشخصي ',
+              onPress: () =>
+                navigation.navigate('Profile', { force_update: true })
+            }
+          ],
+          { cancelable: false }
+        )
       )
       .catch(e => console.log('error when update service to profile :', e));
+  };
+  // delete service from user profile
+
+  const deleteServiceFromProfile = serviceId => {
+    fr.collection('users')
+      .doc(currentUser.uid)
+      .collection('services')
+      .doc(serviceId)
+      .delete()
+      .then(() => console.log('service deleted from user profile '))
+      .catch(e =>
+        console.log('error when deleting  service from profile :', e)
+      );
   };
 
   //------------------SetState Handler --------------------//
@@ -189,7 +218,10 @@ const Service = ({ route, navigation }) => {
               .collection(originalService)
               .doc(serviceID)
               .delete()
-              .then(() => console.log('deleted with success '))
+              .then(
+                () => console.log('deleted with success '),
+                deleteServiceFromProfile(serviceID)
+              )
               .catch(e => {
                 console.log('error : ', e);
                 alert('وقع خطأ ما ، الرجاء إعادة المحاولة ');
@@ -247,18 +279,6 @@ const Service = ({ route, navigation }) => {
           const { serviceData, id } = route.params;
           const { cityName, categoryName, name, tele } = serviceData;
           const serviceId = id;
-          // console.log(
-          //   'city name value : ' +
-          //     cityName +
-          //     'categoryName' +
-          //     categoryName +
-          //     'name :' +
-          //     name +
-          //     'tele:' +
-          //     tele +
-          //     ' ID : ',
-          //   id
-          // );
           const serviceDocRef = fr
             .collection('services')
             .doc(cityName)

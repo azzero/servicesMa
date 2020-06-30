@@ -12,19 +12,21 @@ import Constants from 'expo-constants';
 import * as customConstants from '../constants/constants';
 import { Entypo } from '@expo/vector-icons';
 
-const Profile = ({ navigation }) => {
+const Profile = ({ route, navigation }) => {
   const [services, setServices] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [selected, setSelected] = useState(null);
   const [is_needUpdate, setIs_needUpdate] = useState(false);
-  const [deletedRowKey, setDeletedRowKey] = useState(null);
-
+  // var force_update = null;
+  // force_update = route.params && route.params.force_update;
+  // if (force_update) {
+  //   setServices(null);
+  // }
   //------------------------------------------------//
   //----------------------functions----------------//
   //-----------------------------------------------//
 
   const handleTriggerUpdate = id => {
-    setDeletedRowKey(id);
     setIs_needUpdate(!is_needUpdate);
     let new_list = null;
     new_list = services.filter(service => {
@@ -40,6 +42,7 @@ const Profile = ({ navigation }) => {
     try {
       // get all user services
       async function getServices() {
+        console.group('inside get services function ');
         const { uid } = f.auth().currentUser;
         //get all user data by id
         const userDocRef = fr.collection('users').doc(uid);
@@ -56,6 +59,11 @@ const Profile = ({ navigation }) => {
         }
       }
       getServices();
+      // add listener to screen focus
+      const unsubscribe = navigation.addListener('focus', () => {
+        getServices();
+      });
+      return unsubscribe;
     } catch (e) {
       console.log('error : ', e);
     }
