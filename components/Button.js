@@ -164,7 +164,7 @@ class Button extends Component {
                 <AntDesign
                   size={20}
                   name={lastIconName}
-                  color={CustomConstants.second}
+                  color={styles.second}
                 />
               </Animated.View>
             </TouchableWithoutFeedback>
@@ -180,7 +180,7 @@ class Button extends Component {
                 <AntDesign
                   size={20}
                   name={secondIconName}
-                  color={CustomConstants.second}
+                  color={styles.second}
                 />
               </Animated.View>
             </TouchableWithoutFeedback>

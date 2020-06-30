@@ -35,8 +35,7 @@ const Home = props => {
   const { position, askingPosition } = useContext(LocalisationContext);
   const { localisation, setlocalisation } = position;
   // const [data, setData] = useState(null);
-  const { logging, tokenManager } = useContext(UserContext);
-  const { isLoggedIn, setisLoggedIn } = logging;
+  const { tokenManager } = useContext(UserContext);
   const { asklocalisationpopup, setasklocalisationpopup } = askingPosition;
   //------------------------------------------------//
   //---------------------Handlers-------------------//

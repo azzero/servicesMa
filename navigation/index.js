@@ -22,7 +22,6 @@ const Stack = createStackNavigator();
 const StackRouter = () => {
   const { tokenManager } = useContext(UserContext);
   const { token, setToken } = tokenManager;
-  useEffect(() => {}, [token]);
   return (
     <Stack.Navigator
       headerMode='screen'

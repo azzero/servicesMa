@@ -49,6 +49,7 @@ const Service = ({ route, navigation }) => {
   //------------------------------------------------//
   //-----------------------functions----------------//
   //-----------------------------------------------//
+  // logout
   const logout = () => {
     auth
       .signOut()
@@ -58,6 +59,41 @@ const Service = ({ route, navigation }) => {
       .catch(error => {
         console.log('eror', error);
       });
+  };
+  // add service to user profile
+  const addServiceToProfile = id => {
+    console.log('inside addThisServiceToProfile ', id);
+    fr.collection('users')
+      .doc(currentUser.uid)
+      .collection('services')
+      .doc(id)
+      .set({
+        categoryName: serviceTitle,
+        cityName: city,
+        name,
+        tele
+      })
+
+      .then(() => console.log('service add to profile successfully '))
+      .catch(e => console.log('error when add service to profile :', e));
+  };
+  // update service in user profile
+  const updateServiceInProfile = serviceId => {
+    fr.collection('users')
+      .doc(currentUser.uid)
+      .collection('services')
+      .doc(serviceId)
+      .update({
+        categoryName: serviceTitle,
+        cityName: city,
+        name,
+        tele
+      })
+      .then(
+        () => console.log('service updated in profile successfully '),
+        navigation.navigate('Profile')
+      )
+      .catch(e => console.log('error when update service to profile :', e));
   };
 
   //------------------SetState Handler --------------------//
@@ -144,19 +180,9 @@ const Service = ({ route, navigation }) => {
             location: position,
             userID: currentUser.uid
           });
-          console.log('response : ', response);
-          // alert('تم التعديل بنجاح ');
-          navigation.navigate('Profile');
+          updateServiceInProfile(serviceID);
         } else {
           // if it's an update and the user change city or service category we need to delete the first record and create new one to respect db modeling
-          console.log(
-            'city : ' +
-              city +
-              ' serviceCategory : ' +
-              serviceTitle +
-              ' service ID : ' +
-              serviceID
-          );
           if (is_update) {
             fr.collection('services')
               .doc(originalCity)
@@ -179,7 +205,8 @@ const Service = ({ route, navigation }) => {
               location: position,
               userID: currentUser.uid
             })
-            .then(function() {
+            .then(function(response) {
+              addServiceToProfile(response.id);
               Alert.alert(
                 'ممتاز !!',
                 'تمت الإضافة بنجاح ',
@@ -220,18 +247,18 @@ const Service = ({ route, navigation }) => {
           const { serviceData, id } = route.params;
           const { cityName, categoryName, name, tele } = serviceData;
           const serviceId = id;
-          console.log(
-            'city name value : ' +
-              cityName +
-              'categoryName' +
-              categoryName +
-              'name :' +
-              name +
-              'tele:' +
-              tele +
-              ' ID : ',
-            id
-          );
+          // console.log(
+          //   'city name value : ' +
+          //     cityName +
+          //     'categoryName' +
+          //     categoryName +
+          //     'name :' +
+          //     name +
+          //     'tele:' +
+          //     tele +
+          //     ' ID : ',
+          //   id
+          // );
           const serviceDocRef = fr
             .collection('services')
             .doc(cityName)

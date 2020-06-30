@@ -9,11 +9,23 @@ import SwipeOutButton from '../components/SwipeOutButton';
 const ProfileService = ({ service, navigation, triggerUpdate }) => {
   // states
   const [activeRowKey, setactiveRowKey] = useState(null);
-
-  // delete service function -------------------------------------------->
+  const { cityName, categoryName } = service.data();
+  const serviceId = service.id;
+  const currentUser = f.auth().currentUser;
+  // -----------delete service from Profile -------------------------------------------->
+  const deleteServiceFromProfile = () => {
+    fr.collection('users')
+      .doc(currentUser.uid)
+      .collection('services')
+      .doc(serviceId)
+      .delete()
+      .then(() => console.log('deleted service form profile  successfully '))
+      .catch(e => {
+        console.log('delete service failed error message  : ', e);
+      });
+  };
+  // -----------delete service function -------------------------------------------->
   const deleteService = () => {
-    const { cityName, categoryName } = service.data();
-    const serviceId = service.id;
     const response = fr
       .collection('services')
       .doc(cityName)
@@ -22,6 +34,7 @@ const ProfileService = ({ service, navigation, triggerUpdate }) => {
       .delete()
       .then(
         () => console.log('deleted with success '),
+        deleteServiceFromProfile(),
         triggerUpdate(activeRowKey)
       )
       .catch(e => {

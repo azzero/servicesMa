@@ -105,7 +105,6 @@ export default function App({ navigation }) {
       ratingServicesManager: { ratedServices, setRatedServices }
     }),
     [
-      setisLoggedIn,
       token,
       setToken,
       loadingToken,

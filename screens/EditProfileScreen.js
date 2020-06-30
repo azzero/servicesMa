@@ -123,11 +123,12 @@ const EditProfile = ({ navigation }) => {
       //get all user data by id
       const userInfo = await userDocRef.get();
       const userData = userInfo.data();
-      console.log('user data :', userData);
-      setCity(userData.city);
-      setUsername(userData.name);
-      setServiceCategory(userData.service);
-      setPhoneNumber(userData.tele);
+      if (typeof userData !== 'undefined') {
+        setCity(userData.city);
+        setUsername(userData.name);
+        setServiceCategory(userData.service);
+        setPhoneNumber(userData.tele);
+      }
     }
     getServices();
   }, []);

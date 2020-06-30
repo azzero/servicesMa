@@ -26,8 +26,6 @@ const Login = ({ navigation }) => {
   const [validation, setValidation] = useState(1);
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { logging } = useContext(UserContext);
-  const { isLoggedIn, setisLoggedIn } = logging;
   // console.log('we set token here ,token value : ', token);
   const onConfirm = async () => {
     setIsLoading(true);

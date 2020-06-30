@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import * as Facebook from 'expo-facebook';
 import * as CustomConstants from '../constants/constants';
-import { f, auth } from '../config/config.js';
+import { fr, f } from '../config/config.js';
 import {
   StyleSheet,
   View,
@@ -10,197 +9,122 @@ import {
   Alert,
   StatusBar
 } from 'react-native';
-import { Input, Text, Divider } from 'react-native-elements';
-import Button from '../components/Button';
-import validate from 'validate.js';
+import { Input, Text } from 'react-native-elements';
+import { Button } from '../components';
+import { Dropdown } from 'react-native-material-dropdown';
+import Constants from 'expo-constants';
 import constraints from '../constants/constraints';
-import UserContext from '../context/UserContext.js';
-const inputEmailRef = React.createRef();
-const inputPasswordRef = React.createRef();
-const SignUp = ({ navigation }) => {
+import validate from 'validate.js';
+import { Entypo } from '@expo/vector-icons';
+const EditProfile = ({ navigation }) => {
   //----------- initialisation ---------- //
-  const [email, setemail] = useState('');
-  const [password, setpassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [validation, setValidation] = useState(0);
-  const [passwordError, setPasswordError] = useState('');
-  const [matchPasswordError, setMatchPasswordError] = useState('');
-  const { isLoggedIn, setisLoggedIn } = useContext(UserContext);
+  const [username, setUsername] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState(null);
+  const [serviceCategory, setServiceCategory] = useState('');
+  const [city, setCity] = useState('');
+  const [phoneError, setPhoneError] = useState(null);
+  const [usernameError, setUsernameError] = useState(null);
+  const [serviceErrors, setServiceErrors] = useState(null);
+  const [cityErrors, setCityErrors] = useState('');
+  //------------- global use ----------------- //
+  const { uid } = f.auth().currentUser;
+  const userDocRef = fr.collection('users').doc(uid);
+  //------------ references ------------------//
+  const nameRef = React.createRef();
+  const phoneRef = React.createRef();
+
+  // ------------ validation -----------------//
   const onConfirm = () => {
-    if (matchPasswordError !== '') {
-      Alert.alert(matchPasswordError);
-      return;
-    }
     // ----- validation  -------:
-    setValidation(1);
     const validationResult = validate(
-      { email: email, password: password },
-      constraints.login
+      {
+        name: username,
+        tele: phoneNumber,
+        service: serviceCategory,
+        city: city
+      },
+      constraints.services
     );
-    if (typeof validationResult !== 'undefined' && validationResult.email) {
-      const emailErrors = validationResult.email[0];
-      setValidation(0);
-      errorHandler(emailErrors, 'email');
-    }
-    if (typeof validationResult !== 'undefined' && validationResult.password) {
-      const passwordErrors = validationResult.password[0];
-      setValidation(0);
-      errorHandler(passwordErrors, 'password');
+    if (typeof validationResult !== 'undefined') {
+      //unvalide data
+      if (validationResult.name) {
+        const nameError = validationResult.name[0];
+        setUsernameError(nameError);
+        nameRef.current.shake();
+      }
+      if (validationResult.service) {
+        const serviceErrorMessage = validationResult.service[0];
+        setServiceErrors(serviceErrorMessage);
+      }
+      if (validationResult.tele) {
+        const phoneErrorMessage = validationResult.tele[0];
+        setPhoneError(phoneErrorMessage);
+        phoneRef.current.shake();
+      }
+      if (validationResult.city) {
+        const cityErrorMessage = validationResult.city[0];
+        setCityErrors(cityErrorMessage);
+      }
+    } else {
+      updateProfile();
     }
   };
   //-------------Validation End ----------//
 
   //---------- handling inputs -----------//
-  const handleEmail = text => {
-    setErrorMessage('');
-    setemail(text);
+  const handleUsername = text => {
+    setUsernameError('');
+    setUsername(text);
   };
-  const handlePassword = text => {
-    setPasswordError('');
-    setpassword(text);
+  const handlePhoneNumber = number => {
+    setPhoneError('');
+    setPhoneNumber(number);
   };
-  const handlePasswordConfirmation = text => {
-    setConfirmPassword('');
-    setConfirmPassword(text);
+  const setServiceCategoryHandler = text => {
+    setServiceErrors('');
+    setServiceCategory(text);
   };
-  //------------ handling errors ------//
-  const errorHandler = (error, type) => {
-    switch (type) {
-      case 'email':
-        setErrorMessage(error);
-        inputEmailRef.current.shake();
-        return;
-      case 'password':
-        setPasswordError(error);
-        inputPasswordRef.current.shake();
-        return;
-      case 'confirmPassword':
-        setMatchPasswordError(error);
-        return;
-      case 'auth/weak-password': {
-        setValidation(0);
-        Alert.alert(
-          'للأمان ',
-          'إستعمل رقم سري قوي  !',
-          [
-            {
-              text: 'Cancel',
-              onPress: () => console.log('Cancel Pressed'),
-              style: 'cancel'
-            },
-            { text: 'OK', onPress: () => console.log('OK Pressed') }
-          ],
-          { cancelable: false }
-        );
-        return;
-      }
-      case 'auth/email-already-in-use':
-        {
-          setValidation(0);
-          Alert.alert(
-            'تعدر التسجيل ',
-            'هذا الإيميل مسجل لدينا  !',
-
-            [
-              {
-                text: 'Cancel',
-                onPress: () => console.log('Cancel Pressed'),
-                style: 'cancel'
-              },
-              { text: 'OK', onPress: () => console.log('OK Pressed') }
-            ],
-            { cancelable: false }
-          );
-        }
-        return;
-      case 'auth/invalid-email': {
-        setValidation(0);
-        Alert.alert(
-          'تعدر الدخول ',
-          ' المرجو ادخال بريد الكتروني فعال !',
-
-          [
-            {
-              text: 'Cancel',
-              onPress: () => console.log('Cancel Pressed'),
-              style: 'cancel'
-            },
-            { text: 'OK', onPress: () => console.log('OK Pressed') }
-          ],
-          { cancelable: false }
-        );
-      }
-      case 'auth/network-request-failed':
-        {
-          setValidation(0);
-          Alert.alert(
-            'تعدر الدخول ',
-            ' غير متصل بشبكة الأنترنت  !',
-
-            [
-              {
-                text: 'Cancel',
-                onPress: () => console.log('Cancel Pressed'),
-                style: 'cancel'
-              },
-              { text: 'OK', onPress: () => console.log('OK Pressed') }
-            ],
-            { cancelable: false }
-          );
-        }
-        return;
-      default:
-        return;
-    }
+  const citiesPickerHandler = text => {
+    setCityErrors('');
+    setCity(text);
   };
-  //---------------------------//
-  //------------backend connection -----------//
-  const loginInDb = async () => {
+  //------------------------------------------------//
+  //--------------------update Profile--------------//
+  //-----------------------------------------------//
+  const updateProfile = async () => {
     try {
-      const response = await auth.createUserWithEmailAndPassword(
-        email,
-        password
+      await userDocRef.set({
+        city,
+        name: username,
+        service: serviceCategory,
+        tele: phoneNumber
+      });
+      Alert.alert(
+        'جيد',
+        'تم اضافة معلوماتك بنجاح  ',
+        [
+          {
+            text: 'رجوع',
+            onPress: () => console.log('cancel pressed'),
+            style: 'cancel'
+          },
+          {
+            text: 'البحث عن خدمة',
+            onPress: () => navigation.navigate('Home')
+          },
+          {
+            text: 'اضافة خدمة',
+            onPress: () => navigation.navigate('AddService')
+          }
+        ],
+        { cancelable: true }
       );
-      setisLoggedIn(true);
-      if (response) {
-        navigation.navigate('SignUpProfile');
-      }
-    } catch (error) {
-      var errorCode = error.code;
-      errorHandler('', errorCode);
+      console.log('insered');
+    } catch (e) {
+      console.log('error while updating : ', e);
+      alert('وقع خطأ ما  ، المرجو إعادة المحاولة');
     }
   };
-  //---------------------------//
-
-  //------- USE EFFECT  ------//
-  useEffect(() => {
-    const emailMatchResult = validate(
-      { password: password, confirmPassword: confirmPassword },
-      constraints.login
-    );
-    setMatchPasswordError('');
-    if (
-      typeof emailMatchResult !== 'undefined' &&
-      emailMatchResult.confirmPassword
-    ) {
-      console.log('confirmation error : ', emailMatchResult.confirmPassword[0]);
-      const confirmPasswordError = emailMatchResult.confirmPassword[0];
-      setValidation(0);
-      errorHandler(confirmPasswordError, 'confirmPassword');
-    }
-  }, [confirmPassword, password]);
-
-  //---- use effect for db connection after validation  ----//
-  useEffect(() => {
-    console.log('validation', validation);
-    if (validation === 1) {
-      loginInDb();
-    } else {
-      console.log('validation rejected ');
-    }
-  }, [validation]);
-  //--------------------------//
 
   //--------------------- Components ------------ //
 
@@ -213,55 +137,113 @@ const SignUp = ({ navigation }) => {
     >
       <StatusBar barStyle='light-content'></StatusBar>
       <View style={styles.intro}>
-        <Text style={styles.introText}>مرحبا بك في موقع خدمات</Text>
+        <Text style={styles.introText}>صفحتك الشخصية</Text>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Home');
+          }}
+          style={{ position: 'absolute', left: 5, top: 5 }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Entypo name='chevron-thin-right' size={32} color='#00ff00' />
+            <Text style={{ color: '#00ff00', fontSize: 20 }}>تجاوز</Text>
+          </View>
+        </TouchableOpacity>
       </View>
-
+      {/*---------- form-------  */}
       <View style={styles.form}>
         <Input
-          ref={inputEmailRef}
-          placeholder='اكتب بريدك الالكتروني هنا '
+          ref={nameRef}
+          placeholder='اكتب اسمك هنا'
           placeholderTextColor='#bbc3c7'
           inputStyle={styles.input}
           containerStyle={styles.InputContainer}
-          leftIcon={{ type: 'MaterialCommunityIcons', name: 'mail-outline' }}
-          onChangeText={handleEmail}
-          errorMessage={errorMessage !== '' ? errorMessage : ''}
-          value={email}
-          keyboardType='email-address'
+          leftIcon={
+            <Entypo name='user' size={22} color={CustomConstants.fifthColor} />
+          }
+          onChangeText={handleUsername}
+          errorMessage={usernameError !== '' ? usernameError : ''}
+          value={username}
         />
         <Input
-          ref={inputPasswordRef}
-          placeholder='أدخل رقمك السري هنا '
+          ref={phoneRef}
+          placeholder='0xxxxxxxxx '
           placeholderTextColor='#bbc3c7'
           inputStyle={styles.input}
           containerStyle={styles.InputContainer}
-          leftIcon={{ type: 'font-awesome', name: 'lock' }}
-          secureTextEntry={true}
-          errorMessage={passwordError !== '' ? passwordError : ''}
-          onChangeText={handlePassword}
-          value={password}
-          autoCapitalize='none'
-          autoCorrect={false}
+          leftIcon={
+            <Entypo name='phone' size={22} color={CustomConstants.fifthColor} />
+          }
+          onChangeText={handlePhoneNumber}
+          errorMessage={phoneError !== '' ? phoneError : ''}
+          value={phoneNumber}
+          keyboardType='phone-pad'
         />
-        <Input
-          placeholder='أعد إدخال رقمك السري هنا  '
-          placeholderTextColor='#bbc3c7'
-          inputStyle={styles.input}
-          containerStyle={styles.InputContainer}
-          leftIcon={{ type: 'font-awesome', name: 'lock' }}
-          secureTextEntry={true}
-          errorMessage={matchPasswordError !== '' ? matchPasswordError : ''}
-          onChangeText={handlePasswordConfirmation}
-          value={confirmPassword}
-          autoCapitalize='none'
-        />
-        <Divider
-          style={{
-            height: 0,
-            marginVertical: 20
+        <Dropdown
+          label=' نوع الخدمة التي تقدم '
+          baseColor='#ffffff'
+          itemColor='#ffffff'
+          textColor={CustomConstants.fourthColor}
+          dropdownOffset={{ top: 20, left: 0 }}
+          rippleInsets={{ top: 0, bottom: 0 }}
+          data={CustomConstants.services}
+          containerStyle={{
+            justifyContent: 'center',
+            width: '80%',
+            paddingHorizontal: 10
           }}
+          onChangeText={value => {
+            setServiceCategoryHandler(value);
+          }}
+          pickerStyle={{
+            borderRadius: 15,
+            backgroundColor: CustomConstants.PrimaryColor,
+            borderColor: CustomConstants.fourthColor,
+            borderWidth: 1
+          }}
+          itemTextStyle={{
+            fontFamily: CustomConstants.ShebaYeFont,
+            textAlign: 'center',
+            margin: 1
+          }}
+          itemCount={8}
+          value={serviceCategory}
+          rippleCentered={true}
+          error={serviceErrors}
         />
-        <Button gradient onPress={onConfirm} style={styles.button}>
+        <Dropdown
+          label='المدينة'
+          baseColor='#ffffff'
+          itemColor='#ffffff'
+          textColor={CustomConstants.fourthColor}
+          data={CustomConstants.MoroccoCities}
+          containerStyle={{
+            justifyContent: 'center',
+            width: '80%',
+            paddingHorizontal: 10
+          }}
+          dropdownOffset={{ top: 20, left: 0 }}
+          onChangeText={value => {
+            citiesPickerHandler(value);
+          }}
+          pickerStyle={{
+            borderRadius: 15,
+            backgroundColor: CustomConstants.PrimaryColor,
+            borderColor: CustomConstants.fourthColor,
+            borderWidth: 1
+          }}
+          itemTextStyle={{
+            fontFamily: CustomConstants.ShebaYeFont,
+            textAlign: 'center',
+            margin: 1
+          }}
+          rippleInsets={{ top: 0, bottom: 0 }}
+          itemCount={7}
+          value={city}
+          rippleCentered={true}
+          error={cityErrors}
+        />
+        <Button onPress={() => onConfirm()} style={styles.button} gradient>
           <Text
             style={{
               textAlign: 'center',
@@ -269,35 +251,9 @@ const SignUp = ({ navigation }) => {
               color: 'black'
             }}
           >
-            تسجيل
+            حفظ
           </Text>
         </Button>
-
-        <Divider
-          style={{
-            height: 1,
-            backgroundColor: '#ffffff',
-            width:
-              CustomConstants.screenWidth - CustomConstants.screenWidth / 3,
-            marginVertical: 10,
-            opacity: 0.8
-          }}
-        />
-        <TouchableOpacity
-          style={{ marginTop: 10, alignSelf: 'center' }}
-          onPress={() => navigation.navigate('SignIn')}
-        >
-          <Text
-            style={{
-              textAlign: 'center',
-              width: '100%',
-              color: CustomConstants.fourthColor,
-              fontSize: 17
-            }}
-          >
-            العودة إلى تسجيل الدخول ؟
-          </Text>
-        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
@@ -313,14 +269,19 @@ const styles = StyleSheet.create({
     color: CustomConstants.fourthColor
   },
   form: {
-    marginVertical: 38,
+    flex: 0.8,
+    // marginVertical: ,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
     flexDirection: 'column',
-    flexWrap: 'nowrap'
+    height: '80%'
   },
-
+  button: {
+    width: CustomConstants.screenWidth - 100,
+    marginVertical: 10,
+    justifyContent: 'center'
+  },
   errorContainer: {
     height: 72,
     alignItems: 'center',
@@ -334,13 +295,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'red'
   },
   loginContainer: {
-    paddingHorizontal: 15,
+    paddingTop: Constants.statusBarHeight + 10,
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    // justifyContent: 'center',
     backgroundColor: CustomConstants.PrimaryColor
   },
-  intro: { marginBottom: 30 },
+  intro: {
+    marginBottom: 30,
+    borderBottomWidth: 1,
+    width: '100%',
+    borderBottomColor: CustomConstants.black
+  },
   input: {
     color: 'white',
     width: '100%',
@@ -348,7 +314,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'none',
     fontFamily: 'openSans',
     fontSize: 18,
-    paddingHorizontal: 10
+    margin: 5
   },
   InputContainer: {
     width: '80%'
@@ -366,4 +332,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default SignUp;
+export default EditProfile;

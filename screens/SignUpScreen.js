@@ -160,7 +160,6 @@ const SignUp = ({ navigation }) => {
         email,
         password
       );
-      setisLoggedIn(true);
       if (response) {
         navigation.navigate('SignUpProfile');
       }
