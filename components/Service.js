@@ -158,8 +158,10 @@ const Service = props => {
             style={{
               fontSize: CustomConstants.sizes.body,
               textAlign: 'center',
-              color: 'gray'
+              color: CustomConstants.SecondColor,
+              paddingHorizontal: 5
             }}
+            numberOfLines={3}
           >
             {Description}
           </Text>
@@ -199,11 +201,7 @@ const Service = props => {
                     </Text>
                   </View>
                   <View style={{}}>
-                    <FontAwesome
-                      name='mobile-phone'
-                      size={42}
-                      color='#ffffff'
-                    />
+                    <FontAwesome name='mobile-phone' size={42} color='#fff' />
                   </View>
                 </View>
               </Animated.View>
@@ -216,8 +214,8 @@ const Service = props => {
           flex: 0.2,
           justifyContent: 'center',
           alignItems: 'center',
-          borderTopColor: 'white',
-          borderWidth: 1
+          borderTopColor: CustomConstants.SecondColor,
+          borderTopWidth: 1
         }}
       >
         <Rating
@@ -240,8 +238,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     backgroundColor: CustomConstants.PrimaryColor,
-    borderRadius: 6,
-    marginTop: 10
+    // borderRadius: 6,
+    borderTopWidth: 5,
+    borderTopColor: '#fff'
   },
   info: {
     flex: 1,
@@ -254,17 +253,17 @@ const styles = StyleSheet.create({
     width: '100%'
   },
   description: {
-    backgroundColor: '#F92660',
+    backgroundColor: CustomConstants.PrimaryColor,
     width: '100%',
-    borderTopColor: 'gray',
-    borderTopWidth: 1,
+    // borderTopColor: 'gray',
+    // borderTopWidth: 1,
     flex: 0.4,
     justifyContent: 'center',
     alignItems: 'center'
   },
   phoneText: {
     fontSize: CustomConstants.sizes.title,
-    color: '#ffffff'
+    color: '#fff'
   },
   phoneZone: {
     width: windowWidth / 2

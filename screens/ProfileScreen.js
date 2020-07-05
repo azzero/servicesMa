@@ -10,8 +10,13 @@ import { f, fr } from '../config/config';
 import { Button, Text, ProfileService } from '../components';
 import Constants from 'expo-constants';
 import * as customConstants from '../constants/constants';
-import { Entypo } from '@expo/vector-icons';
-
+import { AntDesign } from '@expo/vector-icons';
+import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
+import { bannerAdsIDs } from '../constants/AdsParams';
+// global :
+const bannerAdId =
+  Platform.OS === 'ios' ? bannerAdsIDs.iosTest : bannerAdsIDs.androidTest;
+setTestDeviceIDAsync('EMULATOR');
 const Profile = ({ route, navigation }) => {
   const [services, setServices] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
@@ -84,7 +89,6 @@ const Profile = ({ route, navigation }) => {
           alignItems: 'center'
         }}
       >
-        {/* <Text style={{ color: 'white' }}> في طور التحميل ... </Text> */}
         <ActivityIndicator size='large' color={customConstants.fourthColor} />
       </View>
     );
@@ -95,27 +99,27 @@ const Profile = ({ route, navigation }) => {
          everything it's OKay .. dislay profile
           Top of profile - title - welcome 
       */}
-      <View style={styles.top}>
-        <View style={styles.welcome}>
-          <View style={{ position: 'absolute', left: 5, top: 5 }}>
-            <TouchableWithoutFeedback
-              onPress={() => navigation.navigate('EditProfile')}
-            >
-              <Entypo name='edit' size={22} color='#fff' />
-            </TouchableWithoutFeedback>
-          </View>
-          <View>
-            <Text center white>
-              مرحبا بك
+
+      <View style={styles.welcome}>
+        <View style={{ position: 'absolute', left: 5, top: 5 }}>
+          <TouchableWithoutFeedback
+            onPress={() => navigation.navigate('EditProfile')}
+          >
+            <AntDesign name='setting' size={22} color='#fff' />
+          </TouchableWithoutFeedback>
+        </View>
+        <View>
+          <Text center white>
+            مرحبا بك
+          </Text>
+          <View style={{ paddingRight: 5 }}>
+            <Text h1 style={{ color: customConstants.fourthColor }} center>
+              {userProfile ? userProfile['name'] : 'في ملفك الشخصي'}
             </Text>
-            <View style={{ paddingRight: 5 }}>
-              <Text h1 style={{ color: customConstants.fourthColor }} center>
-                {userProfile ? userProfile['name'] : 'في ملفك الشخصي'}
-              </Text>
-            </View>
           </View>
         </View>
       </View>
+
       {/* --------------------middle : display services , informations ..  ------------------*/}
       <View
         style={{
@@ -163,13 +167,23 @@ const Profile = ({ route, navigation }) => {
           />
         )}
       </View>
-      <View style={{ flex: 0.2 }}>
+      <View style={{ flex: 0.1 }}>
         <Button
           rounded
           firstIconName='arrowleft'
-          style={{ bottom: 35, right: 45 }}
+          style={{ bottom: 40, right: 40 }}
           firstbtnfunction={() => navigation.goBack()}
         />
+      </View>
+      <View
+        style={{
+          width: '100%',
+          height: 200,
+          alignItems: 'center',
+          flex: 0.1
+        }}
+      >
+        <AdMobBanner bannerSize='banner' adUnitID={bannerAdId} />
       </View>
     </View>
   );
@@ -179,24 +193,17 @@ const Profile = ({ route, navigation }) => {
 //-----------------------------------------------//
 const styles = StyleSheet.create({
   container: {
-    marginTop: Constants.statusBarHeight,
+    paddingTop: Constants.statusBarHeight,
     flex: 1,
     justifyContent: 'center',
     backgroundColor: customConstants.PrimaryColor
   },
-  top: {
-    flex: 0.3,
-    backgroundColor: customConstants.PrimaryColor,
-    // justifyContent: 'center',
-    alignItems: 'center'
-  },
   welcome: {
+    flex: 0.2,
     justifyContent: 'center',
-    alignContent: 'center',
-    flexDirection: 'row',
+    alignSelf: 'center',
     backgroundColor: customConstants.PrimaryColor,
     width: '80%',
-    height: '50%',
     borderRadius: 8,
     borderColor: '#808080',
     borderWidth: 1

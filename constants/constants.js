@@ -3,6 +3,7 @@ export const screenWidth = Math.round(Dimensions.get('window').width);
 export const screenHeight = Math.round(Dimensions.get('window').height);
 //colors
 export const PrimaryColor = '#003049';
+export const PrimaryColorGradient = '#006396';
 export const SecondColor = '#F77F00';
 export const thirdColor = '#D62828';
 export const fourthColor = '#FCBF49';
@@ -59,6 +60,30 @@ export const MoroccoCities = [
   }
 ];
 export const services = [
+  {
+    value: 'كهربائي'
+  },
+  {
+    value: 'ميكانيكي'
+  },
+  {
+    value: 'بلومبي'
+  },
+  {
+    value: 'نجار'
+  },
+  {
+    value: 'حداد'
+  },
+  {
+    value: 'صباغ'
+  },
+  {
+    value: 'بناء'
+  },
+  {
+    value: 'حارس'
+  },
   {
     value: 'كهربائي'
   },

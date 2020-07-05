@@ -1,5 +1,5 @@
-import React, { useContext, useRef } from 'react';
-import { StyleSheet, View, FlatList } from 'react-native';
+import React, { useContext, useRef, useEffect } from 'react';
+import { StyleSheet, View, FlatList, StatusBar } from 'react-native';
 import DataContext from '../context/DataContext';
 import { Service, Button, Text } from '../components';
 import MapView, { Marker, Circle } from 'react-native-maps';
@@ -7,6 +7,15 @@ import Constants from 'expo-constants';
 import LocalisationContext from '../context/LocalisationContext';
 import { Entypo } from '@expo/vector-icons';
 import * as customConstants from '../constants/constants';
+import { interstitialAdsIDs } from '../constants/AdsParams';
+import { AdMobInterstitial, setTestDeviceIDAsync } from 'expo-ads-admob';
+const interstitialAdId =
+  Platform.OS === 'ios'
+    ? interstitialAdsIDs.iosTest
+    : interstitialAdsIDs.androidTest;
+AdMobInterstitial.setAdUnitID(interstitialAdId);
+setTestDeviceIDAsync('EMULATOR');
+
 const DisplayServices = ({ navigation, route }) => {
   //------------------------------------------------//
   //------------------------state------------------//
@@ -31,60 +40,95 @@ const DisplayServices = ({ navigation, route }) => {
     const { latitude, longitude } = markerData.nativeEvent.coordinate;
     scrollRef.current.scrollToItem({ animated: true, item });
   };
-
+  // interstitial ads  request
+  const _openInterstitial = async () => {
+    try {
+      await AdMobInterstitial.requestAdAsync();
+      await AdMobInterstitial.showAdAsync();
+    } catch (error) {
+      console.error(error);
+    }
+  };
   //------------------------------------------------//
-  //------------------------Return------------------//
+  //---------------------UseEffect------------------//
+  //-----------------------------------------------//
+  //admob initialisation
+  useEffect(() => {
+    try {
+      const timeout = setTimeout(() => {
+        _openInterstitial();
+      }, 7000);
+      return () => {
+        clearTimeout(timeout);
+      };
+    } catch (e) {
+      console.log('ads error :', e);
+    }
+  }, []);
+  //------------------------------------------------//
+  //------------------------Render------------------//
   //-----------------------------------------------//
   const { distance, searchingByPosition, service, city } = route.params;
   if (!searchingByPosition) {
     return (
       <View style={styles.container}>
+        <StatusBar barStyle='light-content'></StatusBar>
         <View
           style={{
-            borderBottomWidth: 1,
-            borderRadius: 20,
-            borderBottomColor: customConstants.PrimaryColor,
-            width: '70%',
-            marginBottom: 20
+            width: '100%',
+            // marginBottom: 20,
+            flex: 0.2,
+            justifyContent: 'center',
+            alignItems: 'center'
           }}
         >
-          <Text
-            h1
-            right
+          <View
             style={{
-              color: customConstants.PrimaryColor,
-              paddingHorizontal: 20
+              borderBottomWidth: 1,
+              borderRadius: 20,
+              borderBottomColor: customConstants.PrimaryColor
             }}
           >
-            الخدمات المتوفرة :
-          </Text>
+            <Text
+              h1
+              right
+              style={{
+                color: customConstants.PrimaryColor,
+                paddingHorizontal: 20
+              }}
+            >
+              الخدمات المتوفرة
+            </Text>
+          </View>
         </View>
-        <FlatList
-          ref={scrollRef}
-          showsVerticalScrollIndicator={false}
-          data={data}
-          renderItem={({ item }) => (
-            <Service
-              id={item.id}
-              title={item.data().name}
-              phone={item.data().tele}
-              Description={item.data().Description}
-              userRating={item.data().rating}
-              service={service}
-              city={city}
-            />
-          )}
-          keyExtractor={item => item.id}
-          extraData={selected}
-        />
-        <View style={{ height: 80 }}>
-          <Button
-            rounded
-            firstIconName='arrowleft'
-            style={{ bottom: 40, right: 30 }}
-            firstbtnfunction={() => navigation.goBack()}
+        <View style={{ flex: 0.8 }}>
+          <FlatList
+            contentContainerStyle={{ justifyContent: 'space-between' }}
+            ref={scrollRef}
+            showsVerticalScrollIndicator={false}
+            data={data}
+            renderItem={({ item }) => (
+              <Service
+                id={item.id}
+                title={item.data().name}
+                phone={item.data().tele}
+                Description={item.data().Description}
+                userRating={item.data().rating}
+                service={service}
+                city={city}
+                color={customConstants.SecondColor}
+              />
+            )}
+            keyExtractor={item => item.id}
+            // extraData={selected}
           />
         </View>
+        <Button
+          rounded
+          firstIconName='arrowleft'
+          style={{ bottom: 40, right: 40 }}
+          firstbtnfunction={() => navigation.goBack()}
+        />
       </View>
     );
   } else {
@@ -139,19 +183,20 @@ const DisplayServices = ({ navigation, route }) => {
                 phone={item.tele}
                 Description={item.Description}
                 userRating={item.rating}
+                color={customConstants.SecondColor}
               />
             )}
             keyExtractor={item => item.tele + item.name}
             extraData={selected}
           />
-        </View>
-        <View style={{ height: 80 }}>
-          <Button
-            rounded
-            firstIconName='arrowleft'
-            style={{ bottom: 40, right: 30 }}
-            firstbtnfunction={() => navigation.goBack()}
-          />
+          <View>
+            <Button
+              rounded
+              firstIconName='arrowleft'
+              style={{ bottom: 40, right: 40 }}
+              firstbtnfunction={() => navigation.goBack()}
+            />
+          </View>
         </View>
       </View>
     );
@@ -161,9 +206,10 @@ const DisplayServices = ({ navigation, route }) => {
 export default DisplayServices;
 const styles = StyleSheet.create({
   container: {
-    marginTop: Constants.statusBarHeight,
-    marginHorizontal: 10,
-    width: '90%',
+    paddingTop: Constants.statusBarHeight,
+    backgroundColor: customConstants.SecondColor,
+    // marginHorizontal: 10,
+    width: '100%',
     flex: 1
     // justifyContent: 'center'
   },

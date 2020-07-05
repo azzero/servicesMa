@@ -26,6 +26,7 @@ const EditProfile = ({ navigation }) => {
   const [usernameError, setUsernameError] = useState(null);
   const [serviceErrors, setServiceErrors] = useState(null);
   const [cityErrors, setCityErrors] = useState('');
+  const [isEmptyProfile, setIsEmptyProfile] = useState(false);
   //------------- global use ----------------- //
   const { uid } = f.auth().currentUser;
   const userDocRef = fr.collection('users').doc(uid);
@@ -54,7 +55,7 @@ const EditProfile = ({ navigation }) => {
       }
       if (validationResult.service) {
         const serviceErrorMessage = validationResult.service[0];
-        setServiceerrors(serviceErrorMessage);
+        setServiceErrors(serviceErrorMessage);
       }
       if (validationResult.tele) {
         const phoneErrorMessage = validationResult.tele[0];
@@ -63,7 +64,7 @@ const EditProfile = ({ navigation }) => {
       }
       if (validationResult.city) {
         const cityErrorMessage = validationResult.city[0];
-        setCityerrors(cityErrorMessage);
+        setCityErrors(cityErrorMessage);
       }
     } else {
       updateProfile();
@@ -91,12 +92,21 @@ const EditProfile = ({ navigation }) => {
   //-----------------------------------------------//
   const updateProfile = async () => {
     try {
-      await userDocRef.update({
-        city,
-        name: username,
-        service: serviceCategory,
-        tele: phoneNumber
-      });
+      if (isEmptyProfile) {
+        await userDocRef.set({
+          city,
+          name: username,
+          service: serviceCategory,
+          tele: phoneNumber
+        });
+      } else {
+        await userDocRef.update({
+          city,
+          name: username,
+          service: serviceCategory,
+          tele: phoneNumber
+        });
+      }
       Alert.alert(
         'جيد',
         'تم التعديل بنجاح ',
@@ -128,6 +138,8 @@ const EditProfile = ({ navigation }) => {
         setUsername(userData.name);
         setServiceCategory(userData.service);
         setPhoneNumber(userData.tele);
+      } else {
+        setIsEmptyProfile(true);
       }
     }
     getServices();
@@ -156,7 +168,7 @@ const EditProfile = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('Home');
+            navigation.navigate('Profile');
           }}
           style={{ position: 'absolute', right: 5, top: 5 }}
         >

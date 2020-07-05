@@ -124,6 +124,10 @@ const Service = ({ route, navigation }) => {
         console.log('error when deleting  service from profile :', e)
       );
   };
+  // goTo Profile
+  const GoToProfile = () => {
+    navigation.navigate('Profile');
+  };
 
   //------------------SetState Handler --------------------//
 
@@ -373,13 +377,14 @@ const Service = ({ route, navigation }) => {
             value={name}
             autoCorrect={false}
           />
+
           <Dropdown
             label='نوع الخدمة'
             baseColor='#ffffff'
             itemColor='#ffffff'
             textColor={customConstants.fourthColor}
             dropdownOffset={{ top: 20, left: 0 }}
-            rippleInsets={{ top: 0, bottom: 0 }}
+            rippleInsets={{ top: 20, bottom: 0 }}
             data={customConstants.services}
             containerStyle={{
               justifyContent: 'center',
@@ -414,6 +419,7 @@ const Service = ({ route, navigation }) => {
             numberOflines={4}
             placeholder='وصف الخدمة'
             value={Description}
+            maxLength={150}
           />
           <Input
             ref={teleRref}
@@ -496,7 +502,7 @@ const Service = ({ route, navigation }) => {
             firstIconName='magnifying-glass'
             secondIconName='profile'
             lastIconName='logout'
-            style={{ bottom: 35, left: 30 }}
+            style={{ bottom: 40, left: 40 }}
             rounded
             firstbtnfunction={() => navigation.navigate('Home')}
             secondbtnfunction={() => GoToProfile()}
@@ -508,7 +514,7 @@ const Service = ({ route, navigation }) => {
           <Button
             rounded
             firstIconName='arrowleft'
-            style={{ bottom: 35, right: 30 }}
+            style={{ bottom: 40, right: 40 }}
             firstbtnfunction={() => navigation.goBack()}
           />
         </View>

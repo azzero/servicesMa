@@ -1,5 +1,5 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { View, StyleSheet, Slider, Platform } from 'react-native';
+import React, { useContext, useState, useEffect, useRef } from 'react';
+import { View, StyleSheet, Slider, Platform, SafeAreaView } from 'react-native';
 import UserContext from '../context/UserContext';
 import DataContext from '../context/DataContext';
 import { Button, Text } from '../components';
@@ -14,6 +14,17 @@ import { Dropdown } from 'react-native-material-dropdown';
 import { CheckBox } from 'react-native-elements';
 import Constants from 'expo-constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {
+  AdMobBanner,
+  AdMobInterstitial,
+  setTestDeviceIDAsync
+} from 'expo-ads-admob';
+import { bannerAdsIDs } from '../constants/AdsParams';
+// global :
+const bannerAdId =
+  Platform.OS === 'ios' ? bannerAdsIDs.iosTest : bannerAdsIDs.androidTest;
+setTestDeviceIDAsync('EMULATOR');
+
 //-------------- Home Screen ---------------------//
 const Home = props => {
   //------------------------------------------------//
@@ -26,7 +37,26 @@ const Home = props => {
   const [displayDistance, setDisplayDistance] = useState(0);
   const [serviceErrors, setServiceerrors] = useState('');
   const [cityErrors, setCityerrors] = useState('');
+  const [isMenuNeedToBeClosed, setisMenuNeedToBeClosed] = useState(false);
+  const [DisableInterstitialBtn, setDisableInterstitialBtn] = useState(false);
+  //------------------------------------------------//
+  //------------------------ads params------------------//
+  //-----------------------------------------------//
+  //ios banner :
+  //ca-app-pub-4596141779919006/7794395894
+  // ios interstitial:
+  //ca-app-pub-4596141779919006/5138751896
+  // android banner : ca-app-pub-4596141779919006/7980252243
+  // android interstitial : ca-app-pub-4596141779919006/1689341918
+  // ads error handler
 
+  const bannerError = e => {
+    console.log('banner error : ', e);
+  };
+  //------------------------------------------------//
+  //------------------------Ref--------------------//
+  //-----------------------------------------------//
+  const MenuRef = useRef(null);
   //------------------------------------------------//
   //----------------------Context------------------//
   //-----------------------------------------------//
@@ -149,8 +179,9 @@ const Home = props => {
     }
   };
   //------------------------------------------------//
-  //------------------------use effect------------------//
+  //--------------------use effect-----------------//
   //-----------------------------------------------//
+
   useEffect(() => {
     if (asklocalisationpopup && localisation === null) {
       console.log('inside use effect ');
@@ -161,6 +192,11 @@ const Home = props => {
       console.log('localisation updated', localisation);
       setisSearchByPosition(true);
     }
+
+    const FocusListener = navigation.addListener('blur', () => {
+      MenuRef.current.toggleMenu();
+    });
+    return FocusListener;
   }, [asklocalisationpopup, localisation]);
   //----------------------------------------
   return (
@@ -328,7 +364,7 @@ const Home = props => {
               </View>
             </View>
           )}
-          <View style={{ marginTop: 30 }}>
+          <View style={{ marginVertical: 30 }}>
             <Button gradient onPress={() => checkInputs()}>
               <Text button>إبحث</Text>
             </Button>
@@ -339,16 +375,31 @@ const Home = props => {
       {/*------------BOTTOM -------------------- */}
       <View style={styles.buttonContainer}>
         <Button
+          ref={MenuRef}
           multiple
           firstIconName='plus'
           lastIconName='logout'
           secondIconName='profile'
           rounded
-          style={{ bottom: 30 }}
+          style={{ bottom: 10 }}
           lastbtnfunction={() => logout()}
           secondbtnfunction={() => GoToProfile()}
           firstbtnfunction={() => goToAddService()}
+          // initialise={isMenuNeedToBeClosed}
         />
+      </View>
+      <View
+        style={{
+          width: '100%',
+          height: 200,
+          alignItems: 'center',
+          justifyContent: 'center',
+          // borderWidth: 2,
+          // borderColor: 'red',
+          flex: 0.2
+        }}
+      >
+        <AdMobBanner bannerSize='banner' adUnitID={bannerAdId} />
       </View>
     </View>
   );
@@ -368,7 +419,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   buttonContainer: {
-    flex: 0.4,
+    flex: 0.2,
     alignItems: 'center',
     marginVertical: 20,
     width: '100%',
