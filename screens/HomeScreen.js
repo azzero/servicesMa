@@ -1,12 +1,12 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Slider, Platform, SafeAreaView } from 'react-native';
+import { View, StyleSheet, Slider, Platform, Alert } from 'react-native';
 import UserContext from '../context/UserContext';
 import DataContext from '../context/DataContext';
 import { Button, Text } from '../components';
 import * as CustomConstants from '../constants/constants';
 import validate from 'validate.js';
 import constraints from '../constants/constraints';
-import { auth, fr, geo } from '../config/config';
+import { auth, fr, geo, f } from '../config/config';
 import LocalisationContext from '../context/LocalisationContext';
 import * as customConstants from '../constants/constants';
 import { get } from 'geofirex';
@@ -14,16 +14,11 @@ import { Dropdown } from 'react-native-material-dropdown';
 import { CheckBox } from 'react-native-elements';
 import Constants from 'expo-constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import {
-  AdMobBanner,
-  AdMobInterstitial,
-  setTestDeviceIDAsync
-} from 'expo-ads-admob';
+import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 import { bannerAdsIDs } from '../constants/AdsParams';
 // global :
 const bannerAdId =
-  Platform.OS === 'ios' ? bannerAdsIDs.iosTest : bannerAdsIDs.androidTest;
-setTestDeviceIDAsync('EMULATOR');
+  Platform.OS === 'ios' ? bannerAdsIDs.iosreal : bannerAdsIDs.androidreal;
 
 //-------------- Home Screen ---------------------//
 const Home = props => {
@@ -42,14 +37,6 @@ const Home = props => {
   //------------------------------------------------//
   //------------------------ads params------------------//
   //-----------------------------------------------//
-  //ios banner :
-  //ca-app-pub-4596141779919006/7794395894
-  // ios interstitial:
-  //ca-app-pub-4596141779919006/5138751896
-  // android banner : ca-app-pub-4596141779919006/7980252243
-  // android interstitial : ca-app-pub-4596141779919006/1689341918
-  // ads error handler
-
   const bannerError = e => {
     console.log('banner error : ', e);
   };
@@ -149,6 +136,7 @@ const Home = props => {
         const field = 'location';
         const query = geo.query(services).within(center, radius, field);
         const docs = await get(query);
+
         setData(docs);
         if (!docs.length) {
           alert(' لا توجد أي خدمات موافقة للمعطيات التي أدخلت ');
@@ -186,7 +174,18 @@ const Home = props => {
     if (asklocalisationpopup && localisation === null) {
       console.log('inside use effect ');
       setisSearchByPosition(false);
-      alert('للأسف تعدر علينا الوصول لموقعك');
+      Alert.alert(
+        'للأسف',
+        ' تعدر علينا الوصول لموقعك ',
+        [
+          {
+            text: 'الرجوع',
+            onPress: () => navigation.navigate('Profile'),
+            style: 'cancel'
+          }
+        ],
+        { cancelable: true }
+      );
     }
     if (asklocalisationpopup && localisation !== null) {
       console.log('localisation updated', localisation);
@@ -229,6 +228,7 @@ const Home = props => {
               `your localisation is longitude : ${localisation.longitude} latitude : ${localisation.latitude} `}
           </Text> */}
           <Dropdown
+            dropdownPosition={-5}
             error={serviceErrors}
             label='نوع الخدمة'
             dropdownOffset={{ top: 20, left: 0 }}

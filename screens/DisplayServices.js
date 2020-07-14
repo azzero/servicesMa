@@ -1,5 +1,5 @@
-import React, { useContext, useRef, useEffect } from 'react';
-import { StyleSheet, View, FlatList, StatusBar } from 'react-native';
+import React, { useContext, useRef, useEffect, useState } from 'react';
+import { StyleSheet, View, FlatList, StatusBar, Platform } from 'react-native';
 import DataContext from '../context/DataContext';
 import { Service, Button, Text } from '../components';
 import MapView, { Marker, Circle } from 'react-native-maps';
@@ -7,21 +7,23 @@ import Constants from 'expo-constants';
 import LocalisationContext from '../context/LocalisationContext';
 import { Entypo } from '@expo/vector-icons';
 import * as customConstants from '../constants/constants';
-import { interstitialAdsIDs } from '../constants/AdsParams';
-import { AdMobInterstitial, setTestDeviceIDAsync } from 'expo-ads-admob';
+import { interstitialAdsIDs, bannerAdsIDs } from '../constants/AdsParams';
+import { AdMobInterstitial, AdMobBanner } from 'expo-ads-admob';
+const bannerAdId =
+  Platform.OS === 'ios' ? bannerAdsIDs.iosreal : bannerAdsIDs.androidreal;
+// global :
+
 const interstitialAdId =
   Platform.OS === 'ios'
-    ? interstitialAdsIDs.iosTest
-    : interstitialAdsIDs.androidTest;
+    ? interstitialAdsIDs.iosreal
+    : interstitialAdsIDs.android;
 AdMobInterstitial.setAdUnitID(interstitialAdId);
-setTestDeviceIDAsync('EMULATOR');
-
 const DisplayServices = ({ navigation, route }) => {
   //------------------------------------------------//
   //------------------------state------------------//
   //-----------------------------------------------//
   const [selected, setSelected] = React.useState(new Map());
-
+  const [is_loading, setis_loading] = useState(true);
   //------------------------------------------------//
   //------------------------Context-----------------//
   //-----------------------------------------------//
@@ -37,7 +39,7 @@ const DisplayServices = ({ navigation, route }) => {
   //--------------------Functions------------------//
   //-----------------------------------------------//
   const handlerMarkerPress = (markerData, item) => {
-    const { latitude, longitude } = markerData.nativeEvent.coordinate;
+    // const { latitude, longitude } = markerData.nativeEvent.coordinate;
     scrollRef.current.scrollToItem({ animated: true, item });
   };
   // interstitial ads  request
@@ -55,6 +57,14 @@ const DisplayServices = ({ navigation, route }) => {
   //admob initialisation
   useEffect(() => {
     try {
+      const adsId = Math.random()
+        .toString(36)
+        .substr(2, 9);
+      let datawithAds = data;
+      console.log('type of data : ', typeof data);
+      const length = data.length;
+      datawithAds[length] = { ads: true, id: adsId };
+      setData(datawithAds);
       const timeout = setTimeout(() => {
         _openInterstitial();
       }, 7000);
@@ -65,6 +75,7 @@ const DisplayServices = ({ navigation, route }) => {
       console.log('ads error :', e);
     }
   }, []);
+
   //------------------------------------------------//
   //------------------------Render------------------//
   //-----------------------------------------------//
@@ -107,20 +118,36 @@ const DisplayServices = ({ navigation, route }) => {
             ref={scrollRef}
             showsVerticalScrollIndicator={false}
             data={data}
-            renderItem={({ item }) => (
-              <Service
-                id={item.id}
-                title={item.data().name}
-                phone={item.data().tele}
-                Description={item.data().Description}
-                userRating={item.data().rating}
-                service={service}
-                city={city}
-                color={customConstants.SecondColor}
-              />
-            )}
-            keyExtractor={item => item.id}
-            // extraData={selected}
+            renderItem={({ item }) => {
+              if (typeof item.ads !== 'undefined') {
+                return (
+                  <View
+                    style={{
+                      width: '100%',
+                      height: 200,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flex: 0.2
+                    }}
+                  >
+                    <AdMobBanner bannerSize='banner' adUnitID={bannerAdId} />
+                  </View>
+                );
+              }
+              return (
+                <Service
+                  id={item.id}
+                  title={item.data().name}
+                  phone={item.data().tele}
+                  Description={item.data().Description}
+                  service={service}
+                  city={city}
+                  color={customConstants.SecondColor}
+                  keyExtractor={item => item.id}
+                />
+                // extraData={selected}
+              );
+            }}
           />
         </View>
         <Button
@@ -137,9 +164,7 @@ const DisplayServices = ({ navigation, route }) => {
         <View style={{ flex: 1 }}>
           <MapView
             showsUserLocation
-            onMapReady={() => {
-              console.log('map is ready');
-            }}
+            onMapReady={() => console.log('map is ready')}
             style={{ flex: 1 }}
             initialRegion={{
               latitude: localisation.latitude,
@@ -149,21 +174,23 @@ const DisplayServices = ({ navigation, route }) => {
             }}
           >
             {data.map(doc => {
-              const { latitude, longitude } = doc.location.geopoint;
-              return (
-                <Marker
-                  onPress={coordinate => handlerMarkerPress(coordinate, doc)}
-                  key={doc.id}
-                  coordinate={{ latitude: latitude, longitude: longitude }}
-                  title={doc.name}
-                  description={doc.Description}
-                  // image={require('../assets/icons/markerresized.png')}
-                >
-                  <View>
-                    <Entypo name='location-pin' size={42} color='#f00' />
-                  </View>
-                </Marker>
-              );
+              if (typeof doc.ads === 'undefined') {
+                const { latitude, longitude } = doc.location.geopoint;
+                return (
+                  <Marker
+                    onPress={coordinate => handlerMarkerPress(coordinate, doc)}
+                    key={doc.id}
+                    coordinate={{ latitude: latitude, longitude: longitude }}
+                    title={doc.name}
+                    description={doc.Description}
+                    // image={require('../assets/icons/markerresized.png')}
+                  >
+                    <View>
+                      <Entypo name='location-pin' size={42} color='#f00' />
+                    </View>
+                  </Marker>
+                );
+              }
             })}
             <Circle center={localisation} radius={distance} />
           </MapView>
@@ -174,19 +201,37 @@ const DisplayServices = ({ navigation, route }) => {
             ref={scrollRef}
             showsVerticalScrollIndicator={false}
             data={data}
-            renderItem={({ item }) => (
-              <Service
-                id={item.id}
-                service={service}
-                city={city}
-                title={item.name}
-                phone={item.tele}
-                Description={item.Description}
-                userRating={item.rating}
-                color={customConstants.SecondColor}
-              />
-            )}
-            keyExtractor={item => item.tele + item.name}
+            renderItem={({ item }) => {
+              if (typeof item.ads !== 'undefined') {
+                return (
+                  <View
+                    style={{
+                      width: '100%',
+                      height: 200,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flex: 0.2
+                    }}
+                  >
+                    <AdMobBanner bannerSize='banner' adUnitID={bannerAdId} />
+                  </View>
+                );
+              }
+              return (
+                <Service
+                  id={item.id}
+                  service={service}
+                  city={city}
+                  title={item.name}
+                  phone={item.tele}
+                  Description={item.Description}
+                  // userRating={item.rating}
+                  color={customConstants.SecondColor}
+                  ads={typeof item.ads === 'undefined' ? false : true}
+                />
+              );
+            }}
+            keyExtractor={item => item.id}
             extraData={selected}
           />
           <View>

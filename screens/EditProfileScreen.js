@@ -112,8 +112,13 @@ const EditProfile = ({ navigation }) => {
         'تم التعديل بنجاح ',
         [
           {
-            text: 'رجوع',
+            text: 'البقاء',
             onPress: () => console.log('cancel pressed'),
+            style: 'cancel'
+          },
+          {
+            text: 'الرجوع',
+            onPress: () => navigation.navigate('Profile'),
             style: 'cancel'
           }
         ],
@@ -212,7 +217,7 @@ const EditProfile = ({ navigation }) => {
           itemColor='#ffffff'
           textColor={CustomConstants.fourthColor}
           dropdownOffset={{ top: 20, left: 0 }}
-          rippleInsets={{ top: 0, bottom: 0 }}
+          rippleInsets={{ top: 20, bottom: 10 }}
           data={CustomConstants.services}
           containerStyle={{
             justifyContent: 'center',
@@ -264,7 +269,7 @@ const EditProfile = ({ navigation }) => {
             textAlign: 'center',
             margin: 1
           }}
-          rippleInsets={{ top: 0, bottom: 0 }}
+          rippleInsets={{ top: 20, bottom: 10 }}
           itemCount={7}
           value={city}
           rippleCentered={true}

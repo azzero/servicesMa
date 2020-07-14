@@ -182,14 +182,14 @@ const AskLocalisation = ({ navigation, route }) => {
           {asklocalisationpopup ? (
             <Text style={{ color: 'red' }} center>
               للأسف لم تفعل خدمة الوصول للموقع (GPS ) أعد المحاولة بالضغط على
-              الرابط أسفله ، و إذا تعدر الأمر فربما حضرت تطبيقنا من الوصول
+              الرابط أسفله ، و إذا تعدر الأمر فربما حضرت التطبيق من الوصول
               لموقعك أعد السماح للتطبيق من الولوج لموقعك عن طريق إعدادات هاتفك
             </Text>
           ) : null}
           <Text center>لكي نوفر لك أفضل خدمة ممكنة نحتاج الوصول لموقعك</Text>
           <Text center>
-            إذا كنت موافقك على استعمال موقعك لنوفر لك أفضل النتائج الممكنة و
-            ربطه بالخدمات التي ستقوم بإنشائها مستقبلا ، إضغط على فعل
+            انطلاقا من موقعك سنبحث لك عن أقرب مقدمي الخدمات إليك و ربطه بالخدمات
+            الخاصة بك إضغط على تفعيل إن كنت موافق
           </Text>
         </View>
         {/*  buttons  */}
@@ -200,17 +200,6 @@ const AskLocalisation = ({ navigation, route }) => {
           <Text center body>
             * يمكنك تعطيل هذه الخاصية في أي وقت أردت
           </Text>
-
-          {/* <Button
-            onPress={() => {
-              fromScreen
-              ? navigation.navigate(fromScreen)
-              : navigation.goBack();
-            }}
-            gradient
-            >
-            <Text button>للرجوع إضغط هنا </Text>
-          </Button> */}
         </View>
       </View>
       <Button

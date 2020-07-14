@@ -103,7 +103,9 @@ const Splash = () => {
   }, []);
   return (
     <View style={styles.splash}>
-      <ActivityIndicator size='large' />
+      <View style={{ justifyContent: 'center', alignContent: 'center' }}>
+        <Image style={styles.tinyLogo} source={require('../assets/icon.png')} />
+      </View>
     </View>
   );
 };
@@ -129,7 +131,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#0a3261'
+    backgroundColor: '#fff'
+  },
+  tinyLogo: {
+    width: 200,
+    height: 200
   }
 });
 export default NavigationRoot;

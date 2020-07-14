@@ -4,12 +4,21 @@ import {
   View,
   TouchableWithoutFeedback,
   Animated,
-  Easing
+  Easing,
+  Text
 } from 'react-native';
+import * as CustomConstants from '../constants/constants';
 import { FontAwesome } from '@expo/vector-icons';
 import UserContext from '../context/UserContext';
 
-const Rating = ({ userRating, numStarts, color, handleRating, id }) => {
+const Rating = ({
+  userRating,
+  numStarts,
+  color,
+  handleRating,
+  id,
+  reviewers
+}) => {
   //------------------------------------------------//
   //------------------------State------------------//
   //-----------------------------------------------//
@@ -116,6 +125,9 @@ const Rating = ({ userRating, numStarts, color, handleRating, id }) => {
           //   position: 'absolute'
         }}
       >
+        <Text style={{ color: CustomConstants.SecondColor, fontSize: 16 }}>
+          ({reviewers})
+        </Text>
         {stars}
       </View>
     </View>
@@ -125,7 +137,8 @@ const Rating = ({ userRating, numStarts, color, handleRating, id }) => {
 Rating.defaultProps = {
   rating: 1,
   numStarts: 5,
-  color: 'yellow'
+  color: 'yellow',
+  reviewers: 0
 };
 
 const styles = StyleSheet.create({

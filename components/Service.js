@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -6,7 +6,9 @@ import {
   TouchableWithoutFeedback,
   Animated,
   Dimensions,
-  AsyncStorage
+  AsyncStorage,
+  Linking,
+  Platform
 } from 'react-native';
 import * as CustomConstants from '../constants/constants';
 import { FontAwesome } from '@expo/vector-icons';
@@ -31,15 +33,16 @@ const Service = props => {
   // animation State
   const [activated, setActivated] = useState(new Animated.Value(0));
   const [animation, setAnimation] = useState(new Animated.Value(0));
-  const [customRating, setCustomRating] = useState(userRating);
+  const [customRating, setCustomRating] = useState([0, 0, 0, 0, 0]);
   const [RatingAlertShowed, setRatingAlertShowed] = useState(true);
+  const [totalReviewers, setTotalReviewers] = useState(0);
   // ------------------- Context--------------------------//
   const { ratingServicesManager } = useContext(UserContext);
   const { ratedServices, setRatedServices } = ratingServicesManager;
   //---------- phone number Formate -------------- //
   const phoneNumber = () => {
     let result = [phone[0].toString()];
-    for (let i = 1; i <= phone.length; i++) {
+    for (let i = 1; i < phone.length; i++) {
       if (i % 2 === 0) {
         result.push('-', phone[i]);
       } else {
@@ -48,6 +51,7 @@ const Service = props => {
     }
     return result;
   };
+
   //---------------- handle rating function ----------------- //
   const handleRating = value => {
     if (typeof customRating !== 'undefined') {
@@ -70,15 +74,25 @@ const Service = props => {
     }
 
     setCustomRating(newRating);
+    const total =
+      typeof newRating !== 'undefined'
+        ? newRating.reduce((pre, item) => pre + item, 0)
+        : 0;
+    setTotalReviewers(total);
     var docRef = fr
       .collection('services')
       .doc(city)
       .collection(service)
-      .doc(id);
+      .doc(id)
+      .collection('rating')
+      .doc('rate');
     docRef
-      .update({
-        rating: newRating
-      })
+      .set(
+        {
+          rating: newRating
+        },
+        { merge: true }
+      )
       .then(async () => {
         try {
           let ratedServicesNewList = [];
@@ -101,6 +115,31 @@ const Service = props => {
         console.log('error : ', e);
       });
   };
+  //------------------------------------------------//
+  //--------------------use effect-----------------//
+  //-----------------------------------------------//
+  useEffect(() => {
+    const getRating = async docId => {
+      var doc = await fr
+        .collection('services')
+        .doc(city)
+        .collection(service)
+        .doc(id)
+        .collection('rating')
+        .doc('rate')
+        .get();
+      if (doc.exists) {
+        const ratinglist = doc.data().rating;
+        setCustomRating(ratinglist);
+        const total =
+          typeof ratinglist !== 'undefined'
+            ? ratinglist.reduce((pre, item) => pre + item, 0)
+            : 0;
+        setTotalReviewers(total);
+      }
+    };
+    getRating();
+  }, []);
   //--------------- Function --------------//
   const handleRatingClick = () => {
     if (RatingAlertShowed) {
@@ -137,8 +176,9 @@ const Service = props => {
       ]
     }
   };
-  //---------------- UseEffect ----------------//
-  //rendering
+  //------------------------------------------------//
+  //------------------------Render------------------//
+  //-----------------------------------------------//
   return (
     <View style={styles.container} {...others}>
       {/* <View style={{ flex: 0.8, flexDirection: 'row' }}> */}
@@ -196,7 +236,10 @@ const Service = props => {
                   }}
                 >
                   <View style={{ justifyContent: 'center' }}>
-                    <Text style={[styles.phoneText, {}]}>
+                    <Text
+                      style={[styles.phoneText, {}]}
+                      onPress={() => Linking.openURL(`tel:${phone}`)}
+                    >
                       {phone && phoneNumber()}
                     </Text>
                   </View>
@@ -219,6 +262,7 @@ const Service = props => {
         }}
       >
         <Rating
+          reviewers={totalReviewers}
           userRating={customRating}
           handleRating={handleRating}
           id={id}

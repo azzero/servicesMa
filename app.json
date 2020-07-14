@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Blank Template",
+    "name": "allo khidma",
     "slug": "servicesMa",
     "privacy": "public",
     "backgroundColor": "#000000",
@@ -19,14 +19,19 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
+      "bundleIdentifier": "com.azzeddineelat.allokhidma",
       "supportsTablet": true,
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-4596141779919006~1803702614"
       }
     },
     "android": {
+      "package": "com.azzeddineelat.allokhidma",
       "config": {
-        "googleMobileAdsAppId": "ca-app-pub-4596141779919006~2919497251"
+        "googleMobileAdsAppId": "ca-app-pub-4596141779919006~2919497251",
+        "googleMaps": {
+          "apiKey": "AIzaSyA8ixx2HI-1O1iBPHm8ybfiGKhgTzLQNzY"
+        }
       }
     }
   }

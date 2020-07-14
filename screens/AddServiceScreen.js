@@ -14,7 +14,8 @@ import { Dropdown } from 'react-native-material-dropdown';
 import * as customConstants from '../constants/constants';
 import LocalisationContext from '../context/LocalisationContext';
 import { CheckBox } from 'react-native-elements';
-import * as CustomConstants from '../constants/constants';
+import Constants from 'expo-constants';
+
 var is_update = false;
 const Service = ({ route, navigation }) => {
   //---------------Some params ---------------------------//
@@ -341,185 +342,186 @@ const Service = ({ route, navigation }) => {
   //-----------------------Render------------------//
   //-----------------------------------------------//
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffse={15}
-      enabled
-      style={{ flex: 1 }}
-    >
-      <View style={styles.container}>
-        <View style={styles.form}>
-          <View
-            style={{
-              borderBottomWidth: 1,
-              borderBottomColor: customConstants.fourthColor,
-              marginBottom: 20,
-              width: '50%',
-              borderRadius: 20
-            }}
-          >
-            <Text
-              style={{
-                color: CustomConstants.fourthColor,
-                paddingHorizontal: 20
-              }}
-              h1
-              right
-            >
-              أضف خدمة
-            </Text>
-          </View>
-          <Input
-            ref={nameRef}
-            inputHandler={setNameHandler}
-            errorMessage={nameErrors}
-            placeholder='الاسم'
-            value={name}
-            autoCorrect={false}
-          />
-
-          <Dropdown
-            label='نوع الخدمة'
-            baseColor='#ffffff'
-            itemColor='#ffffff'
-            textColor={customConstants.fourthColor}
-            dropdownOffset={{ top: 20, left: 0 }}
-            rippleInsets={{ top: 20, bottom: 0 }}
-            data={customConstants.services}
-            containerStyle={{
-              justifyContent: 'center',
-              width: '100%',
-              paddingHorizontal: 10
-            }}
-            onChangeText={value => {
-              setServiceTitleHandler(value);
-            }}
-            pickerStyle={{
-              borderRadius: 15,
-              backgroundColor: customConstants.PrimaryColor,
-              borderColor: customConstants.fourthColor,
-              borderWidth: 1
-            }}
-            itemTextStyle={{
-              fontFamily: customConstants.ShebaYeFont,
-              textAlign: 'center',
-              margin: 1
-            }}
-            itemCount={8}
-            value={serviceTitle}
-            rippleCentered={true}
-            error={serviceErrors}
-          />
-          <Input
-            ref={DescriptionRref}
-            errorMessage={DescriptionErrors}
-            inputHandler={setDescriptionHandler}
-            multiline={true}
-            autoCorrect={false}
-            numberOflines={4}
-            placeholder='وصف الخدمة'
-            value={Description}
-            maxLength={150}
-          />
-          <Input
-            ref={teleRref}
-            errorMessage={teleErrors}
-            inputHandler={setTeleHandler}
-            placeholder='رقم الهاتف'
-            value={tele}
-            autoCorrect={false}
-          />
-
-          <Dropdown
-            label='المدينة'
-            baseColor='#ffffff'
-            itemColor='#ffffff'
-            textColor={customConstants.fourthColor}
-            data={customConstants.MoroccoCities}
-            containerStyle={{
-              justifyContent: 'center',
-              width: '100%',
-              paddingHorizontal: 10
-            }}
-            dropdownOffset={{ top: 20, left: 0 }}
-            onChangeText={value => {
-              citiesPickerHandler(value);
-            }}
-            pickerStyle={{
-              borderRadius: 15,
-              backgroundColor: customConstants.PrimaryColor,
-              borderColor: customConstants.fourthColor,
-              borderWidth: 1
-            }}
-            itemTextStyle={{
-              fontFamily: customConstants.ShebaYeFont,
-              textAlign: 'center',
-              margin: 1
-            }}
-            rippleInsets={{ top: 0, bottom: 0 }}
-            itemCount={7}
-            value={city}
-            rippleCentered={true}
-            error={cityErrors}
-          />
-
-          <CheckBox
-            checkedIcon='dot-circle-o'
-            uncheckedIcon='circle-o'
-            containerStyle={{
-              backgroundColor: customConstants.PrimaryColor
-            }}
-            textStyle={{ color: '#ffffff' }}
-            uncheckedColor='#ff0000'
-            checkedColor={customConstants.fourthColor}
-            onPress={() => checkButtonHandler()}
-            title=' موقعك ليس مربوط بالخدمة '
-            checkedTitle='موقعك مربوط بالخدمة'
-            checked={isSearchByPosition}
-          />
-
-          <View style={styles.buttonContainer}>
-            <Button
-              color={customConstants.fourthColor}
-              onPress={() => confirm()}
-              shadow
-            >
-              <Text style={{ color: '#000000' }} button>
-                حفظ
-              </Text>
-            </Button>
-          </View>
-        </View>
+    // <KeyboardAvoidingView
+    //   behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+    //   keyboardVerticalOffse={30}
+    //   enabled
+    //   style={{ flex: 1 }}
+    // >
+    <View style={styles.container}>
+      <View style={styles.form}>
         <View
           style={{
-            flex: 0.3,
-            marginTop: 20,
-            width: '100%',
-            justifyContent: 'center'
+            borderBottomWidth: 1,
+            borderBottomColor: customConstants.fourthColor,
+            marginBottom: 20,
+            width: '50%',
+            borderRadius: 20
           }}
         >
-          <Button
-            firstIconName='magnifying-glass'
-            secondIconName='profile'
-            lastIconName='logout'
-            style={{ bottom: 40, left: 40 }}
-            rounded
-            firstbtnfunction={() => navigation.navigate('Home')}
-            secondbtnfunction={() => GoToProfile()}
-            lastbtnfunction={() => {
-              logout();
+          <Text
+            style={{
+              color: customConstants.fourthColor,
+              paddingHorizontal: 20
             }}
-            multiple
-          />
+            h1
+            right
+          >
+            أضف خدمة
+          </Text>
+        </View>
+        <Input
+          ref={nameRef}
+          inputHandler={setNameHandler}
+          errorMessage={nameErrors}
+          placeholder='الاسم'
+          value={name}
+          autoCorrect={false}
+          maxLength={60}
+        />
+
+        <Dropdown
+          label='نوع الخدمة'
+          baseColor='#ffffff'
+          itemColor='#ffffff'
+          textColor={customConstants.fourthColor}
+          dropdownOffset={{ top: 20, left: 0 }}
+          rippleInsets={{ top: 20, bottom: 0 }}
+          data={customConstants.services}
+          containerStyle={{
+            justifyContent: 'center',
+            width: '100%',
+            paddingHorizontal: 10
+          }}
+          onChangeText={value => {
+            setServiceTitleHandler(value);
+          }}
+          pickerStyle={{
+            borderRadius: 15,
+            backgroundColor: customConstants.PrimaryColor,
+            borderColor: customConstants.fourthColor,
+            borderWidth: 1
+          }}
+          itemTextStyle={{
+            fontFamily: customConstants.ShebaYeFont,
+            textAlign: 'center',
+            margin: 1
+          }}
+          itemCount={8}
+          value={serviceTitle}
+          rippleCentered={true}
+          error={serviceErrors}
+        />
+        <Input
+          ref={DescriptionRref}
+          errorMessage={DescriptionErrors}
+          inputHandler={setDescriptionHandler}
+          multiline={true}
+          autoCorrect={false}
+          numberOflines={4}
+          placeholder='وصف الخدمة'
+          value={Description}
+          maxLength={150}
+        />
+        <Input
+          ref={teleRref}
+          errorMessage={teleErrors}
+          inputHandler={setTeleHandler}
+          placeholder='رقم الهاتف'
+          value={tele}
+          autoCorrect={false}
+        />
+
+        <Dropdown
+          label='المدينة'
+          baseColor='#ffffff'
+          itemColor='#ffffff'
+          textColor={customConstants.fourthColor}
+          data={customConstants.MoroccoCities}
+          containerStyle={{
+            justifyContent: 'center',
+            width: '100%',
+            paddingHorizontal: 10
+          }}
+          dropdownOffset={{ top: 20, left: 0 }}
+          onChangeText={value => {
+            citiesPickerHandler(value);
+          }}
+          pickerStyle={{
+            borderRadius: 15,
+            backgroundColor: customConstants.PrimaryColor,
+            borderColor: customConstants.fourthColor,
+            borderWidth: 1
+          }}
+          itemTextStyle={{
+            fontFamily: customConstants.ShebaYeFont,
+            textAlign: 'center',
+            margin: 1
+          }}
+          rippleInsets={{ top: 0, bottom: 0 }}
+          itemCount={7}
+          value={city}
+          rippleCentered={true}
+          error={cityErrors}
+        />
+
+        <CheckBox
+          checkedIcon='dot-circle-o'
+          uncheckedIcon='circle-o'
+          containerStyle={{
+            backgroundColor: customConstants.PrimaryColor
+          }}
+          textStyle={{ color: '#ffffff' }}
+          uncheckedColor='#ff0000'
+          checkedColor={customConstants.fourthColor}
+          onPress={() => checkButtonHandler()}
+          title=' موقعك ليس مربوط بالخدمة '
+          checkedTitle='موقعك مربوط بالخدمة'
+          checked={isSearchByPosition}
+        />
+
+        <View style={styles.buttonContainer}>
           <Button
-            rounded
-            firstIconName='arrowleft'
-            style={{ bottom: 40, right: 40 }}
-            firstbtnfunction={() => navigation.goBack()}
-          />
+            color={customConstants.fourthColor}
+            onPress={() => confirm()}
+            shadow
+          >
+            <Text style={{ color: '#000000' }} button>
+              حفظ
+            </Text>
+          </Button>
         </View>
       </View>
-    </KeyboardAvoidingView>
+      <View
+        style={{
+          flex: 0.3,
+          // marginTop: 10,
+          width: '100%',
+          justifyContent: 'center'
+        }}
+      >
+        <Button
+          firstIconName='magnifying-glass'
+          secondIconName='profile'
+          lastIconName='logout'
+          style={{ bottom: 40, left: 40 }}
+          rounded
+          firstbtnfunction={() => navigation.navigate('Home')}
+          secondbtnfunction={() => GoToProfile()}
+          lastbtnfunction={() => {
+            logout();
+          }}
+          multiple
+        />
+        <Button
+          rounded
+          firstIconName='arrowleft'
+          style={{ bottom: 40, right: 40 }}
+          firstbtnfunction={() => navigation.goBack()}
+        />
+      </View>
+    </View>
+    // </KeyboardAvoidingView>
   );
 };
 
@@ -530,9 +532,9 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 15,
     flex: 1,
-    alignItems: 'center',
+    // alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: CustomConstants.PrimaryColor
+    backgroundColor: customConstants.PrimaryColor
   },
   buttonContainer: {
     width: '100%',
@@ -550,7 +552,8 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   form: {
-    justifyContent: 'center',
+    // justifyContent: 'center',
+    paddingTop: Constants.statusBarHeight,
     width: '100%',
     flex: 0.7
   }

@@ -15,18 +15,13 @@ import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 import { bannerAdsIDs } from '../constants/AdsParams';
 // global :
 const bannerAdId =
-  Platform.OS === 'ios' ? bannerAdsIDs.iosTest : bannerAdsIDs.androidTest;
-setTestDeviceIDAsync('EMULATOR');
+  Platform.OS === 'ios' ? bannerAdsIDs.iosreal : bannerAdsIDs.androidreal;
 const Profile = ({ route, navigation }) => {
   const [services, setServices] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [selected, setSelected] = useState(null);
   const [is_needUpdate, setIs_needUpdate] = useState(false);
-  // var force_update = null;
-  // force_update = route.params && route.params.force_update;
-  // if (force_update) {
-  //   setServices(null);
-  // }
+
   //------------------------------------------------//
   //----------------------functions----------------//
   //-----------------------------------------------//

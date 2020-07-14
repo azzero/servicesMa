@@ -5,7 +5,7 @@ import { Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as customConstants from '../constants/constants';
 import Swipeout from 'react-native-swipeout';
 import { f, fr } from '../config/config';
-import SwipeOutButton from '../components/SwipeOutButton';
+import SwipeOutButton from './SwipeOutButton';
 const ProfileService = ({ service, navigation, triggerUpdate }) => {
   // states
   const [activeRowKey, setactiveRowKey] = useState(null);
