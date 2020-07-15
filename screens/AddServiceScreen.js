@@ -295,7 +295,7 @@ const Service = ({ route, navigation }) => {
             typeof serviceData !== 'undefined' &&
             typeof service !== 'undefined'
           ) {
-            const { Description } = service.data();
+            const { Description, location } = service.data();
             setCity(cityName);
             setOriginalCity(cityName);
             setName(name);
@@ -304,6 +304,11 @@ const Service = ({ route, navigation }) => {
             setserviceID(serviceId);
             setServiceTitle(categoryName);
             setOriginalService(categoryName);
+            if (location.geohash !== '7zzzzzzzz') {
+              setisSearchByPosition(true);
+              console.log('geo point :', location.geopoint);
+              setlocalisation(location.geopoint);
+            }
           }
         } else {
           // if it's an creation of new service put user info as default values
@@ -367,7 +372,7 @@ const Service = ({ route, navigation }) => {
             h1
             right
           >
-            أضف خدمة
+            {is_update ? ' تعديل خدمة' : ' أضف خدمة'}
           </Text>
         </View>
         <Input
@@ -487,7 +492,7 @@ const Service = ({ route, navigation }) => {
             shadow
           >
             <Text style={{ color: '#000000' }} button>
-              حفظ
+              {is_update ? 'تعديل' : 'حفظ'}
             </Text>
           </Button>
         </View>

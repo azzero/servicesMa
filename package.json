@@ -16,11 +16,13 @@
     "@react-navigation/stack": "^5.1.1",
     "base-64": "^0.1.0",
     "expo": "~36.0.0",
+    "expo-ads-admob": "~8.0.0",
     "expo-constants": "~8.0.0",
     "expo-facebook": "~8.0.0",
     "expo-intent-launcher": "~8.0.0",
     "expo-linear-gradient": "~8.0.0",
     "expo-location": "~8.0.0",
+    "expo-splash-screen": "^0.3.1",
     "firebase": "^7.13.1",
     "geofirex": "^0.1.0",
     "geolib": "^3.2.1",
@@ -41,8 +43,7 @@
     "react-native-swipeout": "^2.3.1",
     "react-native-web": "~0.11.7",
     "rxjs": "^6.5.5",
-    "validate.js": "^0.13.1",
-    "expo-ads-admob": "~8.0.0"
+    "validate.js": "^0.13.1"
   },
   "devDependencies": {
     "babel-preset-expo": "~8.0.0",

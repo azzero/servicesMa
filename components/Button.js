@@ -11,11 +11,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AntDesign, Entypo, SimpleLineIcons } from '@expo/vector-icons';
 let initialise = false;
 class Button extends Component {
-  // constructor(props) {
-  //   super(props);
-  //   initialise = this.props.initialise ? this.props.initialise : false;
-  //   this.open = initialise;
-  // }
   animation = new Animated.Value(0);
   toggleMenu = () => {
     const toValue = this.open ? 0 : 1;

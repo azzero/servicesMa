@@ -16,6 +16,7 @@ import Constants from 'expo-constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 import { bannerAdsIDs } from '../constants/AdsParams';
+console.disableYellowBox = true;
 // global :
 const bannerAdId =
   Platform.OS === 'ios' ? bannerAdsIDs.iosreal : bannerAdsIDs.androidreal;
@@ -193,7 +194,8 @@ const Home = props => {
     }
 
     const FocusListener = navigation.addListener('blur', () => {
-      MenuRef.current.toggleMenu();
+      // MenuRef.current.toggleMenu();
+      MenuRef.current.open = false;
     });
     return FocusListener;
   }, [asklocalisationpopup, localisation]);

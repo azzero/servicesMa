@@ -70,12 +70,6 @@ const loadingAssets = async () => {
       MaghribiFont: require('./assets/fonts/Maghribi-Font.ttf'),
       ShebaYeFont: require('./assets/fonts/ShebaYe.ttf')
     });
-
-    // const cacheImages = images.map(image => {
-    //   return Asset.fromModule(image).downloadAsync();
-    // });
-
-    // return Promise.all(cacheImages);
   } catch (e) {
     // error reading value
     console.log('error storage : ', e);
@@ -131,37 +125,13 @@ export default function App({ navigation }) {
   //----------------------Use Effect ------------------------//
   useEffect(() => {
     const authSubscription = f.auth().onAuthStateChanged(authUser => {
-      console.log('loading  before  : ', loadingToken);
       setloadingToken(false);
-      console.log('loading  after  : ', loadingToken);
       if (authUser) {
         setToken(authUser);
       } else {
         setToken(null);
       }
     });
-    //   if (user) {
-    //     var currentUser = f.auth().currentUser;
-    //     if (currentUser !== null) {
-    //       const userToken = await currentUser.getIdToken();
-    //       try {
-    //         AsyncStorage.setItem('token', userToken);
-    //       } catch (e) {
-    //         alert('وقع خطأ ما المرجو إعادة المحاولة ');
-    //         console.log('get token error :', e);
-    //       }
-    //       setToken(currentUser);
-    //       // store token async
-    //     }
-    //   } else {
-    //     currentUser = null;
-    //     setToken(null);
-    //     AsyncStorage.removeItem('token');
-    //     console.log('no user : ', token);
-    //   }
-    // });
-
-    // authSubscription();
 
     return () => {
       authSubscription();

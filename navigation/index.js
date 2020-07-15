@@ -16,6 +16,7 @@ import EditProfile from '../screens/EditProfileScreen';
 import SignUpProfile from '../screens/SignUpProfileScreen';
 import { AsyncStorage } from 'react-native';
 import Rating from '../components/Rating';
+
 //-------------ROUTERS ------//
 const Stack = createStackNavigator();
 
@@ -96,23 +97,25 @@ const Splash = () => {
           const list = JSON.parse(RatedServicesList);
           setRatedServices(list);
         }
+        await SplashScreen.hideAsync();
       } catch (error) {
         console.log('error while getting rated services list ', error);
       }
     };
   }, []);
-  return (
-    <View style={styles.splash}>
-      <View style={{ justifyContent: 'center', alignContent: 'center' }}>
-        <Image style={styles.tinyLogo} source={require('../assets/icon.png')} />
-      </View>
-    </View>
-  );
+  return null;
 };
 // ------------- Main component --------------------------
 const NavigationRoot = () => {
   const { splash } = useContext(UserContext);
   const { loadingToken, setloadingToken } = splash;
+  useEffect(() => {
+    const displaySplashscreen = async () => {
+      await SplashScreen.preventAutoHideAsync();
+    };
+    displaySplashscreen();
+    return displaySplashscreen;
+  }, []);
   if (loadingToken) {
     return <Splash />;
   }

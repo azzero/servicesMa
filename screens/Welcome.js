@@ -35,9 +35,7 @@ const Welcome = ({ navigation }) => {
           <AntDesign name='phone' color='#799f0c' size={32} />
           <Text style={styles.title}>خدمة</Text>
         </View>
-        <Text style={styles.subTitle}>
-          نوفر لك أفضل الخدمات القريبة من موقعك
-        </Text>
+        <Text style={styles.subTitle}>نوفر لك أفضل الخدمات القريبة منك</Text>
       </View>
       {/* Header End  */}
 
