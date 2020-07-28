@@ -184,11 +184,7 @@ const DisplayServices = ({ navigation, route }) => {
                     title={doc.name}
                     description={doc.Description}
                     // image={require('../assets/icons/markerresized.png')}
-                  >
-                    <View>
-                      <Entypo name='location-pin' size={42} color='#f00' />
-                    </View>
-                  </Marker>
+                  />
                 );
               }
             })}

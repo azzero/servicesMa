@@ -16,6 +16,7 @@ import Constants from 'expo-constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 import { bannerAdsIDs } from '../constants/AdsParams';
+import LoadingDots from 'react-native-loading-dots';
 console.disableYellowBox = true;
 // global :
 const bannerAdId =
@@ -33,8 +34,8 @@ const Home = props => {
   const [displayDistance, setDisplayDistance] = useState(0);
   const [serviceErrors, setServiceerrors] = useState('');
   const [cityErrors, setCityerrors] = useState('');
-  const [isMenuNeedToBeClosed, setisMenuNeedToBeClosed] = useState(false);
-  const [DisableInterstitialBtn, setDisableInterstitialBtn] = useState(false);
+  const [isloading, setIsloading] = useState(false);
+
   //------------------------------------------------//
   //------------------------ads params------------------//
   //-----------------------------------------------//
@@ -52,8 +53,8 @@ const Home = props => {
   const { data, setData } = useContext(DataContext);
   const { position, askingPosition } = useContext(LocalisationContext);
   const { localisation, setlocalisation } = position;
-  // const [data, setData] = useState(null);
-  const { tokenManager } = useContext(UserContext);
+  const { tokenManager, servicesManager } = useContext(UserContext);
+  const { services, setServices } = servicesManager;
   const { asklocalisationpopup, setasklocalisationpopup } = askingPosition;
   //------------------------------------------------//
   //---------------------Handlers-------------------//
@@ -104,7 +105,7 @@ const Home = props => {
     auth
       .signOut()
       .then(() => {
-        setisLoggedIn(false);
+        console.log('signout');
       })
       .catch(error => {
         console.log('eror', error);
@@ -112,22 +113,45 @@ const Home = props => {
   };
   //-------------------Go To Profile  function-------------//
   const GoToProfile = () => {
+    MenuRef.current.toggleMenu();
     navigation.navigate('Profile');
   };
   // ------------------ADD Service function ----------------------//
   const goToAddService = () => {
+    // if the user already create 3 services , so he hit the limit
+    if (services !== null && services.length >= 3) {
+      Alert.alert(
+        'للأسف',
+        ' لقد وصلت للحد الأقصى المسموح به و هو 3 خدمات للشخص الواحد ، إذهب لملفك الشخصي وقم بحدف أو التعديل على إحدى خدماتك ',
+        [
+          {
+            text: 'الرجوع',
+            onPress: () => console.log('cancel'),
+            style: 'cancel'
+          },
+          {
+            text: 'الملف الشخصي',
+            onPress: () => navigation.navigate('Profile')
+          }
+        ],
+        { cancelable: true }
+      );
+      return;
+    }
+    // else go to add service
+    MenuRef.current.toggleMenu();
     navigation.navigate('AddService', { is_update: false });
   };
   //-------------- make search function ------------------------------>
   const getdata = async () => {
     try {
-      const services = fr
+      const category = fr
         .collection('services')
         .doc(city)
         .collection(serviceTitle);
       // const center = geo.point(localisation.latitude, localisation.longitude);
       if (Platform.OS === 'android' && !Constants.isDevice) {
-        setlocalisation({ latitude: 32.26114, longitude: -9.24752 });
+        setlocalisation({ latitude: 0, longitude: 0 });
       }
 
       if (isSearchByPosition) {
@@ -135,12 +159,15 @@ const Home = props => {
         const center = geo.point(localisation.latitude, localisation.longitude);
         const radius = distance;
         const field = 'location';
-        const query = geo.query(services).within(center, radius, field);
+        setIsloading(true);
+        const query = geo.query(category).within(center, radius, field);
         const docs = await get(query);
-
+        setIsloading(false);
         setData(docs);
         if (!docs.length) {
-          alert(' لا توجد أي خدمات موافقة للمعطيات التي أدخلت ');
+          alert(
+            ' لا توجد حاليا أي خدمات موافقة للمعطيات التي أدخلت ، المرجو معاودة المحاولة لاحقا أو توسيع دائرة البحث عن طريق زيادة المسافة   '
+          );
           return;
         }
       } else {
@@ -151,7 +178,9 @@ const Home = props => {
           .get();
         setData(response.docs);
         if (!response.docs.length) {
-          alert(' لا توجد أي خدمات موافقة للمعطيات التي أدخلت ');
+          alert(
+            ' لا توجد حاليا أي خدمات موافقة للمعطيات التي أدخلت ، المرجو معاودة المحاولة لاحقا '
+          );
           return;
         }
       }
@@ -170,8 +199,8 @@ const Home = props => {
   //------------------------------------------------//
   //--------------------use effect-----------------//
   //-----------------------------------------------//
-
   useEffect(() => {
+    console.log('services in home screen : ', services);
     if (asklocalisationpopup && localisation === null) {
       console.log('inside use effect ');
       setisSearchByPosition(false);
@@ -181,7 +210,7 @@ const Home = props => {
         [
           {
             text: 'الرجوع',
-            onPress: () => navigation.navigate('Profile'),
+            onPress: () => console.log('cancel'),
             style: 'cancel'
           }
         ],
@@ -200,6 +229,21 @@ const Home = props => {
     return FocusListener;
   }, [asklocalisationpopup, localisation]);
   //----------------------------------------
+  //while waiting for  data
+  if (isloading) {
+    return (
+      <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+        <LoadingDots />
+        <View style={{ marginTop: 20 }}>
+          <Text
+            style={{ fontSize: 20, fontFamily: customConstants.ShebaYeFont }}
+          >
+            جاري البحث ..
+          </Text>
+        </View>
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       {/*------------------Top------------------- */}
@@ -225,10 +269,6 @@ const Home = props => {
               إبحث عن خدمة
             </Text>
           </View>
-          {/* <Text>
-            {localisation &&
-              `your localisation is longitude : ${localisation.longitude} latitude : ${localisation.latitude} `}
-          </Text> */}
           <Dropdown
             dropdownPosition={-5}
             error={serviceErrors}
@@ -248,7 +288,8 @@ const Home = props => {
               borderRadius: 15,
               backgroundColor: customConstants.PrimaryColor,
               borderColor: customConstants.fourthColor,
-              borderWidth: 1
+              borderWidth: 1,
+              marginTop: Constants.statusBarHeight + 20
             }}
             itemTextStyle={{
               fontFamily: customConstants.ShebaYeFont,
@@ -383,7 +424,7 @@ const Home = props => {
           lastIconName='logout'
           secondIconName='profile'
           rounded
-          style={{ bottom: 10 }}
+          style={{ bottom: 0 }}
           lastbtnfunction={() => logout()}
           secondbtnfunction={() => GoToProfile()}
           firstbtnfunction={() => goToAddService()}
@@ -414,11 +455,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   top: {
+    paddingTop: Constants.statusBarHeight,
     flex: 1,
-    // borderColor: 'blue',
-    // borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center'
+    alignItems: 'center'
+    // justifyContent: 'center'
   },
   buttonContainer: {
     flex: 0.2,

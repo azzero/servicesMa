@@ -107,23 +107,24 @@ const EditProfile = ({ navigation }) => {
           tele: phoneNumber
         });
       }
-      Alert.alert(
-        'جيد',
-        'تم التعديل بنجاح ',
-        [
-          {
-            text: 'البقاء',
-            onPress: () => console.log('cancel pressed'),
-            style: 'cancel'
-          },
-          {
-            text: 'الرجوع',
-            onPress: () => navigation.navigate('Profile'),
-            style: 'cancel'
-          }
-        ],
-        { cancelable: true }
-      );
+      // Alert.alert(
+      //   'جيد',
+      //   'تم التعديل بنجاح ',
+      //   [
+      //     {
+      //       text: 'البقاء',
+      //       onPress: () => console.log('cancel pressed'),
+      //       style: 'cancel'
+      //     },
+      //     {
+      //       text: 'الرجوع',
+      //       onPress: () => navigation.navigate('Profile'),
+      //       style: 'cancel'
+      //     }
+      //   ],
+      //   { cancelable: true }
+      // );
+      navigation.navigate('Home');
       console.log('updated');
     } catch (e) {
       console.log('error while updating : ', e);
@@ -168,7 +169,7 @@ const EditProfile = ({ navigation }) => {
           style={{ position: 'absolute', left: 5, top: 5 }}
         >
           <View>
-            <Entypo name='check' size={32} color={CustomConstants.fifthColor} />
+            <Entypo name='check' size={32} color='#0f0' />
           </View>
         </TouchableOpacity>
         <TouchableOpacity
@@ -286,7 +287,7 @@ const EditProfile = ({ navigation }) => {
 const styles = StyleSheet.create({
   introText: {
     fontFamily: CustomConstants.ShebaYeFont,
-    fontSize: 32,
+    fontSize: 28,
     color: CustomConstants.fourthColor
   },
   form: {

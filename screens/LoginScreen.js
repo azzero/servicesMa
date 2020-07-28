@@ -5,7 +5,6 @@ import { f, auth } from '../config/config.js';
 import {
   StyleSheet,
   View,
-  KeyboardAvoidingView,
   TouchableOpacity,
   Alert,
   StatusBar,
@@ -15,7 +14,10 @@ import { Divider } from 'react-native-elements';
 import { Button, Input, Text } from '../components/';
 import validate from 'validate.js';
 import constraints from '../constants/constraints';
-import UserContext from '../context/UserContext.js';
+import Constants from 'expo-constants';
+import { Icon } from 'react-native-elements';
+import SplashScreen from './SplashScreen';
+
 const inputEmailRef = React.createRef();
 const inputPasswordRef = React.createRef();
 const Login = ({ navigation }) => {
@@ -26,9 +28,9 @@ const Login = ({ navigation }) => {
   const [validation, setValidation] = useState(1);
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [hidePassword, setHidePassword] = useState(true);
   // console.log('we set token here ,token value : ', token);
   const onConfirm = async () => {
-    setIsLoading(true);
     // ----- validation  -------:
     const validationResult = validate(
       { email: email, password: password },
@@ -164,6 +166,7 @@ const Login = ({ navigation }) => {
   //--------- Login with Facebook --------//
   const loginWithFacebook = async () => {
     try {
+      setIsLoading(true);
       await Facebook.initializeAsync('229138198490211');
       const response = await Facebook.logInWithReadPermissionsAsync({
         permissions: ['public_profile']
@@ -177,6 +180,7 @@ const Login = ({ navigation }) => {
           .then(() => {
             // setisLoggedIn(true);
             const currentUser = f.auth().currentUser;
+            setIsLoading(false);
             console.log('CURRENT USER : ', currentUser);
           })
           .catch(error => {
@@ -192,13 +196,11 @@ const Login = ({ navigation }) => {
     }
   };
   //---------------------------//
+  if (isLoading) {
+    return <SplashScreen />;
+  }
   return (
-    <KeyboardAvoidingView
-      style={styles.loginContainer}
-      behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffse={20}
-      enabled
-    >
+    <View style={styles.loginContainer}>
       <StatusBar barStyle='light-content'></StatusBar>
       <View style={styles.intro}>
         <Text style={styles.introText}>تسجيل الدخول</Text>
@@ -210,7 +212,11 @@ const Login = ({ navigation }) => {
           ref={inputEmailRef}
           placeholder='اكتب بريدك الالكتروني هنا '
           onChangeText={handleEmail}
-          leftIcon={{ type: 'MaterialCommunityIcons', name: 'mail-outline' }}
+          leftIcon={{
+            type: 'MaterialCommunityIcons',
+            name: 'mail-outline',
+            color: '#fff'
+          }}
           errorMessage={errorMessage}
           value={email}
           keyboardType='email-address'
@@ -222,10 +228,18 @@ const Login = ({ navigation }) => {
         <Input
           ref={inputPasswordRef}
           placeholder='أدخل رقمك السري هنا '
-          secureTextEntry={true}
+          secureTextEntry={hidePassword}
           onChangeText={handlePassword}
           errorMessage={passwordError}
-          leftIcon={{ type: 'font-awesome', name: 'lock' }}
+          leftIcon={{ type: 'font-awesome', name: 'lock', color: '#fff' }}
+          rightIcon={
+            <Icon
+              name='eye'
+              type='font-awesome'
+              color='#fff'
+              onPress={() => setHidePassword(!hidePassword)}
+            />
+          }
           value={password}
           autoCapitalize='none'
           autoCorrect={false}
@@ -285,7 +299,6 @@ const Login = ({ navigation }) => {
           style={styles.button}
         >
           <Text button style={{ color: '#ffffff' }}>
-            {' '}
             الدخول بحساب فايسبوك
           </Text>
         </Button>
@@ -311,7 +324,7 @@ const Login = ({ navigation }) => {
               fontSize: 17
             }}
           >
-            لا تتوفر على حساب ؟{' '}
+            لا تتوفر على حساب ؟
             <Text
               style={{
                 fontWeight: '500',
@@ -323,7 +336,7 @@ const Login = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -337,7 +350,7 @@ const styles = StyleSheet.create({
     color: CustomConstants.fourthColor
   },
   form: {
-    marginVertical: 38,
+    marginTop: 28,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
@@ -350,7 +363,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'red',
-    width: '100%'
+    width: '100%',
+    flex: 0.7
   },
   error: {
     textAlign: 'center',
@@ -358,13 +372,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'red'
   },
   loginContainer: {
+    paddingTop: Constants.statusBarHeight,
     paddingHorizontal: 15,
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: CustomConstants.PrimaryColor
   },
-  intro: { marginBottom: 10 },
+  intro: {
+    marginBottom: 10,
+    paddingTop: 30
+  },
 
   button: {
     width: CustomConstants.screenWidth - 100,

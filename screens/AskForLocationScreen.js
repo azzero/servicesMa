@@ -1,9 +1,15 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { Text, Input, Button } from '../components';
-import { StyleSheet, View, Platform, AppState } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Platform,
+  AppState,
+  ActivityIndicator
+} from 'react-native';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-import Constants from 'expo-constants';
+import * as customConstants from '../constants/constants';
 import Modal from 'react-native-modal';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { Linking } from 'expo';
@@ -13,9 +19,6 @@ const AskLocalisation = ({ navigation, route }) => {
   //------------------------------------------------//
   //------------------------state------------------//
   //-----------------------------------------------//
-  const [trackingAppState, settrackingAppState] = useState(null);
-  const [location, setLocation] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
   const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
   const [appStateNow, setAppStateNow] = useState(AppState.currentState);
@@ -27,6 +30,7 @@ const AskLocalisation = ({ navigation, route }) => {
   const { position, askingPosition } = useContext(LocalisationContext);
   const { localisation, setlocalisation } = position;
   const { asklocalisationpopup, setasklocalisationpopup } = askingPosition;
+  const [Loading, setLoading] = useState(false);
 
   //------------------------------------------------//
   //------------------------Ref------------------//
@@ -53,18 +57,14 @@ const AskLocalisation = ({ navigation, route }) => {
     try {
       let ProviderStatus = Location.hasServicesEnabledAsync();
       const locationIsEnbaled = await ProviderStatus;
-
       if (!locationIsEnbaled && !EnableLocationServiceAsked) {
-        // if (Platform.OS === 'ios') {
-        //   setIsLocationModalVisible(true);
-        // }
         setIsLocationModalVisible(true);
         setEnableLocationServiceAsked(true);
         return;
       }
+      // if Im already asked for
       if (!locationIsEnbaled && EnableLocationServiceAsked) {
         setasklocalisationpopup(true);
-        // setErrorMessage('لم تسمح لنا بالوصول إلى موقعك');
         if (fromScreen) {
           navigation.navigate(fromScreen);
         } else {
@@ -72,30 +72,31 @@ const AskLocalisation = ({ navigation, route }) => {
         }
         return;
       }
+      // get permissions
       let { status } = await Permissions.askAsync(Permissions.LOCATION);
+      setLoading(true);
       if (status !== 'granted') {
+        // if it's not granted go back to home screen
         setasklocalisationpopup(true);
         if (fromScreen) {
           navigation.navigate(fromScreen);
         } else {
           navigation.goBack();
         }
-        // setErrorMessage('لم يسمح بالولوج للموقع');
         return;
-      }
-      let lc = await Location.getCurrentPositionAsync({});
-
-      const { longitude, latitude } = lc.coords;
-      setLongitude(longitude);
-      setLatitude(latitude);
-      console.log(`longitude : ${longitude} , latitude ${latitude}`);
-      setlocalisation({ longitude, latitude });
-      setasklocalisationpopup(true);
-      console.log('from screen ', fromScreen);
-      if (fromScreen) {
-        navigation.navigate(fromScreen);
-      } else {
-        navigation.goBack();
+      } else if (status === 'granted') {
+        let lc = await Location.getCurrentPositionAsync({});
+        setLoading(false);
+        const { longitude, latitude } = lc.coords;
+        setLongitude(longitude);
+        setLatitude(latitude);
+        setlocalisation({ longitude, latitude });
+        setasklocalisationpopup(true);
+        if (fromScreen) {
+          navigation.navigate(fromScreen);
+        } else {
+          navigation.goBack();
+        }
       }
     } catch (e) {
       alert(e);
@@ -106,24 +107,13 @@ const AskLocalisation = ({ navigation, route }) => {
   //------------------------app State change Handler ------------------//
   //-----------------------------------------------//
   const handleAppStateChange = nextAppState => {
-    // setIsLocationModalVisible(false);
-    // setAppStateNow(nextAppState);
-    // if (localisation === null && nextAppState !== appStateNow) {
-    //   getLocationAsync();
-    //   console.log('call getlocationAsync inside handle app state');
-    // } else {
-    //   setAppStateNow(nextAppState);
-    // }
-    // if (appStateNow === 'background' && nextAppState === 'active') {
-    //   console.log('inside checking  ');
-    //   getLocationAsync();
-    // }
     setAppStateNow(prev => {
       if (
         nextAppState === 'active' &&
         nextAppState !== prev &&
         localisation === null
       ) {
+        // setLoading(true);
         getLocationAsync();
 
         return nextAppState;
@@ -149,6 +139,19 @@ const AskLocalisation = ({ navigation, route }) => {
   //------------------------------------------------//
   //-----------------------render------------------//
   //-----------------------------------------------//
+  if (Loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
+        <ActivityIndicator size='large' color={customConstants.PrimaryColor} />
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <Modal

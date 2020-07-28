@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "allo khidma",
-    "slug": "servicesMa",
+    "name": "allo Khidma",
+    "slug": "allo-khidma",
     "privacy": "public",
     "backgroundColor": "#000000",
     "sdkVersion": "36.0.0",
     "platforms": ["ios", "android", "web"],
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -23,8 +23,13 @@
       "supportsTablet": true,
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-4596141779919006~1803702614"
-      }
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app uses the location to linked to the service that is added by the user with his permission and he can disable it any time "
+      },
+      "buildNumber": "1.0.0"
     },
+
     "android": {
       "package": "com.azzeddineelat.allokhidma",
       "config": {
@@ -32,7 +37,14 @@
         "googleMaps": {
           "apiKey": "AIzaSyA8ixx2HI-1O1iBPHm8ybfiGKhgTzLQNzY"
         }
-      }
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ],
+      "versionCode": 2
     }
   }
 }

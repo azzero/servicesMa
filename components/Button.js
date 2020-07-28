@@ -289,12 +289,11 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: CustomConstants.fourthColor
   },
-  primary: { backgroundColor: CustomConstants.primary },
+  primary: { backgroundColor: CustomConstants.PrimaryColor },
   second: { backgroundColor: CustomConstants.SecondColor },
   third: { backgroundColor: CustomConstants.thirdColor },
-  fourth: { backgroundColor: CustomConstants.fourth },
+  fourth: { backgroundColor: CustomConstants.fourthColor },
   fifth: { backgroundColor: CustomConstants.fifthColor },
-  primary: { backgroundColor: CustomConstants.primary },
   facebook: { backgroundColor: CustomConstants.facebookColor }
 });
 export default Button;

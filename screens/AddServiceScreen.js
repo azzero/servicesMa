@@ -14,6 +14,7 @@ import { Dropdown } from 'react-native-material-dropdown';
 import * as customConstants from '../constants/constants';
 import LocalisationContext from '../context/LocalisationContext';
 import { CheckBox } from 'react-native-elements';
+import UserContext from '../context/UserContext';
 import Constants from 'expo-constants';
 
 var is_update = false;
@@ -41,6 +42,8 @@ const Service = ({ route, navigation }) => {
   const { position, askingPosition } = useContext(LocalisationContext);
   const { asklocalisationpopup, setasklocalisationpopup } = askingPosition;
   const { localisation, setlocalisation } = position;
+  const { servicesManager } = useContext(UserContext);
+  const { services, setServices } = servicesManager;
   //------------------ REFERENCES --------------------------//
   const nameRef = React.createRef();
   // const serviceRef = React.createRef();
@@ -50,6 +53,16 @@ const Service = ({ route, navigation }) => {
   //------------------------------------------------//
   //-----------------------functions----------------//
   //-----------------------------------------------//
+  const updateServices = async () => {
+    const { uid } = f.auth().currentUser;
+    const userDocRef = fr.collection('users').doc(uid);
+    const servicesList = await userDocRef.collection('services').get();
+    if (servicesList.docs.length) {
+      setServices(servicesList.docs);
+    } else {
+      console.log('document doesnt exist ');
+    }
+  };
   // logout
   const logout = () => {
     auth
@@ -63,20 +76,43 @@ const Service = ({ route, navigation }) => {
   };
   // add service to user profile
   const addServiceToProfile = id => {
-    console.log('inside addThisServiceToProfile ', id);
-    fr.collection('users')
-      .doc(currentUser.uid)
-      .collection('services')
-      .doc(id)
-      .set({
-        categoryName: serviceTitle,
-        cityName: city,
-        name,
-        tele
-      })
+    let docRef = fr.collection('users').doc(currentUser.uid);
 
-      .then(() => console.log('service add to profile successfully '))
-      .catch(e => console.log('error when add service to profile :', e));
+    docRef
+      .get()
+      .then(async userDoc => {
+        if (userDoc.exists) {
+          docRef
+            .collection('services')
+            .doc(id)
+            .set({
+              categoryName: serviceTitle,
+              cityName: city,
+              name,
+              tele
+            })
+            .then(() => console.log('service add to profile successfully '))
+            .catch(e => console.log('error when add service to profile :', e));
+        } else {
+          await docRef.set({
+            city,
+            name: name,
+            service: serviceTitle,
+            tele
+          });
+          await docRef
+            .collection('services')
+            .doc(id)
+            .set({
+              categoryName: serviceTitle,
+              cityName: city,
+              name,
+              tele
+            });
+        }
+        updateServices();
+      })
+      .catch(e => console.log('error adding service : ', e));
   };
   // update service in user profile
   const updateServiceInProfile = serviceId => {
@@ -148,8 +184,9 @@ const Service = ({ route, navigation }) => {
     setServiceTitle(text);
   };
   const setTeleHandler = text => {
+    var res = text.replace(/\D/g, '');
     setTeleerrors('');
-    setTele(text);
+    setTele(res);
   };
   const setDescriptionHandler = text => {
     setDescriptionErrors('');
@@ -215,6 +252,7 @@ const Service = ({ route, navigation }) => {
             userID: currentUser.uid
           });
           updateServiceInProfile(serviceID);
+          updateServices();
         } else {
           // if it's an update and the user change city or service category we need to delete the first record and create new one to respect db modeling
           if (is_update) {
@@ -244,22 +282,23 @@ const Service = ({ route, navigation }) => {
             })
             .then(function(response) {
               addServiceToProfile(response.id);
-              Alert.alert(
-                'ممتاز !!',
-                'تمت الإضافة بنجاح ',
-                [
-                  {
-                    text: 'البقاء هنا ',
-                    onPress: () => console.log('Cancel Pressed'),
-                    style: 'cancel'
-                  },
-                  {
-                    text: 'الرجوع للواجهة الرئيسية',
-                    onPress: () => navigation.navigate('Home')
-                  }
-                ],
-                { cancelable: false }
-              );
+              // Alert.alert(
+              //   'ممتاز !!',
+              //   'تمت الإضافة بنجاح ',
+              //   [
+              //     {
+              //       text: 'البقاء هنا ',
+              //       onPress: () => console.log('Cancel Pressed'),
+              //       style: 'cancel'
+              //     },
+              //     {
+              //       text: 'الرجوع للواجهة الرئيسية',
+              //       onPress: () => navigation.navigate('Home')
+              //     }
+              //   ],
+              //   { cancelable: false }
+              // );
+              navigation.navigate('Home');
             })
             .catch(function(error) {
               alert('وقع خطأ ما ، المرجو إعادة المحاولة');
@@ -277,6 +316,7 @@ const Service = ({ route, navigation }) => {
   //-----------------------------------------------//
   useEffect(() => {
     try {
+      updateServices();
       async function getService() {
         is_update = route.params.is_update;
         if (is_update) {
@@ -314,6 +354,7 @@ const Service = ({ route, navigation }) => {
           // if it's an creation of new service put user info as default values
           console.log('add service party ');
           const { uid } = f.auth().currentUser;
+          console.log('the user id is : ', uid);
           const userDocRef = fr.collection('users').doc(uid);
           const userInfo = await userDocRef.get();
           const userData = userInfo.data();
@@ -347,12 +388,6 @@ const Service = ({ route, navigation }) => {
   //-----------------------Render------------------//
   //-----------------------------------------------//
   return (
-    // <KeyboardAvoidingView
-    //   behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
-    //   keyboardVerticalOffse={30}
-    //   enabled
-    //   style={{ flex: 1 }}
-    // >
     <View style={styles.container}>
       <View style={styles.form}>
         <View
@@ -360,7 +395,7 @@ const Service = ({ route, navigation }) => {
             borderBottomWidth: 1,
             borderBottomColor: customConstants.fourthColor,
             marginBottom: 20,
-            width: '50%',
+            width: '60%',
             borderRadius: 20
           }}
         >

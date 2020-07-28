@@ -77,8 +77,9 @@ const EditProfile = ({ navigation }) => {
     setUsername(text);
   };
   const handlePhoneNumber = number => {
+    var res = number.replace(/\D/g, '');
     setPhoneError('');
-    setPhoneNumber(number);
+    setPhoneNumber(res);
   };
   const setServiceCategoryHandler = text => {
     setServiceErrors('');
@@ -93,32 +94,14 @@ const EditProfile = ({ navigation }) => {
   //-----------------------------------------------//
   const updateProfile = async () => {
     try {
-      await userDocRef.set({
+      userDocRef.set({
         city,
         name: username,
         service: serviceCategory,
         tele: phoneNumber
       });
-      Alert.alert(
-        'جيد',
-        'تم اضافة معلوماتك بنجاح  ',
-        [
-          {
-            text: 'رجوع',
-            onPress: () => console.log('cancel pressed'),
-            style: 'cancel'
-          },
-          {
-            text: 'البحث عن خدمة',
-            onPress: () => navigation.navigate('Home')
-          },
-          {
-            text: 'اضافة خدمة',
-            onPress: () => navigation.navigate('AddService')
-          }
-        ],
-        { cancelable: true }
-      );
+      navigation.navigate('Home');
+
       console.log('insered');
     } catch (e) {
       console.log('error while updating : ', e);
@@ -129,26 +112,41 @@ const EditProfile = ({ navigation }) => {
   //--------------------- Components ------------ //
 
   return (
-    <KeyboardAvoidingView
+    <View
       style={styles.loginContainer}
-      behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffse={15}
-      enabled
+      // behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+      // keyboardVerticalOffse={15}
+      // enabled
     >
       <StatusBar barStyle='light-content'></StatusBar>
       <View style={styles.intro}>
-        <Text style={styles.introText}>صفحتك الشخصية</Text>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('Home');
+        <View style={{ flexGrow: 1 }}>
+          <Text style={styles.introText}>صفحتك الشخصية</Text>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center'
           }}
-          style={{ position: 'absolute', left: 5, top: 5 }}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Entypo name='chevron-thin-right' size={32} color='#00ff00' />
-            <Text style={{ color: '#00ff00', fontSize: 20 }}>تجاوز</Text>
-          </View>
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('Reception');
+            }}
+            style={{ left: 5, top: 5 }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                paddingRight: 10,
+                marginBottom: 10
+              }}
+            >
+              <Entypo name='chevron-thin-right' size={32} color='#00ff00' />
+              <Text style={{ color: '#00ff00', fontSize: 20 }}>تجاوز</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
       {/*---------- form-------  */}
       <View style={styles.form}>
@@ -255,7 +253,7 @@ const EditProfile = ({ navigation }) => {
           </Text>
         </Button>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -305,7 +303,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     borderBottomWidth: 1,
     width: '100%',
-    borderBottomColor: CustomConstants.black
+    borderBottomColor: CustomConstants.black,
+    flexDirection: 'row-reverse'
   },
   input: {
     color: 'white',

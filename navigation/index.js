@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Image, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useContext, useEffect } from 'react';
+import { Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screens/LoginScreen';
@@ -11,18 +11,20 @@ import Welcome from '../screens/Welcome';
 import ForgotScreen from '../screens/ForgotScreen';
 import UserContext from '../context/UserContext';
 import AddService from '../screens/AddServiceScreen';
+import ReceptionScreen from '../screens/ReceptionScreen';
 import DisplayServices from '../screens/DisplayServices';
 import EditProfile from '../screens/EditProfileScreen';
 import SignUpProfile from '../screens/SignUpProfileScreen';
 import { AsyncStorage } from 'react-native';
 import Rating from '../components/Rating';
-
+import SplashScreen from '../screens/SplashScreen';
 //-------------ROUTERS ------//
 const Stack = createStackNavigator();
 
 const StackRouter = () => {
   const { tokenManager } = useContext(UserContext);
   const { token, setToken } = tokenManager;
+
   return (
     <Stack.Navigator
       headerMode='screen'
@@ -65,6 +67,7 @@ const StackRouter = () => {
         </>
       ) : (
         <>
+          <Stack.Screen name='Reception' component={ReceptionScreen} />
           <Stack.Screen name='Home' component={HomeScreen} />
           <Stack.Screen name='DisplayServices' component={DisplayServices} />
           <Stack.Screen name='Rating' component={Rating} />
@@ -78,18 +81,15 @@ const StackRouter = () => {
     </Stack.Navigator>
   );
 };
-//------------------------------------------------//
-//------------------------Splash------------------//
-//-----------------------------------------------//
-
-const Splash = () => {
-  const { ratingServicesManager } = useContext(UserContext);
+// ------------- Main component --------------------------
+const NavigationRoot = () => {
+  const { splash, ratingServicesManager } = useContext(UserContext);
+  const { loadingToken, setloadingToken } = splash;
   const { ratedServices, setRatedServices } = ratingServicesManager;
-
   useEffect(() => {
+    // get all services ID rated by user
     const getStoredRatedServices = async () => {
       try {
-        // get all services ID rated by user
         let RatedServicesList = await AsyncStorage.getItem(
           '@zizuAppStore:services'
         );
@@ -97,48 +97,25 @@ const Splash = () => {
           const list = JSON.parse(RatedServicesList);
           setRatedServices(list);
         }
-        await SplashScreen.hideAsync();
       } catch (error) {
         console.log('error while getting rated services list ', error);
       }
     };
-  }, []);
-  return null;
-};
-// ------------- Main component --------------------------
-const NavigationRoot = () => {
-  const { splash } = useContext(UserContext);
-  const { loadingToken, setloadingToken } = splash;
-  useEffect(() => {
-    const displaySplashscreen = async () => {
-      await SplashScreen.preventAutoHideAsync();
+    // call functions
+    getStoredRatedServices();
+    return () => {
+      getStoredRatedServices();
     };
-    displaySplashscreen();
-    return displaySplashscreen;
   }, []);
-  if (loadingToken) {
-    return <Splash />;
-  }
-  return (
-    <NavigationContainer>
-      <StackRouter />
-    </NavigationContainer>
-  );
-};
 
-//------------------------------------------------//
-//------------------------Styling------------------//
-//-----------------------------------------------//
-const styles = StyleSheet.create({
-  splash: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff'
-  },
-  tinyLogo: {
-    width: 200,
-    height: 200
+  if (loadingToken) {
+    return <SplashScreen />;
+  } else {
+    return (
+      <NavigationContainer>
+        <StackRouter />
+      </NavigationContainer>
+    );
   }
-});
+};
 export default NavigationRoot;

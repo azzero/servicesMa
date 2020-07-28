@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from 'react';
-import * as Facebook from 'expo-facebook';
 import * as CustomConstants from '../constants/constants';
 import { f, auth } from '../config/config.js';
 import {
@@ -14,6 +13,7 @@ import { Input, Text, Divider } from 'react-native-elements';
 import Button from '../components/Button';
 import validate from 'validate.js';
 import constraints from '../constants/constraints';
+import { Icon } from 'react-native-elements';
 const inputEmailRef = React.createRef();
 const inputPasswordRef = React.createRef();
 const SignUp = ({ navigation }) => {
@@ -25,6 +25,8 @@ const SignUp = ({ navigation }) => {
   const [validation, setValidation] = useState(0);
   const [passwordError, setPasswordError] = useState('');
   const [matchPasswordError, setMatchPasswordError] = useState('');
+  const [hidePassword, setHidePassword] = useState(true);
+
   const onConfirm = () => {
     if (matchPasswordError !== '') {
       Alert.alert(matchPasswordError);
@@ -210,7 +212,7 @@ const SignUp = ({ navigation }) => {
     >
       <StatusBar barStyle='light-content'></StatusBar>
       <View style={styles.intro}>
-        <Text style={styles.introText}>مرحبا بك في موقع خدمات</Text>
+        <Text style={styles.introText}>مرحبا بك في "ألو خدمة" </Text>
       </View>
 
       <View style={styles.form}>
@@ -220,7 +222,11 @@ const SignUp = ({ navigation }) => {
           placeholderTextColor='#bbc3c7'
           inputStyle={styles.input}
           containerStyle={styles.InputContainer}
-          leftIcon={{ type: 'MaterialCommunityIcons', name: 'mail-outline' }}
+          leftIcon={{
+            type: 'MaterialCommunityIcons',
+            name: 'mail-outline',
+            color: '#fff'
+          }}
           onChangeText={handleEmail}
           errorMessage={errorMessage !== '' ? errorMessage : ''}
           value={email}
@@ -232,8 +238,16 @@ const SignUp = ({ navigation }) => {
           placeholderTextColor='#bbc3c7'
           inputStyle={styles.input}
           containerStyle={styles.InputContainer}
-          leftIcon={{ type: 'font-awesome', name: 'lock' }}
-          secureTextEntry={true}
+          leftIcon={{ type: 'font-awesome', name: 'lock', color: '#fff' }}
+          rightIcon={
+            <Icon
+              name='eye'
+              type='font-awesome'
+              color='#fff'
+              onPress={() => setHidePassword(!hidePassword)}
+            />
+          }
+          secureTextEntry={hidePassword}
           errorMessage={passwordError !== '' ? passwordError : ''}
           onChangeText={handlePassword}
           value={password}
@@ -245,8 +259,16 @@ const SignUp = ({ navigation }) => {
           placeholderTextColor='#bbc3c7'
           inputStyle={styles.input}
           containerStyle={styles.InputContainer}
-          leftIcon={{ type: 'font-awesome', name: 'lock' }}
-          secureTextEntry={true}
+          leftIcon={{ type: 'font-awesome', name: 'lock', color: '#fff' }}
+          rightIcon={
+            <Icon
+              name='eye'
+              type='font-awesome'
+              color='#fff'
+              onPress={() => setHidePassword(!hidePassword)}
+            />
+          }
+          secureTextEntry={hidePassword}
           errorMessage={matchPasswordError !== '' ? matchPasswordError : ''}
           onChangeText={handlePasswordConfirmation}
           value={confirmPassword}

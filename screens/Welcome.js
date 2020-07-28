@@ -32,7 +32,7 @@ const Welcome = ({ navigation }) => {
           }}
         >
           <Text style={styles.title}>ألو</Text>
-          <AntDesign name='phone' color='#799f0c' size={32} />
+          {/* <AntDesign name='phone' color='#799f0c' size={32} /> */}
           <Text style={styles.title}>خدمة</Text>
         </View>
         <Text style={styles.subTitle}>نوفر لك أفضل الخدمات القريبة منك</Text>
@@ -79,7 +79,8 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: Constants.statusBarHeight,
     flexDirection: 'column',
-    alignItems: 'stretch'
+    alignItems: 'stretch',
+    backgroundColor: '#fff'
   },
   top: {
     flex: 1,

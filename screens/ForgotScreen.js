@@ -5,12 +5,18 @@ import { Input, Button, Text } from '../components/index';
 import * as CustomConstants from '../constants/constants';
 import { auth } from '../config/config';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 const Forgot = ({ navigation }) => {
   const [email, setEmail] = useState('');
+  const [errorMessage, setErrorMessage] = useState(null);
+
   const handleEmail = value => {
+    setErrorMessage('');
     setEmail(value);
   };
   const handleSubmission = () => {
+    setErrorMessage('');
+
     auth
       .sendPasswordResetEmail(email)
       .then(function() {
@@ -19,9 +25,20 @@ const Forgot = ({ navigation }) => {
         );
       })
       .catch(function(error) {
-        console.log(error);
-        alert('هناك خطأ ما تأكد من اتصالك بالأنترنت ');
+        console.log(error.code);
+        switch (error.code) {
+          case 'auth/invalid-email':
+            setErrorMessage('المرجو إدخال بريد إلكتروني فعال ');
+            return;
+          case 'auth/user-not-found':
+            setErrorMessage('هذا البريد الإلكتروني غير مسجل لدينا ');
+            return;
+          default:
+            setErrorMessage('هناك خطأ ما أعد المحاولة ');
+            return;
+        }
       });
+    // }
   };
   return (
     <View style={styles.container}>
@@ -39,16 +56,20 @@ const Forgot = ({ navigation }) => {
         <View style={{ width: '90%' }}>
           <Input
             autoFocus={true}
-            // ref={inputEmailRef}
             placeholder='اكتب بريدك الالكتروني هنا '
             onChangeText={handleEmail}
-            leftIcon={{ type: 'MaterialCommunityIcons', name: 'mail-outline' }}
-            // errorMessage={errorMessage}
+            leftIcon={{
+              type: 'MaterialCommunityIcons',
+              name: 'mail-outline',
+              color: '#fff'
+            }}
+            errorMessage={errorMessage}
             value={email}
             keyboardType='email-address'
             style={{
               fontFamily: CustomConstants.BoldFont,
-              color: '#000000'
+              color: '#fff',
+              paddingHorizontal: 10
             }}
           />
         </View>
@@ -82,7 +103,7 @@ export default Forgot;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: CustomConstants.PrimaryColor,
-    marginTop: Constants.statusBarHeight,
+    paddingTop: Constants.statusBarHeight,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'

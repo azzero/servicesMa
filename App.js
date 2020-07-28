@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet, Text, View, I18nManager } from 'react-native';
+import { StyleSheet, I18nManager } from 'react-native';
 import { ThemeProvider } from 'react-native-elements';
 import * as Font from 'expo-font';
 import { AppLoading } from 'expo';
 import NavigationRoot from './navigation';
 import * as customConstants from './constants/constants';
-import { Asset } from 'expo-asset';
-import { f, database, auth } from './config/config.js';
+import { f, fr } from './config/config.js';
 import UserContext from './context/UserContext';
 import DataContext from './context/DataContext';
 import LocalisationContext from './context/LocalisationContext';
-import { AsyncStorage } from 'react-native';
 import { YellowBox } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+import Diconnected from './screens/DiconnectedScreen';
 import _ from 'lodash';
 import { decode, encode } from 'base-64';
 global.crypto = require('@firebase/firestore');
@@ -39,12 +39,6 @@ if (!global.atob) {
   global.atob = decode;
 }
 
-//--------------------------------
-
-const images = [
-  require('./assets/illustrations/online_cv.png'),
-  require('./assets/illustrations/phototry.jpg')
-];
 //---- react native element theme ---- //
 const theme = {
   Button: {
@@ -59,6 +53,7 @@ const theme = {
     }
   }
 };
+
 //----Loading assets pre-lunch---//
 // get storage data
 // loading root :
@@ -90,13 +85,15 @@ export default function App({ navigation }) {
   const [loadingToken, setloadingToken] = useState(true);
   const [ratedServices, setRatedServices] = useState(null);
   const [asklocalisationpopup, setasklocalisationpopup] = useState(false);
-
+  const [isConnected, setIsConnected] = useState(true);
+  const [services, setServices] = useState(null);
   //-------------- User ContextProvider -------------------//
   const providerValue = useMemo(
     () => ({
       tokenManager: { token, setToken },
       splash: { loadingToken, setloadingToken },
-      ratingServicesManager: { ratedServices, setRatedServices }
+      ratingServicesManager: { ratedServices, setRatedServices },
+      servicesManager: { services, setServices }
     }),
     [
       token,
@@ -104,9 +101,24 @@ export default function App({ navigation }) {
       loadingToken,
       setloadingToken,
       ratedServices,
-      setRatedServices
+      setRatedServices,
+      services,
+      setServices
     ]
   );
+  // ----------------- get services function --------------------//
+  const getServices = async uid => {
+    console.log('user ID : ', uid);
+    const userDocRef = fr.collection('users').doc(uid);
+    const servicesList = await userDocRef.collection('services').get();
+    if (servicesList.docs.length) {
+      console.log('service tool app : ', servicesList.docs);
+      setServices(servicesList.docs);
+    } else {
+      console.log('document doesnt exist ');
+    }
+    console.log('services in app : ', services);
+  };
   //-------------------Data Context Provider -------------------//
   const DataProvider = useMemo(() => ({ data, setData }), [data, setData]);
   //-------------------Data Context Provider -------------------//
@@ -124,19 +136,37 @@ export default function App({ navigation }) {
   );
   //----------------------Use Effect ------------------------//
   useEffect(() => {
+    const displaySplash = async () => await SplashScreen.preventAutoHideAsync();
+    // subscribe for network state
+    const unsubscribe = NetInfo.addEventListener(state => {
+      if (state.isConnected) {
+        setIsConnected(true);
+      } else {
+        setIsConnected(false);
+      }
+    });
+    // auth subscribe
     const authSubscription = f.auth().onAuthStateChanged(authUser => {
-      setloadingToken(false);
       if (authUser) {
+        const { uid } = f.auth().currentUser;
+        getServices(uid);
         setToken(authUser);
       } else {
         setToken(null);
+        setServices(null);
+        setlocalisation(null);
+        setData(null);
+        setasklocalisationpopup(false);
       }
+      setloadingToken(false);
     });
 
     return () => {
+      displaySplash();
       authSubscription();
+      unsubscribe();
     };
-  }, []);
+  }, [isConnected]);
 
   //--------------- Loading assets -------------//
   if (loading) {
@@ -148,6 +178,9 @@ export default function App({ navigation }) {
         }}
       />
     );
+  } else if (!isConnected) {
+    // if it's diconnected from the internet
+    return <Diconnected />;
   } else {
     //---------------- display app --------------//
     return (
@@ -163,13 +196,3 @@ export default function App({ navigation }) {
     );
   }
 }
-
-//---styling -----/
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center'
-  }
-});

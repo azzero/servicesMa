@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   View,
   StyleSheet,
@@ -11,17 +11,22 @@ import { Button, Text, ProfileService } from '../components';
 import Constants from 'expo-constants';
 import * as customConstants from '../constants/constants';
 import { AntDesign } from '@expo/vector-icons';
-import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
+import { AdMobBanner } from 'expo-ads-admob';
+import UserContext from '../context/UserContext';
 import { bannerAdsIDs } from '../constants/AdsParams';
 // global :
 const bannerAdId =
   Platform.OS === 'ios' ? bannerAdsIDs.iosreal : bannerAdsIDs.androidreal;
 const Profile = ({ route, navigation }) => {
-  const [services, setServices] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [selected, setSelected] = useState(null);
   const [is_needUpdate, setIs_needUpdate] = useState(false);
 
+  //------------------------------------------------//
+  //------------------------context------------------//
+  //-----------------------------------------------//
+  const { servicesManager } = useContext(UserContext);
+  const { services, setServices } = servicesManager;
   //------------------------------------------------//
   //----------------------functions----------------//
   //-----------------------------------------------//
@@ -40,28 +45,21 @@ const Profile = ({ route, navigation }) => {
   //-----------------------------------------------//
   useEffect(() => {
     try {
+      console.log('services in home screen : ', services);
       // get all user services
-      async function getServices() {
+      async function getUserInfo() {
         console.group('inside get services function ');
         const { uid } = f.auth().currentUser;
         //get all user data by id
         const userDocRef = fr.collection('users').doc(uid);
-        const servicesList = await userDocRef.collection('services').get();
         const userInfo = await userDocRef.get();
         const userData = userInfo.data();
         setUserProfile(userData);
-
-        // get services from docs
-        if (servicesList.docs.length) {
-          setServices(servicesList.docs);
-        } else {
-          console.log('document doesnt exist ');
-        }
       }
-      getServices();
+      getUserInfo();
       // add listener to screen focus
       const unsubscribe = navigation.addListener('focus', () => {
-        getServices();
+        getUserInfo();
       });
       return unsubscribe;
     } catch (e) {
@@ -95,25 +93,40 @@ const Profile = ({ route, navigation }) => {
           Top of profile - title - welcome 
       */}
 
-      <View style={styles.welcome}>
-        <View style={{ position: 'absolute', left: 5, top: 5 }}>
-          <TouchableWithoutFeedback
-            onPress={() => navigation.navigate('EditProfile')}
+      <TouchableWithoutFeedback
+        onPress={() => navigation.navigate('EditProfile')}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <View style={styles.welcome}>
+          <View
+            style={{
+              position: 'absolute',
+              left: 5,
+              top: 5,
+              // borderWidth: 2,
+              // borderColor: 'red',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: 30,
+              height: 30
+            }}
           >
-            <AntDesign name='setting' size={22} color='#fff' />
-          </TouchableWithoutFeedback>
-        </View>
-        <View>
-          <Text center white>
-            مرحبا بك
-          </Text>
-          <View style={{ paddingRight: 5 }}>
-            <Text h1 style={{ color: customConstants.fourthColor }} center>
-              {userProfile ? userProfile['name'] : 'في ملفك الشخصي'}
+            <View>
+              <AntDesign name='setting' size={22} color='#fff' />
+            </View>
+          </View>
+          <View>
+            <Text center white>
+              مرحبا بك
             </Text>
+            <View style={{ paddingRight: 5 }}>
+              <Text h1 style={{ color: customConstants.fourthColor }} center>
+                {userProfile ? userProfile['name'] : 'في ملفك الشخصي'}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
 
       {/* --------------------middle : display services , informations ..  ------------------*/}
       <View
